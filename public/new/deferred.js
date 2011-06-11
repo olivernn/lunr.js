@@ -48,7 +48,7 @@ Search.Deferred.prototype = {
     return this;
   },
 
-  thenDisplay: function () {
+  thenLog: function () {
     this.then(function () {
       console.log(this)
     })
