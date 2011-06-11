@@ -4,6 +4,8 @@ Search.Index = function (name) {
   this.wordStore = new Search.Store (name + "-words")
   this.docStore = new Search.Store (name + "-docs")
 
+  this.adding = false
+
   // do this elsewhere???
   this.wordStore.init(function () { console.log('wordStore initialized') })
   this.docStore.init(function () { console.log('docStore initialized') })
@@ -14,19 +16,26 @@ Search.Index.prototype = {
   add: function (obj) {
     var self = this
     var doc = new Search.Document(obj, this.fields)
+    var stopAdding = function () { self.adding = false }
 
-    doc.words().forEach(function (word) {
-      self.wordStore.find(word.id).then(function (existing) {
-        if (existing) {
-          existing.docs.push(word.docs[0])
-          self.wordStore.save(existing)
-        } else {
-          self.wordStore.save(word)
-        };
+    if (this.adding) {
+      setTimeout(function () { self.add(obj) }, 50)
+    } else {
+      this.adding = true
+      doc.words().forEach(function (word) {
+        self.wordStore.find(word.id).then(function (existingWord) {
+          if (existingWord) {
+            existingWord.docs.push(word.docs[0])
+            self.wordStore.save(existingWord).then(stopAdding)
+          } else {
+            self.wordStore.save(word).then(stopAdding)
+          };
+        })
       })
-    })
 
-    this.docStore.save(doc.asJSON())
+      this.docStore.save(doc.asJSON())
+    };
+
   },
 
   field: function (name, opts) {
@@ -51,30 +60,33 @@ Search.Index.prototype = {
     var wordDeferred = new Search.Deferred (words.map(function (word) { return self.wordStore.find(word) }))
 
     wordDeferred.then(function (words) {
+      if (!words[0]) {
+        returnDeferred.resolve([])
+      } else {
+        var wordDocs = words
+          .map(function (word) { 
+            return word.docs 
+          })
+          .sort(function (a, b) {
+            if (a.score < b.score) return 1
+            if (a.score > b.score) return -1
+            return 0
+          })
 
-      var wordDocs = words
-        .map(function (word) { 
-          return word.docs 
-        })
-        .sort(function (a, b) {
-          if (a.score < b.score) return 1
-          if (a.score > b.score) return -1
-          return 0
-        })
-
-      docIds = Search.utils.intersect.apply(Search.utils, wordDocs.map(function (docs) {
-        return docs.map(function (doc) {
-          return doc.documentId 
-        })
-      }))
-
-      var docDeferred = new Search.Deferred (docIds.map(function (docId) { return self.docStore.find(docId) }))
-
-      docDeferred.then(function (searchDocs) {
-        returnDeferred.resolve(searchDocs.map(function (searchDoc) {
-          return searchDoc.original
+        docIds = Search.utils.intersect.apply(Search.utils, wordDocs.map(function (docs) {
+          return docs.map(function (doc) {
+            return doc.documentId 
+          })
         }))
-      })
+
+        var docDeferred = new Search.Deferred (docIds.map(function (docId) { return self.docStore.find(docId) }))
+
+        docDeferred.then(function (searchDocs) {
+          returnDeferred.resolve(searchDocs.map(function (searchDoc) {
+            return searchDoc.original
+          }))
+        })
+      }
     })
 
     return returnDeferred

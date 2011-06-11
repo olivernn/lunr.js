@@ -71,10 +71,13 @@
         body: "The summer music festival season is set to kick off as revellers head to the Isle of Wight Festival this weekend."
       }]
 
-      var idx = Search("foo5", function () {
+      // foo5 has good data
+
+      var idx = Search("foo7", function () {
         this.field('title', {'multiplier': 10})
         this.field('body')
       })
+
     </script>
 
   </head>
