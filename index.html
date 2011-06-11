@@ -1,0 +1,18 @@
+<script src="metaphone.js" type="text/javascript" charset="utf-8"></script>
+<script src="porter-stemmer.js" type="text/javascript" charset="utf-8"></script>
+
+<script type="text/javascript" charset="utf-8">
+  var index = Search(function () {
+    this.field('title', {
+      multiplier: 2
+    })
+
+    this.field('body', {
+      multiplier: 1
+    })
+  })
+
+  index.add(document)
+
+  index.search('foo')
+</script>

@@ -1,0 +1,73 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Search tests</title>
+
+    <!-- dependencies -->
+    <script src="/test/env/jquery.js" type="text/javascript" charset="utf-8"></script>
+
+    <!-- QUnit -->
+    <script src="/test/env/qunit.js"></script>
+    <link rel="stylesheet" href="/test/env/qunit.css" type="text/css" media="screen" />
+
+    <!-- Search -->
+    <script src="/metaphone.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/porter-stemmer.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/new/search.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/new/deferred.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/new/store.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/new/index.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/new/document.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/new/word.js" type="text/javascript" charset="utf-8"></script>
+
+    <script type="text/javascript" charset="utf-8">
+
+      // bbc news reports from the 9th June 2011
+      var objs = [{
+        title: "UN nuclear watchdog refers Syria to Security Council",
+        body: "The UN nuclear watchdog is to report Syria to the Security Council over its alleged covert nuclear programme."
+      },{
+        title: "David Cameron rejects Archbishop of Canterbury's claims",
+        body: "Prime Minister David Cameron has mounted a robust defence of government policy following criticisms by the Archbishop of Canterbury."
+      },{
+        title: "Attorney general rules against Dr David Kelly inquest",
+        body: "The attorney general has rejected calls for an inquest into the death in 2003 of government scientist Dr David Kelly"
+      },{
+        title: "London Olympics 2012: Air quality row may hit games",
+        body: "The UK is set to miss EU targets on air quality, government documents say - which may mean a legal row just before the London Olympic Games."
+      },{
+        title: "Students hit by more exam errors",
+        body: "England's exams watchdog is investigating a total of six mistakes in exams taken by tens of thousands of students."
+      },{
+        title: "Bruce Forsyth knighthood heads Queen's Birthday Honours",
+        body: "Entertainer Bruce Forsyth says he is very proud after being knighted in the Queen's Birthday Honours."
+      },{
+        title: "Prince William in first Trooping the Colour parade",
+        body: "The Duke of Cambridge has helped the Queen celebrate her official birthday by taking part in his first Trooping the Colour parade."
+      },{
+        title: "East Africa embassy bomber Fazul Abdullah Mohammed killed",
+        body: "Fazul Abdullah Mohammed, who is suspected of masterminding the 1998 US embassy bombings in East Africa, has been killed in the Somali capital, Mogadishu, reports say."
+      },{
+        title: "Government to review school cuts for academy programme",
+        body: "The government is reviewing the amount of funding it plans to cut from council budgets as increasing number of schools become academies."
+      },{
+        title: "Ed Balls faces more document leaks",
+        body: "A document by civil servants urging spending restraint from the Labour government in 2006 is among more of Ed Balls' leaked, private papers published by the Daily Telegraph."
+      }]
+
+      var idx = Search("foo4", function () {
+        this.field('title', {'multiplier': 10})
+        this.field('body')
+      })
+    </script>
+
+  </head>
+  <body>
+    <h1 id="qunit-header">Search Tests</h1>
+    <h2 id="qunit-banner"></h2>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+
+    <div id="qunit-fixture"></div>
+  </body>
+</html>
