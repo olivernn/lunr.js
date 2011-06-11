@@ -19,20 +19,14 @@ Search.Index.prototype = {
       self.wordStore.find(word.id).then(function (existing) {
         if (existing) {
           existing.docs.push(word.docs[0])
-          self.wordStore.save(existing).then(function () {
-            console.log('update existing word')
-          })
+          self.wordStore.save(existing)
         } else {
-          self.wordStore.save(word).then(function () {
-            console.log('created new word')
-          })
+          self.wordStore.save(word)
         };
       })
     })
 
-    this.docStore.save(doc.asJSON()).then(function () {
-      console.log('saved doc')
-    })
+    this.docStore.save(doc.asJSON())
   },
 
   field: function (name, opts) {
@@ -44,19 +38,42 @@ Search.Index.prototype = {
     var returnDeferred = new Search.Deferred ()
 
     // convert the term into search words
-    var words = term.split(' ').map(function (str) {
-      var word = new Search.Word(str)
-      if (!word.isStopWord()) return word.toString()
-    }).filter(function (wordString) { return wordString })
+    var words = term
+      .split(' ')
+      .map(function (str) {
+        var word = new Search.Word(str)
+        if (!word.isStopWord()) return word.toString()
+      })
+      .filter(function (wordString) {
+        return wordString 
+      })
 
-    var deferred = new Search.Deferred (words.map(function (word) { return self.wordStore.find(word) }))
+    var wordDeferred = new Search.Deferred (words.map(function (word) { return self.wordStore.find(word) }))
 
-    deferred.then(function (words) {
-      var docs = words.filter(function (a) { return a }).map(function (word) { return word.docs })[0] // need to get rid of any empty docs cos of crap data
-      new Search.Deferred(docs.map(function (doc) {
-        return self.docStore.find(doc.documentId || 1)
-      })).then(function () {
-        returnDeferred.resolve(this)
+    wordDeferred.then(function (words) {
+
+      var wordDocs = words
+        .map(function (word) { 
+          return word.docs 
+        })
+        .sort(function (a, b) {
+          if (a.score < b.score) return 1
+          if (a.score > b.score) return -1
+          return 0
+        })
+
+      docIds = Search.utils.intersect.apply(Search.utils, wordDocs.map(function (docs) {
+        return docs.map(function (doc) {
+          return doc.documentId 
+        })
+      }))
+
+      var docDeferred = new Search.Deferred (docIds.map(function (docId) { return self.docStore.find(docId) }))
+
+      docDeferred.then(function (searchDocs) {
+        returnDeferred.resolve(searchDocs.map(function (searchDoc) {
+          return searchDoc.original
+        }))
       })
     })
 

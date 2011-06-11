@@ -14,6 +14,7 @@
     <script src="/metaphone.js" type="text/javascript" charset="utf-8"></script>
     <script src="/porter-stemmer.js" type="text/javascript" charset="utf-8"></script>
     <script src="/new/search.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/new/utils.js" type="text/javascript" charset="utf-8"></script>
     <script src="/new/deferred.js" type="text/javascript" charset="utf-8"></script>
     <script src="/new/store.js" type="text/javascript" charset="utf-8"></script>
     <script src="/new/index.js" type="text/javascript" charset="utf-8"></script>
@@ -53,9 +54,24 @@
       },{
         title: "Ed Balls faces more document leaks",
         body: "A document by civil servants urging spending restraint from the Labour government in 2006 is among more of Ed Balls' leaked, private papers published by the Daily Telegraph."
+      },{
+        title: "Andrew Strauss and Alastair Cook lead Birthday Honours list",
+        body: "Cricketers Andrew Strauss and Alastair Cook are among the sports stars named in the Queen's Birthday Honours list."
+      },{
+        title: "John Steele had to go, says RFU chairman Martyn Thomas",
+        body: "Fresh information about John Steele's leadership of the RFU led to a unanimous vote of no confidence in the chief executive, it has been revealed."
+      },{
+        title: "Jordan Henderson plays down fears of burnout",
+        body: "Liverpool's new signing Jordan Henderson has dismissed concerns over fatigue ahead of playing for England at the European Under-21 Championship."
+      },{
+        title: "Ballet star Carlos Acosta admits O2 Arena challenges",
+        body: "Ballet star Carlos Acosta has admitted there will be challenges staging Romeo and Juliet at the O2."
+      },{
+        title: "Isle of Wight Festival kicks off season",
+        body: "The summer music festival season is set to kick off as revellers head to the Isle of Wight Festival this weekend."
       }]
 
-      var idx = Search("foo4", function () {
+      var idx = Search("foo5", function () {
         this.field('title', {'multiplier': 10})
         this.field('body')
       })
