@@ -76,6 +76,41 @@ Search.Store.prototype = {
     return deferred
   },
 
+  destroy: function (id) {
+    var self = this
+    var deferred = new Search.Deferred ()
+
+    var trans = self.db.transaction([self.name], IDBTransaction.READ_WRITE, 0)
+    var store = trans.objectStore(self.name)
+
+    var request = store.delete(id)
+
+    request.onsuccess = function (e) {
+      deferred.resolve(this.result)
+    }
+
+    request.onerror = function (e) {
+      deferred.fail()
+    }
+
+    return deferred
+  },
+
+  destroyAll: function () {
+    var self = this
+    var returnDeferred = new Search.Deferred ()
+
+    this.all().then(function (objs) {
+      new Search.Deferred (objs.map(function (obj) {
+        return self.destroy(obj.id)
+      })).then(function () {
+        returnDeferred.resolve()
+      })
+    })
+
+    return returnDeferred
+  },
+
   find: function (id) {
     var self = this
     var deferred = new Search.Deferred ()

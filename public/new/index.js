@@ -38,6 +38,15 @@ Search.Index.prototype = {
 
   },
 
+  empty: function () {
+    var self = this
+
+    return new Search.Deferred ([
+      self.wordStore.destroyAll(),
+      self.docStore.destroyAll()
+    ])
+  },
+
   field: function (name, opts) {
     this.fields[name] = opts || {multiplier: 1}
   },
@@ -73,7 +82,7 @@ Search.Index.prototype = {
             return 0
           })
 
-        docIds = Search.utils.intersect.apply(Search.utils, wordDocs.map(function (docs) {
+        var docIds = Search.utils.intersect.apply(Search.utils, wordDocs.map(function (docs) {
           return docs.map(function (doc) {
             return doc.documentId 
           })
