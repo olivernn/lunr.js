@@ -97,7 +97,6 @@ Search.Store.prototype = {
   },
 
   save: function (object) {
-    console.log(object)
     var self = this
     var deferred = new Search.Deferred ()
 
