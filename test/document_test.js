@@ -12,10 +12,11 @@ var fields = {
 
 test("getting scored & stemmed words from a document", function () {
   var doc = new Search.Document(testRawDoc, fields)
-  equal(doc.words().F.score, 2, "foo appears in the document twice")
+  equal(doc.words()[0].id, "F", "foo gets turned into F")
+  equal(doc.words()[0].docs[0].score, 2, "foo is in the document twice")
 })
 
 test("multiplier is applied correctly", function () {
-  var doc = new Search.Document({"title": "foo"}, {"title": {"multiplier": 10}})
-  equal(doc.words().F.score, 10, "foo appears in the document once but the title has a weight of 10")
+  doc = new Search.Document({"title": "foo"}, {"title": {"multiplier": 10}})
+  equal(doc.words()[0].docs[0].score, 10, "foo appears in the document once but the title has a weight of 10")
 })

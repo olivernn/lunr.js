@@ -1,10 +1,4 @@
 require 'rubygems'
 require 'sinatra'
 
-get "/" do
-  erb :index
-end
-
-get "/tests" do
-  erb :tests
-end
+set :public, File.dirname(__FILE__)

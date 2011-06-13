@@ -11,6 +11,8 @@ Search.Deferred = function (deferreds) {
     deferred.then(function (returnVal) {
       output.push(returnVal)
       if (++counter == deferreds.length) self.resolve(output)
+    }, function () {
+      self.fail()
     })
   })
 
@@ -30,8 +32,8 @@ Search.Deferred.prototype = {
   fail: function (ctx) {
     if (!this.state) {
       this.ctx = ctx
-      this.state = 'failure'
-      this.failureCallbacks.forEach(function (callback) {
+      this.state = 'failed'
+      this.failCallbacks.forEach(function (callback) {
         callback.call(ctx, ctx)
       })
     };
@@ -40,7 +42,7 @@ Search.Deferred.prototype = {
   then: function (success, fail) {
     if (this.state) {
       if (this.state = 'success' && success) success.call(this.ctx, this.ctx)
-      if (this.state = 'failure' && fail) fail.call(this.ctx, this.ctx)
+      if (this.state = 'failed' && fail) fail.call(this.ctx, this.ctx)
     } else {
       this.successCallbacks.push(success)
       this.failCallbacks.push(fail)
