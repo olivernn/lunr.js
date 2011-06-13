@@ -1,44 +1,45 @@
-Search.Document = function (original, store) {
+Search.Document = function (original, fields) {
   this.original = original
-  this.store = store
-  this.fields = Object.keys(original)
-  this._words = []
-  this.id = Date.now()
+  this.fields = fields
+  this.ref = Date.now()
 }
 
 Search.Document.prototype = {
 
   asJSON: function () {
     return {
-      id: this.id,
-      words: this.words(),
+      id: this.ref,
+      words: this.words().map(function (word) { return word.id }),
       original: this.original
     }
   },
 
-  save: function () {
-    var self = this
-    var d = new Search.Deferred ()
-    this.store.save(this.asJSON(), function () {
-      d.resolve(self)
-    })
-    return d
-  },
-
   words: function () {
+    var words = {}
     var self = this
+    var allWords = {}
 
-    this.fields.forEach(function (field) {
-      self.original[field].split(' ').forEach(function (str) {
-        var word = new Search.Word(str)
-        if (word.valid()) {
-          if (self._words.indexOf(word) == -1) {
-            self._words.push(word)
-          };
-        };
-      })
+    Object.keys(this.fields).forEach(function (fieldName) {
+      words[fieldName] = self.original[fieldName].split(" ")
+        // convert each raw word into a search word
+        .map(function (rawWord) {
+          var word = new Search.Word(rawWord)
+          if (!word.isStopWord()) return word.toString()
+        })
+        // filter out any stop words
+        .filter(function (word) {
+          return word
+        })
+        // create the total score
+        .forEach(function (word) {
+          if (!allWords[word]) { allWords[word] = {score: 0, ref: self.ref} }
+          allWords[word].score = allWords[word].score + self.fields[fieldName].multiplier
+        })
     })
 
-    return this._words
+    return Object.keys(allWords).map(function (word) {
+      return {id: word, docs: [{score: allWords[word].score, documentId: self.ref}] }
+    })
+
   }
 }

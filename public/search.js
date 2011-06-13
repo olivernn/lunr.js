@@ -1,3 +1,5 @@
-var Search = {
-  stopWords: ["the", "of", "to", "and", "a", "in", "is", "it", "you", "that"]
+var Search = function (name, config) {
+  var index = new Search.Index (name)
+  config.call(index, index)
+  return index
 }
