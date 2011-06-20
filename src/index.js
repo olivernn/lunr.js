@@ -13,29 +13,51 @@ Search.Index = function (name) {
 
 Search.Index.prototype = {
 
+  addList: function (objs) {
+    var self = this
+    var deferred = new Search.Deferred ()
+    var obj = objs.pop()
+    self.add(obj).then(function () {
+      if (objs.length) self.addList(objs)
+    })
+  },
   add: function (obj) {
     var self = this
     var doc = new Search.Document(obj, this.fields)
-    var stopAdding = function () { self.adding = false }
+    var returnDeferred = new Search.Deferred ()
 
-    if (this.adding) {
-      setTimeout(function () { self.add(obj) }, 50)
-    } else {
-      this.adding = true
-      doc.words().forEach(function (word) {
-        self.wordStore.find(word.id).then(function (existingWord) {
-          if (existingWord) {
-            existingWord.docs.push(word.docs[0])
-            self.wordStore.save(existingWord).then(stopAdding)
-          } else {
-            self.wordStore.save(word).then(stopAdding)
-          };
-        })
+    var words = doc.words()
+
+    var findDeferred = new Search.Deferred(words.map(function (word) {
+      return self.wordStore.find(word.id)
+    }))
+
+    findDeferred.then(function (existingWords) {
+
+      existingWords.forEach(function (existingWord) {
+        if (existingWord) {
+          matchingWord = words.filter(function (word) {
+            return word.id === existingWord.id
+          })[0]
+          
+          existingWord.docs.forEach(function (doc) {
+            matchingWord.docs.push(doc)
+          })
+        };
       })
 
-      this.docStore.save(doc.asJSON())
-    };
+      var saveDeferred = new Search.Deferred(words.map(function (word) {
+        return self.wordStore.save(word)
+      }))
 
+      saveDeferred.then(function () {
+        self.docStore.save(doc.asJSON()).then(function () {
+          returnDeferred.resolve()
+        })
+      })
+    })
+
+    return returnDeferred
   },
 
   empty: function () {
