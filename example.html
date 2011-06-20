@@ -1,0 +1,114 @@
+<head>
+  <!-- Vendor -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
+  <script src="/mustache.js" type="text/javascript" charset="utf-8"></script>
+
+  <!-- Search -->
+  <script src="/src/search.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/src/utils.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/src/deferred.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/src/store.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/src/index.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/src/document.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/src/word.js" type="text/javascript" charset="utf-8"></script>
+
+  <script id="question-list-template" type="text/mustache">
+    <div>
+      <input type="search"></input>
+      <a class="all" href="#">All</a>
+      <ul>
+        {{#questions}}
+          <li data-question-id="{{id}}">
+            <h2>{{title}}</h2>
+            <p>{{tags}}</p>
+          </li>
+        {{/questions}}
+      </ul>
+    </div>
+  </script>
+
+  <script id="question-view-template" type="text/mustache">
+    <div>
+      <h1>{{title}}</h1>
+      <p>{{tags}}</p>
+      <div>{{{body}}}</div>
+    </div>
+  </script>
+
+  <script type="text/javascript" charset="utf-8">
+
+    var idx = Search("ollie", function () {
+      this.field('title', {
+        'multiplier': 10
+      })
+
+      this.field('tags', {
+        'multiplier': 100
+      })
+
+      this.field('body')
+    })
+
+    $(document).ready(function () {
+
+      var questionViewTemplate = $("#question-view-template").text()
+      var questionListTemplate = $("#question-list-template").text()
+
+      $.getJSON('/example_data.json', function (data) {
+        questions = data.questions.map(function (raw) {
+          return {
+            id: raw.question_id,
+            title: raw.title,
+            body: raw.body,
+            tags: raw.tags.join(' ')
+          }
+        })
+
+        // this is the main app
+        $("#question-list-container").append(Mustache.to_html(questionListTemplate, {questions: questions}))
+        $("#question-view-container").append(Mustache.to_html(questionViewTemplate, questions[0]))
+
+        $("#question-list-container")
+          .delegate('a.all', 'click', function () {
+            $("#question-list-container").html(Mustache.to_html(questionListTemplate, {questions: questions}))
+          })
+          .delegate('input', 'change', function () {
+            var query = $(this).val()
+            console.log(query)
+            idx.search(query).then(function (results) {
+              console.log(results)
+              $("#question-list-container").html(Mustache.to_html(questionListTemplate, {questions: results}))
+            })
+          })
+
+        // clicking a list item displays it in the main view
+        $("#question-list-container").delegate('li', 'click', function () {
+          var li = $(this)
+          var id = li.data('question-id')
+
+          $("#question-view-container").html(Mustache.to_html(questionViewTemplate, questions.filter(function (question) {
+            return (question.id == id)
+          })[0]))
+        })
+      })
+    })
+
+  </script>
+
+  <style type="text/css" media="screen">
+    #question-list-container {
+      float: left;
+      width: 30%;
+    }
+
+    #question-view-container {
+      float: right;
+      width: 65%;
+    }
+  </style>
+
+</head>
+<body>
+  <div id='question-list-container'></div>
+  <div id='question-view-container'></div>
+</body>
