@@ -1,6 +1,6 @@
 Search.Word = function (raw) {
   this.raw = raw
-  this.out = this.raw
+  this.out = this.raw.replace(/^\W+/, "").replace(/\W+$/, "").toLowerCase()
 }
 
 Search.Word.stopWords = ["the", "of", "to", "and", "a", "in", "is", "it", "you", "that", "this"]
@@ -13,9 +13,8 @@ Search.Word.prototype = {
 
   toString: function () {
     if (this.isStopWord()) return
-    this.stemmed = this.stem()
     this.stem()
-    this.metaphone()
+    // this.metaphone()
     return this.out
     },
 
