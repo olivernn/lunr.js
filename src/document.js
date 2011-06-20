@@ -20,7 +20,11 @@ Search.Document.prototype = {
     var allWords = {}
 
     Object.keys(this.fields).forEach(function (fieldName) {
-      words[fieldName] = self.original[fieldName].split(" ")
+      words[fieldName] = self.original[fieldName].split(/\b/g)
+        // filter out any non word words
+        .filter(function (rawWord) {
+          return !!rawWord.match(/\w/)
+        })
         // convert each raw word into a search word
         .map(function (rawWord) {
           var word = new Search.Word(rawWord)
