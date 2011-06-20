@@ -15,10 +15,12 @@ Search.Index.prototype = {
 
   addList: function (objs) {
     var self = this
+    var list = objs.slice(0, objs.length)
     var deferred = new Search.Deferred ()
-    var obj = objs.pop()
+    var obj = list.pop()
     self.add(obj).then(function () {
-      if (objs.length) self.addList(objs)
+      if (list.length) self.addList(list)
+      list = null // reset list to prevent memory leaks?
     })
   },
   add: function (obj) {
