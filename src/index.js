@@ -120,12 +120,9 @@ Search.Index.prototype = {
       } else {
         var wordDocs = words
           .map(function (word) { 
-            return word.docs 
-          })
-          .sort(function (a, b) {
-            if (a.score < b.score) return 1
-            if (a.score > b.score) return -1
-            return 0
+            return word.docs.sort(function (a, b) {
+              return b.score - a.score
+            })
           })
 
         var docIds = Search.utils.intersect.apply(Search.utils, wordDocs.map(function (docs) {
