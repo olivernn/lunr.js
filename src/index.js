@@ -1,9 +1,22 @@
+/*!
+ * Search - Index
+ * Copyright (C) 2011 Oliver Nightingale
+ * MIT Licensed
+ */
+
+/**
+ * Search.Index provides the public api for the Search library.  It also manages setting up both a wordStore
+ * and a docStore to persist all the words and documents that make up this index.  An index must be initialised
+ * with a name, this name is important as it will be used to create and access the Search.Stores.  If the name
+ * is changed then any previously created indexes will be unavailable.
+ *
+ */
 Search.Index = function (name) {
   this.name = name
   this.fields = {} // by default no fields will be indexed
   this.wordStore = new Search.Store (name + "-words")
   this.docStore = new Search.Store (name + "-docs")
-
+  this.queueLength = 0
   this.adding = false
 
   // do this elsewhere???
@@ -13,6 +26,10 @@ Search.Index = function (name) {
 
 Search.Index.prototype = {
 
+  /**
+   * ## Search.Index.prototype.addList
+   * Add a list of objects to the index
+   */
   addList: function (objs) {
     var self = this
     var list = objs.slice(0, objs.length)
@@ -23,6 +40,11 @@ Search.Index.prototype = {
       list = null // reset list to prevent memory leaks?
     })
   },
+
+  /**
+   * ## Search.Index.prototype.add
+   * Adds a new document to the index
+   */
   add: function (obj) {
     var self = this
     var doc = new Search.Document(obj, this.fields)
