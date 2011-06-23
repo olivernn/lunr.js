@@ -1,6 +1,7 @@
 <head>
   <!-- Vendor -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
+  <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script> -->
+  <script src="/jquery.js" type="text/javascript" charset="utf-8"></script>
   <script src="/mustache.js" type="text/javascript" charset="utf-8"></script>
 
   <!-- Search -->
@@ -14,12 +15,10 @@
 
   <script id="question-list-template" type="text/mustache">
     <div>
-      <input type="search"></input>
-      <a class="all" href="#">All</a>
       <ul>
         {{#questions}}
           <li data-question-id="{{id}}">
-            <h2>{{title}}</h2>
+            <h2><a href="#">{{title}}</a></h2>
             <p>{{tags}}</p>
           </li>
         {{/questions}}
@@ -37,7 +36,8 @@
 
   <script type="text/javascript" charset="utf-8">
 
-    var idx = Search("ollie", function () {
+    // set up the index, specifying that we want to index the title, tags and body fields of documents.
+    var idx = Search("barbar", function () {
       this.field('title', {
         'multiplier': 10
       })
@@ -51,11 +51,28 @@
 
     $(document).ready(function () {
 
+      // load view templates
       var questionViewTemplate = $("#question-view-template").text()
       var questionListTemplate = $("#question-list-template").text()
 
+      var renderQuestionList = function (qs) {
+        $("#question-list-container")
+          .empty()
+          .append(Mustache.to_html(questionListTemplate, {questions: qs}))
+      }
+
+      var renderQuestionView = function (question) {
+        $("#question-view-container")
+          .empty()
+          .append(Mustache.to_html(questionViewTemplate, question))
+      }
+
+
+      // load the example data
       $.getJSON('/example_data.json', function (data) {
-        questions = data.questions.map(function (raw) {
+
+        // format the raw json into a form that is simpler to work with
+        var questions = data.questions.map(function (raw) {
           return {
             id: raw.question_id,
             title: raw.title,
@@ -64,31 +81,41 @@
           }
         })
 
-        // this is the main app
-        $("#question-list-container").append(Mustache.to_html(questionListTemplate, {questions: questions}))
-        $("#question-view-container").append(Mustache.to_html(questionViewTemplate, questions[0]))
-
-        $("#question-list-container")
-          .delegate('a.all', 'click', function () {
-            $("#question-list-container").html(Mustache.to_html(questionListTemplate, {questions: questions}))
-          })
-          .delegate('input', 'change', function () {
-            var query = $(this).val()
-            console.log(query)
-            idx.search(query).then(function (results) {
-              console.log(results)
-              $("#question-list-container").html(Mustache.to_html(questionListTemplate, {questions: results}))
+        if (!localStorage.getItem('indexLoaded?')) {
+          idx.storageInitialized.then(function () {
+            idx.addList(questions).then(function () {
+              localStorage.setItem('indexLoaded?', true)
+              $('.loading').fadeOut()
             })
           })
+        } else {
+          $('.loading').hide()
+        };
+
+        // this is the main app
+        renderQuestionList(questions)
+        renderQuestionView(questions[0])
+
+        $('a.all').bind('click', function () {
+          renderQuestionList(questions)
+          $('input').val('')
+        })
+
+        $('input').bind('change', function () {
+          var query = $(this).val()
+          idx.search(query).then(function (results) {
+            renderQuestionList(results)
+          })
+        })
 
         // clicking a list item displays it in the main view
         $("#question-list-container").delegate('li', 'click', function () {
           var li = $(this)
           var id = li.data('question-id')
 
-          $("#question-view-container").html(Mustache.to_html(questionViewTemplate, questions.filter(function (question) {
+          renderQuestionView(questions.filter(function (question) {
             return (question.id == id)
-          })[0]))
+          })[0])
         })
       })
     })
@@ -96,6 +123,23 @@
   </script>
 
   <style type="text/css" media="screen">
+
+    body {
+      font-family: helvetica;
+      color: #333;
+    }
+
+    input {
+      width: 200px;
+      font-size: 1.4em;
+    }
+
+    #wrap {
+      width: 960px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
     #question-list-container {
       float: left;
       width: 30%;
@@ -105,10 +149,44 @@
       float: right;
       width: 65%;
     }
+
+    .loading {
+      color: red;
+      font-size: 0.9em;
+      border: 1px solid red;
+      padding: 10px;
+    }
+
+    .controls {
+      padding-top: 30px;
+      padding-bottom: 10px;
+      border-top: 3px dashed #333;
+    }
   </style>
 
 </head>
 <body>
-  <div id='question-list-container'></div>
-  <div id='question-view-container'></div>
+  <div id="wrap">
+    <header>
+      <h1>Search.js Example</h1>
+    </header>
+
+    <article>
+      <p>This demo consists of 100 questions taken from stack overflow, they are listed on the left hand side.  Clicking on the headings will display the full question on the right hand side of the page.</p>
+
+      <p>Each question contains a heading, a list of tags and the body of the question.  All three fields are in the index and you can search using any words you want.</p>
+
+      <p class="loading">The index is currently being loaded, you can still search but currently not all the data has been indexed.</p>
+    </article>
+
+    <div class="controls">
+      <input type="search" placeholder="Search..."></input>
+      <a class="all" href="#">All</a>
+    </div>
+
+    <div class="questions">
+      <div id='question-list-container'></div>
+      <div id='question-view-container'></div>
+    </div>
+  </div>
 </body>
