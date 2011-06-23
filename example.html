@@ -4,7 +4,7 @@
   <script src="/jquery.js" type="text/javascript" charset="utf-8"></script>
   <script src="/mustache.js" type="text/javascript" charset="utf-8"></script>
 
-  <!-- Search -->
+  <!-- Searchlite -->
   <script src="/src/search.js" type="text/javascript" charset="utf-8"></script>
   <script src="/src/utils.js" type="text/javascript" charset="utf-8"></script>
   <script src="/src/deferred.js" type="text/javascript" charset="utf-8"></script>
@@ -37,7 +37,7 @@
   <script type="text/javascript" charset="utf-8">
 
     // set up the index, specifying that we want to index the title, tags and body fields of documents.
-    var idx = Search("barbar", function () {
+    var idx = Searchlite("barbar", function () {
       this.field('title', {
         'multiplier': 10
       })
@@ -168,7 +168,7 @@
 <body>
   <div id="wrap">
     <header>
-      <h1>Search.js Example</h1>
+      <h1>Searchlite.js Example</h1>
     </header>
 
     <article>

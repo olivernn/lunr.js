@@ -1,5 +1,5 @@
 /*!
- * Search - Store
+ * Searchlite - Store
  * Copyright (C) 2011 Oliver Nightingale
  * MIT Licensed
  */
@@ -24,18 +24,18 @@ if (window.IDBKeyRange === undefined) {
 };
 
 /**
- * ## Search.Store
+ * ## Searchlite.Store
  * A wrapper around the indexedDB api to provide a common, uniform, interface to the storage engine being
- * used by Search.  This hides away, as far as is possible, the implementation details of storing the indexes
+ * used by Searchlite.  This hides away, as far as is possible, the implementation details of storing the indexes
  * in indexedDB.
  *
- * An instance of Search.Store represents once indexedDB database and one objectStore in that database.  If
+ * An instance of Searchlite.Store represents once indexedDB database and one objectStore in that database.  If
  * the named database does not exist then it is automatically created.
  *
  * @constructor
  * @param {String} name - the name for this indexedDB database
  */
-Search.Store = function (name) {
+Searchlite.Store = function (name) {
   this.name = name
   this.version = "1"
 }
@@ -43,18 +43,18 @@ Search.Store = function (name) {
 /**
  * @private
  */
-Search.Store.prototype = {
+Searchlite.Store.prototype = {
 
   /**
-   * ## Search.Store.prototype.init
+   * ## Searchlite.Store.prototype.init
    * Initializes the store object.  For indexedDB this is required and will either create or open the database
    * of the given name.
    *
-   * @returns {Search.Deferred} a deferred object that will be resolved when the store is ready to be used.
+   * @returns {Searchlite.Deferred} a deferred object that will be resolved when the store is ready to be used.
    */
   init: function () {
     var self = this
-    var deferred = new Search.Deferred ()
+    var deferred = new Searchlite.Deferred ()
     var request = indexedDB.open(this.name, "")
     request.onsuccess = function (e) {
       self.db = this.result
@@ -82,14 +82,14 @@ Search.Store.prototype = {
   },
 
   /**
-   * ## Search.Store.prototype.all
+   * ## Searchlite.Store.prototype.all
    * Returns all the items in the current store's database object store.
    *
-   * @returns {Search.Deferred} a deferred object that will be resolved with the contents of the stores object store.
+   * @returns {Searchlite.Deferred} a deferred object that will be resolved with the contents of the stores object store.
    */
   all: function () {
     var self = this;
-    var deferred = new Search.Deferred ()
+    var deferred = new Searchlite.Deferred ()
     var results = []
 
     var trans = self.db.transaction([self.name], IDBTransaction.READ_WRITE, 0)
@@ -117,15 +117,15 @@ Search.Store.prototype = {
   },
 
   /**
-   * ## Search.Store.prototype.destroy
+   * ## Searchlite.Store.prototype.destroy
    * Removes the item, with the passed id, from the stores object store.
    *
    * @param {String || Number} id - the id of the object to remove from the store
-   * @returns {Search.Deferred} a deferred object that will be resolved when the object has been removed from the store
+   * @returns {Searchlite.Deferred} a deferred object that will be resolved when the object has been removed from the store
    */
   destroy: function (id) {
     var self = this
-    var deferred = new Search.Deferred ()
+    var deferred = new Searchlite.Deferred ()
 
     var trans = self.db.transaction([self.name], IDBTransaction.READ_WRITE, 0)
     var store = trans.objectStore(self.name)
@@ -144,17 +144,17 @@ Search.Store.prototype = {
   },
 
   /**
-   * ## Search.Store.prototype.destroyAll
+   * ## Searchlite.Store.prototype.destroyAll
    * Removes every object from the stores object store.
    *
-   * @returns {Search.Deferred} a deferred object that will be resolved once the object store is empty.
+   * @returns {Searchlite.Deferred} a deferred object that will be resolved once the object store is empty.
    */
   destroyAll: function () {
     var self = this
-    var returnDeferred = new Search.Deferred ()
+    var returnDeferred = new Searchlite.Deferred ()
 
     this.all().then(function (objs) {
-      new Search.Deferred (objs.map(function (obj) {
+      new Searchlite.Deferred (objs.map(function (obj) {
         return self.destroy(obj.id)
       })).then(function () {
         returnDeferred.resolve()
@@ -165,15 +165,15 @@ Search.Store.prototype = {
   },
 
   /**
-   * ## Search.Store.prototype.find
+   * ## Searchlite.Store.prototype.find
    * Finds an object in the store's object store with the passed id.
    *
    * @param {String || Number} id - the id of the object to be found in the object store.
-   * @returns {Search.Deferred} a deferred object that will be resolved with the found object.
+   * @returns {Searchlite.Deferred} a deferred object that will be resolved with the found object.
    */
   find: function (id) {
     var self = this
-    var deferred = new Search.Deferred ()
+    var deferred = new Searchlite.Deferred ()
 
     var trans = self.db.transaction([self.name], IDBTransaction.READ_WRITE, 0)
     var store = trans.objectStore(self.name)
@@ -192,15 +192,15 @@ Search.Store.prototype = {
   },
 
   /**
-   * ## Search.Store.prototype.save
+   * ## Searchlite.Store.prototype.save
    * Saves the passed object into the object store.  Any existing object with the same id will be overwriten.
    *
    * @param {Object} object - the object to store in the object store.
-   * @returns {Search.Deferred} a deferred object that will be resolved when the object has been saved.
+   * @returns {Searchlite.Deferred} a deferred object that will be resolved when the object has been saved.
    */
   save: function (object) {
     var self = this
-    var deferred = new Search.Deferred ()
+    var deferred = new Searchlite.Deferred ()
 
     var trans = self.db.transaction([self.name], IDBTransaction.READ_WRITE, 0)
     var store = trans.objectStore(self.name)

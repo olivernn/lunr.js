@@ -1,15 +1,15 @@
 /*!
- * Search - utils
+ * Searchlite - utils
  * Copyright (C) 2011 Oliver Nightingale
  * MIT Licensed
  */
 
 /**
- * A collection of utils that are used as part of the Search code base.
+ * A collection of utils that are used as part of the Searchlite code base.
  */
-Search.utils = {
+Searchlite.utils = {
   /**
-   * ## Search.utils.uniq
+   * ## Searchlite.utils.uniq
    * Retuns an array with duplicate elements removed.
    *
    * @private
@@ -24,7 +24,7 @@ Search.utils = {
   },
 
   /**
-   * ## Search.utils.intersect
+   * ## Searchlite.utils.intersect
    * Finds the intersect of the array with all other passed arrays.
    *
    * @private

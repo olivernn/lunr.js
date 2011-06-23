@@ -1,42 +1,42 @@
 /*!
- * Search - Word
+ * Searchlite - Word
  * Copyright (C) 2011 Oliver Nightingale
  * MIT Licensed
  */
 
 /**
-* ## Search.Word
-* A Search.Word wraps a string and provides methods to convert the string into a form ready for insertion
+* ## Searchlite.Word
+* A Searchlite.Word wraps a string and provides methods to convert the string into a form ready for insertion
 * into the word index.  It handles exclusion of stop word as well as performing any language based algorithms.
 *
 * @constructor
 * @param {String} raw - the raw word to be used as the base of a search word.
 */
-Search.Word = function (raw) {
+Searchlite.Word = function (raw) {
   this.raw = raw
   this.out = this.raw.replace(/^\W+/, "").replace(/\W+$/, "").toLowerCase()
 }
 
 /**
- * ## Search.Word.stopWords
+ * ## Searchlite.Word.stopWords
  * A list of words that will be considered stop words.
  */
-Search.Word.stopWords = ["the", "of", "to", "and", "a", "in", "is", "it", "you", "that", "this"]
+Searchlite.Word.stopWords = ["the", "of", "to", "and", "a", "in", "is", "it", "you", "that", "this"]
 
-Search.Word.prototype = {
+Searchlite.Word.prototype = {
 
   /**
-   * ## Search.Word.prototype.isStopWord
+   * ## Searchlite.Word.prototype.isStopWord
    * Determines whether or not this word is a stop word.
    *
    * @returns {Boolean}
    */
   isStopWord: function () {
-    return (Search.Word.stopWords.indexOf(this.raw.toLowerCase()) !== -1)
+    return (Searchlite.Word.stopWords.indexOf(this.raw.toLowerCase()) !== -1)
   },
 
   /**
-   * ## Search.Word.prototype.toString
+   * ## Searchlite.Word.prototype.toString
    * Converts the search word into a string representation
    */
   toString: function () {

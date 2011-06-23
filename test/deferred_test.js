@@ -1,7 +1,7 @@
 module("Deferred")
 
 test("adding success callbacks to an unresolved deferred object", function () {
-  var deferred = new Search.Deferred ()
+  var deferred = new Searchlite.Deferred ()
 
   deferred.then(function () {})
 
@@ -9,7 +9,7 @@ test("adding success callbacks to an unresolved deferred object", function () {
 })
 
 test("adding fail and success callbacks to an unresolved deferred object", function () {
-  var deferred = new Search.Deferred ()
+  var deferred = new Searchlite.Deferred ()
 
   deferred.then(function () {}, function () {})
 
@@ -18,13 +18,13 @@ test("adding fail and success callbacks to an unresolved deferred object", funct
 })
 
 test("should have a state of null before being resolved", function () {
-  var deferred = new Search.Deferred ()
+  var deferred = new Searchlite.Deferred ()
 
   equal(deferred.state, null, "should have a state of null before being resolved")
 })
 
 test("succesfully resolving a deferred object", function () {
-  var deferred = new Search.Deferred ()
+  var deferred = new Searchlite.Deferred ()
   var successCalled = false
   var failCalled = false
 
@@ -42,7 +42,7 @@ test("succesfully resolving a deferred object", function () {
 })
 
 test("failing a deferred object", function () {
-  var deferred = new Search.Deferred ()
+  var deferred = new Searchlite.Deferred ()
   var successCalled = false
   var failCalled = false
 
@@ -60,7 +60,7 @@ test("failing a deferred object", function () {
 })
 
 test("resolving a deferred with a context object", function () {
-  var deferred = new Search.Deferred ()
+  var deferred = new Searchlite.Deferred ()
   var successCtx = null
   var yieldedCtx = null
   var context = {}
@@ -78,7 +78,7 @@ test("resolving a deferred with a context object", function () {
 })
 
 test("failing a deferred with a context object", function () {
-  var deferred = new Search.Deferred ()
+  var deferred = new Searchlite.Deferred ()
   var failedCtx = null
   var yieldedCtx = null
   var context = {}
@@ -96,7 +96,7 @@ test("failing a deferred with a context object", function () {
 })
 
 test("adding callbacks to an already resolved deferred object", function () {
-  var deferred = new Search.Deferred ()
+  var deferred = new Searchlite.Deferred ()
   var callbackCalled = false
 
   deferred.resolve()
@@ -111,9 +111,9 @@ test("adding callbacks to an already resolved deferred object", function () {
 test("creating a deferred with other deferreds", function () {
   var callbackCalled = false
 
-  var d1 = new Search.Deferred ()
-  var d2 = new Search.Deferred ()
-  var d3 = new Search.Deferred ([d1, d2])
+  var d1 = new Searchlite.Deferred ()
+  var d2 = new Searchlite.Deferred ()
+  var d3 = new Searchlite.Deferred ([d1, d2])
 
   d3.then(function () {
     callbackCalled = true
@@ -129,9 +129,9 @@ test("a deferred with other deferreds", function () {
   var callbackCalled = false
   var failed = false
 
-  var d1 = new Search.Deferred ()
-  var d2 = new Search.Deferred ()
-  var d3 = new Search.Deferred ([d1, d2])
+  var d1 = new Searchlite.Deferred ()
+  var d2 = new Searchlite.Deferred ()
+  var d3 = new Searchlite.Deferred ([d1, d2])
 
   d3.then(function () {
     callbackCalled = true

@@ -1,16 +1,16 @@
 <!DOCTYPE HTML>
 <html>
   <head>
-    <title>Search Sandbox</title>
+    <title>Searchlite Sandbox</title>
 
-    <!-- Search -->
-    <script src="/search.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/utils.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/deferred.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/store.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/index.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/document.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/word.js" type="text/javascript" charset="utf-8"></script>
+    <!-- Searchlite -->
+    <script src="/src/search.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/src/utils.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/src/deferred.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/src/store.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/src/index.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/src/document.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/src/word.js" type="text/javascript" charset="utf-8"></script>
 
     <script type="text/javascript" charset="utf-8">
 
@@ -79,12 +79,20 @@
         url: "http://www.bbc.co.uk/news/uk-england-gloucestershire-13738215"
       }]
 
-      // foo5 has good data
+      // news has good data
 
-      var idx = Search("news", function () {
+      var idx = Searchlite("ollie", function () {
         this.field('title', {'multiplier': 10})
         this.field('body')
       })
+
+      function load () {
+        var obj = objs.pop()
+        console.log('adding', obj)
+        idx.add(obj).then(function () {
+          if (objs.length) load()
+        })
+      }
 
     </script>
 

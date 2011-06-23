@@ -1,6 +1,6 @@
 module("Index")
 
-var blankIndex = function () { return new Search.Index ('test') }
+var blankIndex = function () { return new Searchlite.Index ('test') }
 
 test("an index has no fields by default", function () {
   var idx = blankIndex()
