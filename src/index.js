@@ -16,34 +16,82 @@ Search.Index = function (name) {
   this.fields = {} // by default no fields will be indexed
   this.wordStore = new Search.Store (name + "-words")
   this.docStore = new Search.Store (name + "-docs")
-  this.queueLength = 0
-  this.adding = false
 
-  // do this elsewhere???
-  this.wordStore.init(function () { console.log('wordStore initialized') })
-  this.docStore.init(function () { console.log('docStore initialized') })
+  // initialize both the stores and store the deferred against storageInitialized
+  // so you can do idx.storageInitialized.then(function () { console.log('ready') })
+  this.storageInitialized = new Search.Deferred([
+    this.wordStore.init(), this.docStore.init()
+  ])
 }
 
 Search.Index.prototype = {
 
   /**
    * ## Search.Index.prototype.addList
-   * Add a list of objects to the index
+   * Adds a list of objects to the index.  When adding a list of objects to the index each object must be
+   * added in serial so that the word index can be built up properly.  The addList method provides a simple
+   * way to add items from a list serially.
+   *
+   * Using addList will allow you to take advantage of the events being fired so that you can get an
+   * idea of the progress of the indexing.
+   *
+   * @params {Array} a list of objects to add to the index.
+   * @returns {Search.Deferred} a deferred object which will be resolved once the whole list of objects has been indexed.
    */
   addList: function (objs) {
     var self = this
     var list = objs.slice(0, objs.length)
     var deferred = new Search.Deferred ()
-    var obj = list.pop()
-    self.add(obj).then(function () {
-      if (list.length) self.addList(list)
-      list = null // reset list to prevent memory leaks?
+    var interval
+    var prevListLength = list.length
+
+    this.addRecursive(list)
+
+    interval = setInterval(function () {
+      if (list.length) {
+        if (list.length < prevListLength) {
+          console.log("progress", (list.length / objs.length) * 100)
+          prevListLength = list.length
+        }
+      } else {
+        clearInterval(interval)
+        deferred.resolve()
+      };
+    }, 10)
+
+    return deferred
+  },
+
+  /**
+   * ## Search.Index.prototype.addRecursive
+   * A method that recursively adds items to the index.  This is a low level method used by the `addList` method.
+   * When adding a list of objects it is advised to use the `addList` method.
+   *
+   * @private
+   * @params {Array} the list of objects to add
+   */
+  addRecursive: function (list) {
+    var self = this
+
+    self.add(list.pop()).then(function () {
+      list.length ? self.addRecursive(list) : (list = null)
     })
   },
 
   /**
    * ## Search.Index.prototype.add
-   * Adds a new document to the index
+   * This method is the primary way of adding objects to the search index.  It will convert the passed
+   * JSON object and convert it into a Search.Document.  The words from the document will then be extracted
+   * add added to the wordStore.  Finally the document itself will be added to the docStore.
+   *
+   * Objects should only be added to the index one at a time.  This is to ensure the wordStore is correctly
+   * maintained.  When adding a list of items to the index it may be more convinient to use the `addList` method
+   * which will ensure only one object is added at a time.
+   *
+   * @see Search.Index.prototype.addList
+   *
+   * @params {Object} obj - the object to add to the index.
+   * @returns {Search.Deferred} a deferred object that will be resolved when the object has been added to the index.
    */
   add: function (obj) {
     var self = this
@@ -84,6 +132,12 @@ Search.Index.prototype = {
     return returnDeferred
   },
 
+  /**
+   * ## Search.Index.prototype.empty
+   * Empties the the index of all documents and words.
+   *
+   * @returns {Search.Deferred} returns a deferred that is resolved when the index has been empties
+   */
   empty: function () {
     var self = this
 
@@ -93,10 +147,40 @@ Search.Index.prototype = {
     ])
   },
 
+  /**
+   * ## Search.Index.prototype.field
+   * A method that is part of the DSL for setting up an index.  Use this method to describe which fields
+   * from a document should be part of the index.  An options object can be passed as the second argument
+   * that will change the way that a particular field is indexed.
+   *
+   * Currently the supported options are:
+   * * __multiplier__ - a multiplier to apply to a field, you can use this to make sure certain fields are
+   * considered more important, e.g. a documents title.
+   *
+   * @params {String} name - the name of the field to index in a document
+   * @params {Object} opts - options for indexing this particular field
+   *
+   * ### Example
+   *     this.field('title', { multiplier: 10 })
+   *     this.field('body')
+   *
+   */
   field: function (name, opts) {
     this.fields[name] = opts || {multiplier: 1}
   },
 
+  /**
+   * ## Search.Index.prototype.search
+   * This method is the main interface for searching documents in the index.  You can pass in a string of words
+   * separated by spaces.  By default the search is an AND search, so if you searched for 'foo bar' the results
+   * would be those documents in the index that contain both the word foo AND the word bar.
+   *
+   * All searches are done asynchronously and the search method returns an instance of Search.Deferred.  The
+   * deferred object will be resolved with the results of the search as soon as those results are available.
+   *
+   * @params {String} term - the term or terms to search the index for.
+   * @returns {Search.Deferred} a deferred object that will be resolved once the search has completed.
+   */
   search: function (term) {
     var self = this
     var returnDeferred = new Search.Deferred ()
