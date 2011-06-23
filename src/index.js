@@ -50,7 +50,6 @@ Search.Index.prototype = {
     interval = setInterval(function () {
       if (list.length) {
         if (list.length < prevListLength) {
-          console.log("progress", (list.length / objs.length) * 100)
           prevListLength = list.length
         }
       } else {
