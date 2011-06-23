@@ -1,4 +1,4 @@
-# Search
+# Searchlite
 
 ## Description
 

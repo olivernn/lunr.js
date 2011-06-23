@@ -5,7 +5,7 @@
   <script src="/mustache.js" type="text/javascript" charset="utf-8"></script>
 
   <!-- Searchlite -->
-  <script src="/src/search.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/src/searchlite.js" type="text/javascript" charset="utf-8"></script>
   <script src="/src/utils.js" type="text/javascript" charset="utf-8"></script>
   <script src="/src/deferred.js" type="text/javascript" charset="utf-8"></script>
   <script src="/src/store.js" type="text/javascript" charset="utf-8"></script>
@@ -83,9 +83,12 @@
 
         if (!localStorage.getItem('indexLoaded?')) {
           idx.storageInitialized.then(function () {
-            idx.addList(questions).then(function () {
-              localStorage.setItem('indexLoaded?', true)
-              $('.loading').fadeOut()
+            // empty the index incase the questions have been partially indexed
+            idx.empty().then(function () {
+              idx.addList(questions).then(function () {
+                localStorage.setItem('indexLoaded?', true)
+                $('.loading').fadeOut()
+              })
             })
           })
         } else {
