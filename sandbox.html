@@ -1,9 +1,9 @@
 <!DOCTYPE HTML>
 <html>
   <head>
-    <title>Searchlite Sandbox</title>
+    <title>Lunr Sandbox</title>
 
-    <!-- Searchlite -->
+    <!-- Lunr -->
     <script src="/src/searchlite.js" type="text/javascript" charset="utf-8"></script>
     <script src="/src/utils.js" type="text/javascript" charset="utf-8"></script>
     <script src="/src/deferred.js" type="text/javascript" charset="utf-8"></script>
@@ -81,7 +81,7 @@
 
       // news has good data
 
-      var idx = Searchlite("ollie", function () {
+      var idx = Lunr("ollie", function () {
         this.field('title', {'multiplier': 10})
         this.field('body')
       })

@@ -1,13 +1,13 @@
 /*!
- * Searchlite - Deferred
+ * Lunr - Deferred
  * Copyright (C) 2011 Oliver Nightingale
  * MIT Licensed
  */
 
 /**
- * Searchlite.Deferred is an implementation of a deferred object and is used throughout the Searchlite library for
+ * Lunr.Deferred is an implementation of a deferred object and is used throughout the Lunr library for
  * dealing with asynchronous calls and requests.  A deferred object can either be stand-alone or wrap other
- * instances of Searchlite.Defered objects.
+ * instances of Lunr.Defered objects.
  *
  * When used as a stand-alone deferred the object is initially in a non-resolved state, callbacks can be
  * attached using the `then` method.  Once the asynchronous activity that the deferred is representing has
@@ -21,11 +21,11 @@
  * @param {Array} an optional list of deferred objects to wrap.
  *
  * ### Example
- *     var deferred = new Searchlite.Deferred ()
+ *     var deferred = new Lunr.Deferred ()
  *     deferred.then(function () { console.log('success') })
  *     deferred.resolve() // 'success' will be logged.
  */
-Searchlite.Deferred = function (deferreds) {
+Lunr.Deferred = function (deferreds) {
   this.state = null
   this.successCallbacks = []
   this.failCallbacks = []
@@ -45,9 +45,9 @@ Searchlite.Deferred = function (deferreds) {
 
 }
 
-Searchlite.Deferred.prototype = {
+Lunr.Deferred.prototype = {
   /**
-   * ## Searchlite.Deferred.prototype.resolve
+   * ## Lunr.Deferred.prototype.resolve
    * A method to resolve this deferred instance.  An optional context object can be passed which will be
    * passed to every success callback.  The context of the success callbacks will also be set to this object.
    *
@@ -68,7 +68,7 @@ Searchlite.Deferred.prototype = {
   },
 
   /**
-   * ## Searchlite.Deferred.prototype.fail
+   * ## Lunr.Deferred.prototype.fail
    * A method to fail this deferred instance.  An optional context object can be passed which will be
    * passed to every failure callback.  The context of the failure callbacks will also be set to this object.
    *
@@ -89,7 +89,7 @@ Searchlite.Deferred.prototype = {
   },
 
   /**
-   * ## Searchlite.Deferred.prototype.then
+   * ## Lunr.Deferred.prototype.then
    * The `then` method allows both success and failure callbacks to be attatched to the deferred object.
    * If the deferred object has still to be resolved or failed then these callbacks will be added to the
    * internal list of success and fail callbacks.  If the deferred object has already been resolved or
@@ -100,7 +100,7 @@ Searchlite.Deferred.prototype = {
    *
    * @param {Function} success - a callback to be called when the deferred is resolved
    * @param {Function} fail - a callback to be called when the deferred is failed.
-   * @returns {Searchlite.Deferred} returns this instance to allow for chaining.
+   * @returns {Lunr.Deferred} returns this instance to allow for chaining.
    *
    * ### Example
    *     deferred.then(function () { console.log('success') })
@@ -117,11 +117,11 @@ Searchlite.Deferred.prototype = {
   },
 
   /**
-   * ## Searchlite.Deferred.prototype.thenLog
+   * ## Lunr.Deferred.prototype.thenLog
    * A convenience function for debugging and development purposes.  Adds a success callback that simply
    * logs the context argument.
    *
-   * @returns {Searchlite.Deferred} returns this instance to allow for chaining.
+   * @returns {Lunr.Deferred} returns this instance to allow for chaining.
    */
   thenLog: function () {
     this.then(function () {

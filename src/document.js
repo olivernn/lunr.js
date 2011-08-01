@@ -1,12 +1,12 @@
 /*!
- * Searchlite - Document
+ * Lunr - Document
  * Copyright (C) 2011 Oliver Nightingale
  * MIT Licensed
  */
 
 /**
- * Searchlite.Document wraps any document that is added to the index.  It extracts any words from the document
- * fields that need indexing and formats the document in a way ready for insertion into the Searchlite.Index
+ * Lunr.Document wraps any document that is added to the index.  It extracts any words from the document
+ * fields that need indexing and formats the document in a way ready for insertion into the Lunr.Index
  * docStore.
  *
  * @constructor
@@ -14,20 +14,20 @@
  * @param {Object} fields - the fields object from the index, indicationg which fields from the document need indexing.
  *
  */
-Searchlite.Document = function (original, fields) {
+Lunr.Document = function (original, fields) {
   this.original = original
   this.fields = fields
   this.ref = Date.now()
 }
 
-Searchlite.Document.prototype = {
+Lunr.Document.prototype = {
   /**
-   * ## Searchlite.Document.prototype.asJSON
-   * Converts this instance of Searchlite.Document into a plain object ready for insertion into the Index's docStore.
-   * The returned object consists of three properties, an auto generated id, an array of Searchlite.Word ids and the
+   * ## Lunr.Document.prototype.asJSON
+   * Converts this instance of Lunr.Document into a plain object ready for insertion into the Index's docStore.
+   * The returned object consists of three properties, an auto generated id, an array of Lunr.Word ids and the
    * original document.
    *
-   * @returns {Object} the plain object representation of the Searchlite.Document.
+   * @returns {Object} the plain object representation of the Lunr.Document.
    */
   asJSON: function () {
     return {
@@ -38,14 +38,14 @@ Searchlite.Document.prototype = {
   },
 
   /**
-   * ## Searchlite.Document.prototype.words
+   * ## Lunr.Document.prototype.words
    * For each field in the original document that requires indexing this method will create an instance of
-   * Searchlite.Word and then tally the total score for that word in the document as a whole.  At this time any
+   * Lunr.Word and then tally the total score for that word in the document as a whole.  At this time any
    * multiplier specified in the fields object will be applied.
    *
    * The list of words will then be converted into a format ready for insertion into the index's wordStore.
    *
-   * @see {Searchlite.Word}
+   * @see {Lunr.Word}
    * @returns {Array} an array of all word objects ready for insertion into the index's wordStore.
    */
   words: function () {
@@ -61,7 +61,7 @@ Searchlite.Document.prototype = {
         })
         // convert each raw word into a search word
         .map(function (rawWord) {
-          var word = new Searchlite.Word(rawWord)
+          var word = new Lunr.Word(rawWord)
           if (!word.isStopWord()) return word.toString()
         })
         // filter out any stop words

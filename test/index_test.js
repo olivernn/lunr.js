@@ -1,6 +1,6 @@
 module("Index")
 
-var blankIndex = function () { return new Searchlite.Index ('test') }
+var blankIndex = function () { return new Lunr.Index ('test') }
 
 test("an index has no fields by default", function () {
   var idx = blankIndex()

@@ -1,4 +1,4 @@
-# Searchlite
+# Lunr
 
 ## Description
 

@@ -1,15 +1,15 @@
 /*!
- * Searchlite - utils
+ * Lunr - utils
  * Copyright (C) 2011 Oliver Nightingale
  * MIT Licensed
  */
 
 /**
- * A collection of utils that are used as part of the Searchlite code base.
+ * A collection of utils that are used as part of the Lunr code base.
  */
-Searchlite.utils = {
+Lunr.utils = {
   /**
-   * ## Searchlite.utils.uniq
+   * ## Lunr.utils.uniq
    * Retuns an array with duplicate elements removed.
    *
    * @private
@@ -24,7 +24,7 @@ Searchlite.utils = {
   },
 
   /**
-   * ## Searchlite.utils.intersect
+   * ## Lunr.utils.intersect
    * Finds the intersect of the array with all other passed arrays.
    *
    * @private
