@@ -39,42 +39,20 @@ Searchlite.Index.prototype = {
    * @returns {Searchlite.Deferred} a deferred object which will be resolved once the whole list of objects has been indexed.
    */
   addList: function (objs) {
-    var self = this
-    var list = objs.slice(0, objs.length)
     var deferred = new Searchlite.Deferred ()
-    var interval
-    var prevListLength = list.length
+    var list = objs.slice(0, objs.length)
 
-    this.addRecursive(list)
+    var adder = function () {
+      return this.add(list.pop()).then(function () {
+        if (!list.length) return deferred.resolve()
+        addRecursive()
+      })
+    }
 
-    interval = setInterval(function () {
-      if (list.length) {
-        if (list.length < prevListLength) {
-          prevListLength = list.length
-        }
-      } else {
-        clearInterval(interval)
-        deferred.resolve()
-      };
-    }, 10)
+    var addRecursive = adder.bind(this)
 
+    addRecursive()
     return deferred
-  },
-
-  /**
-   * ## Searchlite.Index.prototype.addRecursive
-   * A method that recursively adds items to the index.  This is a low level method used by the `addList` method.
-   * When adding a list of objects it is advised to use the `addList` method.
-   *
-   * @private
-   * @params {Array} the list of objects to add
-   */
-  addRecursive: function (list) {
-    var self = this
-
-    self.add(list.pop()).then(function () {
-      list.length ? self.addRecursive(list) : (list = null)
-    })
   },
 
   /**
