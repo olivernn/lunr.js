@@ -154,11 +154,15 @@ Searchlite.Store.prototype = {
     var returnDeferred = new Searchlite.Deferred ()
 
     this.all().then(function (objs) {
-      new Searchlite.Deferred (objs.map(function (obj) {
-        return self.destroy(obj.id)
-      })).then(function () {
+      if (objs.length) {
+        new Searchlite.Deferred (objs.map(function (obj) {
+          return self.destroy(obj.id)
+        })).then(function () {
+          returnDeferred.resolve()
+        })
+      } else {
         returnDeferred.resolve()
-      })
+      };
     })
 
     return returnDeferred
