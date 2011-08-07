@@ -2,6 +2,10 @@
 
 A bit like Solr, but much smaller and not as bright.
 
+## Example
+
+Go to [http://olivernn.github.com/lunr.js/example.html](http://olivernn.github.com/lunr.js/example.html)
+
 ## Description
 
 An experiment in using IndexedDB for a client side full text search engine.
