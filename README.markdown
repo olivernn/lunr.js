@@ -1,5 +1,7 @@
 # Lunr
 
+A bit like Solr, but much smaller and not as bright.
+
 ## Description
 
 An experiment in using IndexedDB for a client side full text search engine.
@@ -16,7 +18,7 @@ Currently Search relies on IndexedDB for its index storage.  This means it will 
 
 ## Installation
 
-Include the search.js file in your page.
+Include the lunr.js file in your page.
 
 ## Todo
 
