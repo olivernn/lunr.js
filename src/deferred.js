@@ -65,6 +65,7 @@ Lunr.Deferred.prototype = {
         callback.call(ctx, ctx)
       })
     };
+    return this
   },
 
   /**
@@ -86,6 +87,7 @@ Lunr.Deferred.prototype = {
         callback.call(ctx, ctx)
       })
     };
+    return this
   },
 
   /**
@@ -123,9 +125,13 @@ Lunr.Deferred.prototype = {
    *
    * @returns {Lunr.Deferred} returns this instance to allow for chaining.
    */
-  thenLog: function () {
+  thenLog: function (msg) {
     this.then(function () {
-      console.log(this)
+      if (msg) {
+        console.log(msg)
+      } else {
+        console.log(this)
+      }
     })
     return this;
   }
