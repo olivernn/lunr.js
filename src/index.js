@@ -41,7 +41,7 @@ Lunr.Index.prototype = {
    */
    addList: function (list) {
      var deferreds = list.map(function (obj) {
-       return this._add(obj)
+       return this.add(obj)
      }, this)
 
      return new Lunr.Deferred(deferreds)
@@ -90,7 +90,7 @@ Lunr.Index.prototype = {
      var self = this
 
      var item = this.addQueue.pop()
-     this.add(item.doc).then(function () {
+     this._add(item.doc).then(function () {
        item.deferred.resolve()
        self._adding()
      })
@@ -113,18 +113,24 @@ Lunr.Index.prototype = {
 
     findDeferred.then(function (existingWords) {
 
+      // push all the documents from any existing stored words
+      // onto the new word object from the new document before
+      // the new word is saved into the word store
       existingWords.forEach(function (existingWord) {
         if (existingWord) {
           matchingWord = words.filter(function (word) {
             return word.id === existingWord.id
           })[0]
-          
+        
           existingWord.docs.forEach(function (doc) {
             matchingWord.docs.push(doc)
           })
         };
       })
 
+      // save all the new words found in the document, these will
+      // incorporate any existing words (from the word store) list
+      // of documents and scores etc.
       var saveDeferred = new Lunr.Deferred(words.map(function (word) {
         return self.wordStore.save(word)
       }))
