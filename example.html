@@ -5,7 +5,7 @@
   <script src="/mustache.js" type="text/javascript" charset="utf-8"></script>
 
   <!-- Lunr -->
-  <script src="/src/searchlite.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/src/lunr.js" type="text/javascript" charset="utf-8"></script>
   <script src="/src/utils.js" type="text/javascript" charset="utf-8"></script>
   <script src="/src/deferred.js" type="text/javascript" charset="utf-8"></script>
   <script src="/src/store.js" type="text/javascript" charset="utf-8"></script>
@@ -72,7 +72,7 @@
       $.getJSON('/example_data.json', function (data) {
 
         // format the raw json into a form that is simpler to work with
-        var questions = data.questions.map(function (raw) {
+        questions = data.questions.map(function (raw) {
           return {
             id: raw.question_id,
             title: raw.title,

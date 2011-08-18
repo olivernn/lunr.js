@@ -17,6 +17,9 @@ Lunr.Index = function (name) {
   this.wordStore = new Lunr.Store (name + "-words")
   this.docStore = new Lunr.Store (name + "-docs")
 
+  this.addQueue = []
+  this.indexing = false
+
   // initialize both the stores and store the deferred against storageInitialized
   // so you can do idx.storageInitialized.then(function () { console.log('ready') })
   this.storageInitialized = new Lunr.Deferred([
@@ -28,9 +31,7 @@ Lunr.Index.prototype = {
 
   /**
    * ## Lunr.Index.prototype.addList
-   * Adds a list of objects to the index.  When adding a list of objects to the index each object must be
-   * added in serial so that the word index can be built up properly.  The addList method provides a simple
-   * way to add items from a list serially.
+   * Adds a list of objects to the index.
    *
    * Using addList will allow you to take advantage of the events being fired so that you can get an
    * idea of the progress of the indexing.
@@ -38,22 +39,14 @@ Lunr.Index.prototype = {
    * @params {Array} a list of objects to add to the index.
    * @returns {Lunr.Deferred} a deferred object which will be resolved once the whole list of objects has been indexed.
    */
-  addList: function (objs) {
-    var deferred = new Lunr.Deferred ()
-    var list = objs.slice(0, objs.length)
+   addList: function (list) {
+     var deferreds = list.map(function (obj) {
+       return this._add(obj)
+     }, this)
 
-    var adder = function () {
-      return this.add(list.pop()).then(function () {
-        if (!list.length) return deferred.resolve()
-        addRecursive()
-      })
-    }
+     return new Lunr.Deferred(deferreds)
+   },
 
-    var addRecursive = adder.bind(this)
-
-    addRecursive()
-    return deferred
-  },
 
   /**
    * ## Lunr.Index.prototype.add
@@ -70,7 +63,44 @@ Lunr.Index.prototype = {
    * @params {Object} obj - the object to add to the index.
    * @returns {Lunr.Deferred} a deferred object that will be resolved when the object has been added to the index.
    */
-  add: function (obj) {
+   add: function (obj) {
+     var deferred = new Lunr.Deferred ()
+
+     this.addQueue.push({
+       doc: obj,
+       deferred: deferred
+     })
+
+     if (!this.indexing) this._adding()
+     return deferred
+   },
+
+   /**
+    * ## Lunr.Index.prototype._adding
+    * Low level method, manages the addQueue etc
+    */
+   _adding: function () {
+     this.indexing = true
+
+     if (!this.addQueue.length) {
+       this.indexing = false
+       return
+     };
+
+     var self = this
+
+     var item = this.addQueue.pop()
+     this.add(item.doc).then(function () {
+       item.deferred.resolve()
+       self._adding()
+     })
+   },
+
+   /**
+    * ## Lunr.Index.prototype._add
+    * Low level method, manages actually adding a document to the index
+    */
+  _add: function (obj) {
     var self = this
     var doc = new Lunr.Document(obj, this.fields)
     var returnDeferred = new Lunr.Deferred ()
