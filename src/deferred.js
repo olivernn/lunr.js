@@ -109,11 +109,11 @@ Lunr.Deferred.prototype = {
    */
   then: function (success, fail) {
     if (this.state) {
-      if (this.state = 'success' && success) success.call(this.ctx, this.ctx)
-      if (this.state = 'failed' && fail) fail.call(this.ctx, this.ctx)
+      if (this.state == 'success' && success) success.call(this.ctx, this.ctx)
+      if (this.state == 'failed' && fail) fail.call(this.ctx, this.ctx)
     } else {
-      this.successCallbacks.push(success)
-      this.failCallbacks.push(fail)
+      if (success) this.successCallbacks.push(success)
+      if (fail) this.failCallbacks.push(fail)
     };
     return this;
   },
