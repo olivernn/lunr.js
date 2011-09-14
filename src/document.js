@@ -14,10 +14,10 @@
  * @param {Object} fields - the fields object from the index, indicationg which fields from the document need indexing.
  *
  */
-Lunr.Document = function (original, fields) {
+Lunr.Document = function (original, refName, fields) {
   this.original = original
   this.fields = fields
-  this.ref = Date.now()
+  this.ref = original[refName]
 }
 
 Lunr.Document.prototype = {
