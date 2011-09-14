@@ -31,26 +31,6 @@ Lunr.Index = function (name) {
 }
 
 Lunr.Index.prototype = {
-
-  /**
-   * ## Lunr.Index.prototype.addList
-   * Adds a list of objects to the index.
-   *
-   * Using addList will allow you to take advantage of the events being fired so that you can get an
-   * idea of the progress of the indexing.
-   *
-   * @params {Array} a list of objects to add to the index.
-   * @returns {Lunr.Deferred} a deferred object which will be resolved once the whole list of objects has been indexed.
-   */
-   // addList: function (list) {
-   //   var deferreds = list.map(function (obj) {
-   //     return this.add(obj)
-   //   }, this)
-   // 
-   //   return new Lunr.Deferred(deferreds)
-   // },
-
-
   /**
    * ## Lunr.Index.prototype.add
    * This method is the primary way of adding objects to the search index.  It will convert the passed
@@ -66,45 +46,6 @@ Lunr.Index.prototype = {
    * @params {Object} obj - the object to add to the index.
    * @returns {Lunr.Deferred} a deferred object that will be resolved when the object has been added to the index.
    */
-   // add: function (obj) {
-   //   var deferred = new Lunr.Deferred ()
-   // 
-   //   this.addQueue.push({
-   //     doc: obj,
-   //     deferred: deferred
-   //   })
-   //   
-   //   if (!this.indexing) this._adding()
-   // 
-   //   return deferred
-   // },
-
-   /**
-    * ## Lunr.Index.prototype._adding
-    * Low level method, manages the addQueue etc
-    */
-   // _adding: function () {
-   //   this.indexing = true
-   // 
-   //   if (!this.addQueue.length) {
-   //     this.indexing = false
-   //     return
-   //   };
-   // 
-   //   var self = this
-   // 
-   //   var item = this.addQueue.pop()
-   //   this._add(item.doc).then(function () {
-   //     item.deferred.resolve()
-   //     self._adding()
-   //   })
-   // },
-
-   /**
-    * ## Lunr.Index.prototype._add
-    * Low level method, manages actually adding a document to the index
-    */
-
   add: function (obj) {
     var doc = new Lunr.Document(obj, this.refName, this.fields)
     var words = doc.words()
@@ -113,66 +54,6 @@ Lunr.Index.prototype = {
       this.trie.set(word.id, word.docs[0])
     }, this)
   },
-
-  // _add: function (obj) {
-  //   var self = this
-  //   var doc = new Lunr.Document(obj, this.fields)
-  //   var returnDeferred = new Lunr.Deferred ()
-  // 
-  //   var words = doc.words()
-  // 
-  //   var findDeferred = new Lunr.Deferred(words.map(function (word) {
-  //     return self.wordStore.find(word.id)
-  //   }))
-  // 
-  //   findDeferred.then(function (existingWords) {
-  // 
-  //     // push all the documents from any existing stored words
-  //     // onto the new word object from the new document before
-  //     // the new word is saved into the word store
-  //     existingWords.forEach(function (existingWord) {
-  //       if (existingWord) {
-  //         matchingWord = words.filter(function (word) {
-  //           return word.id === existingWord.id
-  //         })[0]
-  //       
-  //         existingWord.docs.forEach(function (doc) {
-  //           matchingWord.docs.push(doc)
-  //         })
-  //       };
-  //     })
-  // 
-  //     // save all the new words found in the document, these will
-  //     // incorporate any existing words (from the word store) list
-  //     // of documents and scores etc.
-  //     var saveDeferred = new Lunr.Deferred(words.map(function (word) {
-  //       return self.wordStore.save(word)
-  //     }))
-  // 
-  //     saveDeferred.then(function () {
-  //       self.docStore.save(doc.asJSON()).then(function () {
-  //         returnDeferred.resolve()
-  //       })
-  //     })
-  //   })
-  // 
-  //   return returnDeferred
-  // },
-
-  /**
-   * ## Lunr.Index.prototype.empty
-   * Empties the the index of all documents and words.
-   *
-   * @returns {Lunr.Deferred} returns a deferred that is resolved when the index has been empties
-   */
-  // empty: function () {
-  //   var self = this
-  // 
-  //   return new Lunr.Deferred ([
-  //     self.wordStore.destroyAll(),
-  //     self.docStore.destroyAll()
-  //   ])
-  // },
 
   /**
    * ## Lunr.Index.prototype.field
@@ -238,53 +119,5 @@ Lunr.Index.prototype = {
       }, this)
 
     return Lunr.utils.intersect.apply(Lunr.utils, docIds)
-  }
-
-  // search: function (term) {
-  //   var self = this
-  //   var returnDeferred = new Lunr.Deferred ()
-  // 
-  //   // convert the term into search words
-  //   var words = term
-  //     .split(' ')
-  //     .map(function (str) {
-  //       var word = new Lunr.Word(str)
-  //       if (!word.isStopWord()) return word.toString()
-  //     })
-  //     .filter(function (wordString) {
-  //       return wordString 
-  //     })
-  // 
-  //   var wordDeferred = new Lunr.Deferred (words.map(function (word) { return self.wordStore.find(word) }))
-  // 
-  //   wordDeferred.then(function (words) {
-  //     if (!words[0]) {
-  //       returnDeferred.resolve([])
-  //     } else {
-  //       var wordDocs = words
-  //         .map(function (word) { 
-  //           return word.docs.sort(function (a, b) {
-  //             return b.score - a.score
-  //           })
-  //         })
-  // 
-  //       var docIds = Lunr.utils.intersect.apply(Lunr.utils, wordDocs.map(function (docs) {
-  //         return docs.map(function (doc) {
-  //           return doc.documentId 
-  //         })
-  //       }))
-  // 
-  //       var docDeferred = new Lunr.Deferred (docIds.map(function (docId) { return self.docStore.find(docId) }))
-  // 
-  //       docDeferred.then(function (searchDocs) {
-  //         returnDeferred.resolve(searchDocs.map(function (searchDoc) {
-  //           return searchDoc.original
-  //         }))
-  //       })
-  //     }
-  //   })
-  // 
-  //   return returnDeferred
-  // 
-  // }
+  },
 }

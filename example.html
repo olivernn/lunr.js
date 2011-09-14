@@ -9,6 +9,7 @@
   <script src="/src/utils.js" type="text/javascript" charset="utf-8"></script>
   <script src="/src/deferred.js" type="text/javascript" charset="utf-8"></script>
   <script src="/src/trie.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/src/hash.js" type="text/javascript" charset="utf-8"></script>
   <script src="/src/index.js" type="text/javascript" charset="utf-8"></script>
   <script src="/src/document.js" type="text/javascript" charset="utf-8"></script>
   <script src="/src/word.js" type="text/javascript" charset="utf-8"></script>
@@ -72,7 +73,9 @@
 
       search = function (term) {
         console.time('search')
-        idx.search(term)
+        for (var i=0; i < 1000; i++) {
+          idx.search(term)
+        };
         console.timeEnd('search')
       }
 
@@ -89,27 +92,13 @@
           }
         })
 
+        console.time("load")
         questions.forEach(function (question) {
           idx.add(question)
           $('.loading').hide()
         })
+        console.timeEnd("load")
 
-        // 
-        // if (!localStorage.getItem('indexLoaded?')) {
-        //   idx.storageInitialized.then(function () {
-        //     // empty the index incase the questions have been partially indexed
-        //     idx.empty().then(function () {
-        //       idx.addList(questions).then(function () {
-        //         localStorage.setItem('indexLoaded?', true)
-        //         $('.loading').fadeOut()
-        //       })
-        //     })
-        //   })
-        // } else {
-        //   $('.loading').hide()
-        // };
-
-        // this is the main app
         renderQuestionList(questions)
         renderQuestionView(questions[0])
 
@@ -118,7 +107,8 @@
           $('input').val('')
         })
 
-        $('input').bind('change', function () {
+        $('input').bind('keyup', function () {
+          if ($(this).val() < 2) return
           var query = $(this).val()
           var results = idx.search(query).map(function (id) {
             return questions.filter(function (q) { return q.id === id})[0]
