@@ -1,16 +1,3 @@
-Array.prototype.detect = function (fn, context) {
-  var length = this.length
-  var out = null
-
-  for (var i=0; i < length; i++) {
-   if (fn.call(context, this[i], i, this)) {
-     out = this[i]
-     break
-   };
-  };
-  return out
-}
-
 Lunr.Trie = (function () {
   var Node = function (key) {
     this.children = []
@@ -20,7 +7,7 @@ Lunr.Trie = (function () {
 
   Node.prototype = {
     childForKey: function (key) {
-      var child = this.children.detect(function (child) { return child.match(key) })
+      var child = Lunr.utils.detect(this.children, function (child) { return child.match(key) })
 
       if (!child) {
         child = new Node (key)
@@ -48,8 +35,10 @@ Lunr.Trie = (function () {
       var keys = this.keys(key)
       var self = this
 
-      return keys.reduce(function (res, key) {
-        self.getNode(key).value.forEach(function (val) {
+      return keys.reduce(function (res, k) {
+        self.getNode(k).value.forEach(function (v) {
+          var val = Lunr.utils.copy(v)
+          if (key === k) val.exact = true
           res.push(val)
         })
         return res

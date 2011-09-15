@@ -12,11 +12,11 @@ class Bundler
     def bundle!
       FileUtils.mkdir_p(DIST_DIR)
 
-      write "#{DIST_DIR}/davis-#{version}.js" do
+      write "#{DIST_DIR}/lunr-#{version}.js" do
         Fewer::Engines::Js.new(SRC_DIR, files).read
       end
 
-      write "#{DIST_DIR}/davis-#{version}.min.js" do
+      write "#{DIST_DIR}/lunr-#{version}.min.js" do
         Fewer::Engines::Js.new(SRC_DIR, files, :min => true).read
       end
     end
@@ -28,17 +28,12 @@ class Bundler
     private
       def files
         @files ||= %w(
-          davis.js
-          davis.utils.js
-          davis.listener.js
-          davis.event.js
-          davis.logger.js
-          davis.route.js
-          davis.router.js
-          davis.history.js
-          davis.location.js
-          davis.request.js
-          davis.app.js
+          lunr.js
+          utils.js
+          trie.js
+          index.js
+          document.js
+          word.js
         )
       end
 

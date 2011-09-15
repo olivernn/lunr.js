@@ -17,6 +17,7 @@ Lunr.utils = {
    * @returns {Array} a copy of the input array with all duplicates removed.
    */
   uniq: function (array) {
+    if (!array) return []
     return array.reduce(function (out, elem) {
       if (out.indexOf(elem) === -1) out.push(elem)
       return out
@@ -36,5 +37,25 @@ Lunr.utils = {
         return other.indexOf(item) >= 0
       })
     })
+  },
+
+  detect: function (array, fn, context) {
+    var length = array.length
+    var out = null
+
+    for (var i=0; i < length; i++) {
+     if (fn.call(context, array[i], i, array)) {
+       out = array[i]
+       break
+     };
+    };
+    return out
+  },
+
+  copy: function (obj) {
+    return Object.keys(obj).reduce(function (memo, prop) {
+      memo[prop] = obj[prop]
+      return memo
+    }, {})
   }
 }

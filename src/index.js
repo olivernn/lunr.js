@@ -95,6 +95,8 @@ Lunr.Index.prototype = {
    */
 
   search: function (term) {
+    if (!term) return []
+
     var words = term
       .split(' ')
       .map(function (str) {
@@ -109,6 +111,8 @@ Lunr.Index.prototype = {
       .map(function (word) {
         return this.trie.get(word)
           .sort(function (a, b) {
+            if (a.exact && b.exact === undefined) return -1
+            if (b.exact && a.exact === undefined) return 1
             if (a.score < b.score) return 1
             if (a.score > b.score) return -1
             return 0
@@ -119,5 +123,5 @@ Lunr.Index.prototype = {
       }, this)
 
     return Lunr.utils.intersect.apply(Lunr.utils, docIds)
-  },
+  }
 }
