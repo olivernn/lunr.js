@@ -1,33 +1,26 @@
 Lunr.Trie = (function () {
-  var Node = function (key) {
-    this.children = []
-    this.key = key
-    this.value = []
+
+  var Node = function () {
+    this.children = {}
+    this.values = []
   }
 
   Node.prototype = {
     childForKey: function (key) {
-      var child = Lunr.utils.detect(this.children, function (child) { return child.match(key) })
+
+      var child = this.children[key]
 
       if (!child) {
-        child = new Node (key)
-        this.children.push(child)
+        child = new Node ()
+        this.children[key] = child
       };
 
       return child
-    },
-
-    setValue: function (value) {
-      this.value.push(value)
-    },
-
-    match: function (key) {
-      return key === this.key
     }
   }
 
   var Trie = function () {
-    this.root = new Node ("")
+    this.root = new Node ()
   }
 
   Trie.prototype = {
@@ -36,7 +29,7 @@ Lunr.Trie = (function () {
       var self = this
 
       return keys.reduce(function (res, k) {
-        self.getNode(k).value.forEach(function (v) {
+        self.getNode(k).values.forEach(function (v) {
           var val = Lunr.utils.copy(v)
           if (key === k) val.exact = true
           res.push(val)
@@ -59,10 +52,10 @@ Lunr.Trie = (function () {
           term = term || ""
 
       var getKeys = function (node, term) {
-        if (node.value.length) keys.push(term)
+        if (node.values.length) keys.push(term)
 
-        node.children.forEach(function (child) {
-          getKeys(child, term + child.key)
+        Object.keys(node.children).forEach(function (childKey) {
+          getKeys(node.children[childKey], term + childKey)
         })
       }
 
@@ -72,7 +65,7 @@ Lunr.Trie = (function () {
 
     set: function (key, value) {
       var recursiveSet = function (node, key) {
-        if (!key.length) return node.setValue(value)
+        if (!key.length) return node.values.push(value)
         recursiveSet(node.childForKey(key.charAt(0)), key.slice(1))
       }
 
