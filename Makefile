@@ -1,39 +1,28 @@
 
 SRC = lib/header.js \
-	lib/augment.array.every.js \
-	lib/augment.array.filter.js \
-	lib/augment.array.forEach.js \
-	lib/augment.array.indexOf.js \
-	lib/augment.array.isArray.js \
-	lib/augment.array.lastIndexOf.js \
-	lib/augment.array.map.js \
-	lib/augment.array.reduce.js \
-	lib/augment.array.reduceRight.js \
-	lib/augment.array.some.js \
-	lib/augment.date.now.js \
-	lib/augment.date.toISOString.js \
-	lib/augment.date.toJSON.js \
-	lib/augment.function.bind.js \
-	lib/augment.object.getPrototypeOf.js \
-	lib/augment.object.keys.js \
-	lib/augment.string.trim.js
+	lib/lunr.js \
+	lib/utils.js \
+	lib/index.js \
+	lib/document.js \
+	lib/trie.js \
+	lib/word.js \
 
 VERSION = $(shell cat VERSION)
 
-all: augment.js augment.min.js
+all: lunr.js lunr.min.js
 
-augment.js: $(SRC)
+lunr.js: $(SRC)
 	cat $^ | \
 	sed "s/@VERSION/${VERSION}/" > $@
 
-augment.min.js: augment.js
+lunr.min.js: lunr.js
 	uglifyjs < $< > $@
 
-size: augment.min.js
-	gzip -c augment.min.js | wc -c
+size: lunr.min.js
+	gzip -c lunr.min.js | wc -c
 
 clean:
-	rm -f augment{.min,}.js
+	rm -f lunr{.min,}.js
 
 test:
 	@node server 8003
