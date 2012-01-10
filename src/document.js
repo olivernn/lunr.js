@@ -76,7 +76,7 @@ Lunr.Document.prototype = {
     })
 
     return Object.keys(allWords).map(function (word) {
-      return {id: word, docs: [{score: allWords[word].score, documentId: self.ref}] }
+      return {id: word, doc: {score: allWords[word].score, documentId: self.ref} }
     })
 
   }

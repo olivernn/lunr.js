@@ -15,18 +15,6 @@ Lunr.Index = function (name) {
   this.name = name
   this.refName = "id"
   this.fields = {} // by default no fields will be indexed
-  // this.wordStore = new Lunr.Store (name + "-words")
-  // this.docStore = new Lunr.Store (name + "-docs")
-
-  // this.addQueue = []
-  // this.indexing = false
-
-  // initialize both the stores and store the deferred against storageInitialized
-  // so you can do idx.storageInitialized.then(function () { console.log('ready') })
-  // this.storageInitialized = new Lunr.Deferred([
-  //   this.wordStore.init(), this.docStore.init()
-  // ])
-
   this.trie = new Lunr.Trie ()
 }
 
@@ -51,7 +39,7 @@ Lunr.Index.prototype = {
     var words = doc.words()
 
     words.forEach(function (word) {
-      this.trie.set(word.id, word.docs[0])
+      this.trie.set(word.id, word.doc)
     }, this)
   },
 
