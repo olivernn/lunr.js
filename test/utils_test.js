@@ -59,3 +59,10 @@ test("mapKeys should map an objects keys", function () {
 
   same(['FOO', 'BAR'], out, 'should call the fn for each key and then return an array with the result')
 })
+
+test("map should behave like native map", function () {
+  var a = ['foo', 'bar'],
+      out = Lunr.utils.map(a, function (val) { return val.toUpperCase() })
+
+  same(['FOO', 'BAR'], out, 'should call the fn for each val and then return an array with the result')
+})
