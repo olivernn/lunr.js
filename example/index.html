@@ -1,18 +1,16 @@
 <head>
   <!-- Vendor -->
   <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script> -->
-  <script src="/jquery.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/mustache.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/example/jquery.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/example/mustache.js" type="text/javascript" charset="utf-8"></script>
 
   <!-- Lunr -->
-  <script src="/src/lunr.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/src/utils.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/src/deferred.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/src/trie.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/src/hash.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/src/index.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/src/document.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/src/word.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/lib/lunr.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/lib/utils.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/lib/trie.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/lib/index.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/lib/document.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/lib/word.js" type="text/javascript" charset="utf-8"></script>
 
   <script id="question-list-template" type="text/mustache">
     <div>
@@ -80,7 +78,7 @@
       }
 
       // load the example data
-      $.getJSON('/example_data.json', function (data) {
+      $.getJSON('/example/example_data.json', function (data) {
 
         // format the raw json into a form that is simpler to work with
         questions = data.questions.map(function (raw) {
