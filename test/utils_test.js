@@ -66,3 +66,19 @@ test("map should behave like native map", function () {
 
   same(['FOO', 'BAR'], out, 'should call the fn for each val and then return an array with the result')
 })
+
+test("reduce should behave like native reduce", function () {
+  var a = [1,2,3],
+      sum = Lunr.utils.reduce(a, function (sum, n) { return sum + n }, 0)
+
+  equal(6, sum)
+})
+
+test("forEach should behave like native forEach", function () {
+  var a = [1,2,3]
+      count = 0
+
+  Lunr.utils.forEach(a, function (el) { count++ })
+
+  equal(3, count, 'should loop for each element of the array')
+})
