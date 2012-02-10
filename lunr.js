@@ -10,10 +10,11 @@
  */
 
 /**
-* Convinience method for instantiating and configuring a new Lunr index
-*
-* @param {Function} config A function that will be run with a newly created Lunr.Index as its context.
-*/
+ * Convinience method for instantiating and configuring a new Lunr index
+ *
+ * @param {Function} config - A function that will be run with a newly created Lunr.Index as its context.
+ * @returns {Lunr.Index} a new Lunr Index instance.
+ */
 var Lunr = function (name, config) {
   var index = new Lunr.Index (name)
   config.call(index, index)
@@ -38,11 +39,16 @@ Lunr.utils = {
    * @returns {Array} a copy of the input array with all duplicates removed.
    */
   uniq: function (array) {
-    if (!array) return []
-    return array.reduce(function (out, elem) {
-      if (out.indexOf(elem) === -1) out.push(elem)
-      return out
-    }, [])
+    var out = []
+
+    if (!array) return out
+
+    for (var i=0; i < array.length; i++) {
+      var elem = array[i]
+      if (!~out.indexOf(elem)) out.push(elem)
+    };
+
+    return out
   },
 
   /**
@@ -50,34 +56,145 @@ Lunr.utils = {
    * Finds the intersect of the array with all other passed arrays.
    *
    * @private
+   * @params {Array} array - an array to intersect with.
+   * @params {Splat} any number of other arrays to intersect with array.
+   * @returns {Array} a new array containing the intersection of all the input arrays
    */
   intersect: function (array) {
-    var rest = [].slice.call(arguments, 1)
-    return this.uniq(array).filter(function (item) {
-      return rest.every(function (other) {
-        return other.indexOf(item) >= 0
-      })
-    })
-  },
+    var rest = Array.prototype.slice.call(arguments, 1),
+        uniquedArr = this.uniq(array),
+        len = uniquedArr.length,
+        out = []
 
-  detect: function (array, fn, context) {
-    var length = array.length
-    var out = null
+    for (var i=0; i < len; i++) {
+      var elem = uniquedArr[i],
+          inIntersect = true
 
-    for (var i=0; i < length; i++) {
-     if (fn.call(context, array[i], i, array)) {
-       out = array[i]
-       break
-     };
+      for (var j=0; j < rest.length; j++) {
+        inIntersect = inIntersect && (~rest[j].indexOf(elem))
+      };
+
+      if (inIntersect) out.push(elem)
     };
+
     return out
   },
 
+  /**
+   * ## Lunr.utils.copy
+   * Makes a copy of an object.
+   *
+   * @private
+   * @params {Object} obj - the obj to copy.
+   * @returns {Object} a copy of the input object.
+   */
   copy: function (obj) {
-    return Object.keys(obj).reduce(function (memo, prop) {
-      memo[prop] = obj[prop]
-      return memo
-    }, {})
+    var out = {}
+    for (prop in obj) {
+      if (!obj.hasOwnProperty(prop)) return
+      out[prop] = obj[prop]
+    }
+    return out
+  },
+
+  /**
+   * ## Lunr.utils.forEachKey
+   * Iterates through the passed object, yeilding each key to the passed function. Takes an
+   * optional context object which will be used as the context in the passed function.
+   *
+   * @private
+   * @params {Object} obj - the obj to iterate through.
+   * @params {Function} fn - the function to yield to for each key.
+   * @params {Obj} ctx - an optional context object for fn.
+   */
+  forEachKey: function (obj, fn, ctx) {
+    for (prop in obj) {
+      fn.call(ctx, prop)
+    }
+  },
+
+  /**
+   * ## Lunr.utils.mapKeys
+   * Iterates through the passed object, yeilding each key to the passed function and returning
+   * an array of the output of that function. Takes an optional context object which will be used
+   * as the context in the passed function.
+   *
+   * @private
+   * @params {Object} obj - the obj to iterate through.
+   * @params {Function} fn - the function to yield to for each key.
+   * @params {Obj} ctx - an optional context object for fn.
+   * @returns {Array} the result of mapping each key through fn.
+   */
+  mapKeys: function (obj, fn, ctx) {
+    var out = []
+    this.forEachKey(obj, function (key) {
+      out.push(fn.call(ctx, key))
+    })
+
+    return out
+  },
+
+  /**
+   * ## Lunr.utils.map
+   * A compatibility wrapper to allow the use of map in browsers which do not support
+   * it natively.  If a native map is available this is used, otherwise a fallback is
+   * used.
+   *
+   * @private
+   * @params {Array} arr - the array to map through.
+   * @params {Function} fn - the function to yield to for each key.
+   * @params {Obj} ctx - an optional context object for fn.
+   * @returns {Array} the result of mapping the array through fn.
+   */
+  map: function (arr, fn, ctx) {
+    var out = [],
+        len = arr.length
+
+    for (var i=0; i < len; i++) {
+      out.push(fn.call(ctx, arr[i], i, arr))
+    };
+
+    return out
+  },
+
+  /**
+   * ## Lunr.utils.reduce
+   * A compatibility wrapper to allow the use of reduce in browsers which do not support
+   * it natively.  If a native reduce is available this is used, otherwise a fallback is
+   * used.
+   *
+   * @private
+   * @params {Array} arr - the array to map through.
+   * @params {Function} fn - the function to yield to for each key.
+   * @params {Obj} memo - the starting value of the memo.
+   * @returns the result of reducing the array through fn.
+   */
+  reduce: function (arr, fn, memo) {
+    var len = arr.length
+
+    for (var i=0; i < len; i++) {
+      memo = fn(memo, arr[i])
+    };
+
+    return memo
+  },
+
+  /**
+   * ## Lunr.utils.forEach
+   * A compatibility wrapper to allow the use of forEach in browsers which do not support
+   * it natively.  If a native forEach is available this is used, otherwise a fallback is
+   * used.
+   *
+   * @private
+   * @params {Array} arr - the array to map through.
+   * @params {Function} fn - the function to yield to for each key.
+   * @params {Object} ctx - an optional context object for fn.
+   */
+  forEach: function (arr, fn, ctx) {
+    var len = arr.length
+    for (var i=0; i < len; i++) {
+      fn.call(ctx, arr[i], i, arr)
+    };
   }
 };
 /*!
@@ -87,10 +204,10 @@ Lunr.utils = {
  */
 
 /**
- * Lunr.Index provides the public api for the Lunr library.  It also manages setting up both a wordStore
- * and a docStore to persist all the words and documents that make up this index.  An index must be initialised
- * with a name, this name is important as it will be used to create and access the Lunr.Stores.  If the name
- * is changed then any previously created indexes will be unavailable.
+ * Lunr.Index provides the public api for the Lunr library.
+ *
+ * @constructor
+ * @param {String} name - the name of this search index.
  *
  */
 Lunr.Index = function (name) {
@@ -105,24 +222,20 @@ Lunr.Index.prototype = {
    * ## Lunr.Index.prototype.add
    * This method is the primary way of adding objects to the search index.  It will convert the passed
    * JSON object and convert it into a Lunr.Document.  The words from the document will then be extracted
-   * add added to the wordStore.  Finally the document itself will be added to the docStore.
+   * add added to the index.
    *
-   * Objects should only be added to the index one at a time.  This is to ensure the wordStore is correctly
-   * maintained.  When adding a list of items to the index it may be more convinient to use the `addList` method
-   * which will ensure only one object is added at a time.
-   *
-   * @see Lunr.Index.prototype.addList
+   * @see Lunr.Document
    *
    * @params {Object} obj - the object to add to the index.
-   * @returns {Lunr.Deferred} a deferred object that will be resolved when the object has been added to the index.
    */
   add: function (obj) {
     var doc = new Lunr.Document(obj, this.refName, this.fields)
     var words = doc.words()
 
-    words.forEach(function (word) {
+    for (var i=0; i < words.length; i++) {
+      var word = words[i]
       this.trie.set(word.id, word.doc)
-    }, this)
+    };
   },
 
   /**
@@ -147,6 +260,17 @@ Lunr.Index.prototype = {
     this.fields[name] = opts || {multiplier: 1}
   },
 
+  /**
+   * ## Lunr.Index.prototype.ref
+   * A method that is part of the DSL for setting up an index.  Use this method to select the property by which objects
+   * added to the index can be uniquely identified.
+   *
+   * @params {String} name - the name of the field to index in a document
+   *
+   * ### Example
+   *     this.ref('cid')
+   *
+   */
   ref: function (name) {
     this.refName = name
   },
@@ -157,42 +281,37 @@ Lunr.Index.prototype = {
    * separated by spaces.  By default the search is an AND search, so if you searched for 'foo bar' the results
    * would be those documents in the index that contain both the word foo AND the word bar.
    *
-   * All searches are done asynchronously and the search method returns an instance of Lunr.Deferred.  The
-   * deferred object will be resolved with the results of the search as soon as those results are available.
-   *
    * @params {String} term - the term or terms to search the index for.
-   * @returns {Lunr.Deferred} a deferred object that will be resolved once the search has completed.
+   * @returns {Array} an array of references to documents in the index, this will be the property as defined by ref.
    */
-
   search: function (term) {
     if (!term) return []
 
-    var words = term
-      .split(' ')
-      .map(function (str) {
-        var word = new Lunr.Word(str)
-        if (!word.isStopWord()) return word.toString()
-      })
-      .filter(function (wordString) {
-        return wordString 
-      })
+    var docIds = Lunr.utils.map(Lunr.Word.fromString(term), function (word) {
+      var docs = this.trie
+        .get(word.toString())
+        .sort(function (a, b) {
+          if (a.exact && b.exact === undefined) return -1
+          if (b.exact && a.exact === undefined) return 1
+          if (a.score < b.score) return 1
+          if (a.score > b.score) return -1
+          return 0
+        })
 
-    var docIds = words
-      .map(function (word) {
-        return this.trie.get(word)
-          .sort(function (a, b) {
-            if (a.exact && b.exact === undefined) return -1
-            if (b.exact && a.exact === undefined) return 1
-            if (a.score < b.score) return 1
-            if (a.score > b.score) return -1
-            return 0
-          })
-          .map(function (doc) {
-            return doc.documentId
-          })
-      }, this)
+      return Lunr.utils.map(docs, function (doc) { return doc.documentId })
+    }, this)
 
     return Lunr.utils.intersect.apply(Lunr.utils, docIds)
+  },
+
+  /**
+   * ## Lunr.Index.prototype.empty
+   *
+   * This method empties the index, it will delete the index store and create a new, empty one in its place.
+   */
+  empty: function () {
+    delete this.trie
+    this.trie = new Lunr.Trie
   }
 };
 /*!
@@ -208,6 +327,7 @@ Lunr.Index.prototype = {
  *
  * @constructor
  * @param {Object} original - the document to be added to the search index.
+ * @param {String} refName - the name of the property that can be used as a reference to this document in the index.
  * @param {Object} fields - the fields object from the index, indicationg which fields from the document need indexing.
  *
  */
@@ -220,8 +340,8 @@ Lunr.Document = function (original, refName, fields) {
 Lunr.Document.prototype = {
   /**
    * ## Lunr.Document.prototype.asJSON
-   * Converts this instance of Lunr.Document into a plain object ready for insertion into the Index's docStore.
-   * The returned object consists of three properties, an auto generated id, an array of Lunr.Word ids and the
+   * Converts this instance of Lunr.Document into a plain object ready for insertion into the index.
+   * The returned object consists of three properties, an id, an array of Lunr.Word ids and the
    * original document.
    *
    * @returns {Object} the plain object representation of the Lunr.Document.
@@ -229,7 +349,7 @@ Lunr.Document.prototype = {
   asJSON: function () {
     return {
       id: this.ref,
-      words: this.words().map(function (word) { return word.id }),
+      words: Lunr.utils.map(this.words(), function (word) { return word.id }),
       original: this.original
     }
   },
@@ -240,7 +360,7 @@ Lunr.Document.prototype = {
    * Lunr.Word and then tally the total score for that word in the document as a whole.  At this time any
    * multiplier specified in the fields object will be applied.
    *
-   * The list of words will then be converted into a format ready for insertion into the index's wordStore.
+   * The list of words will then be converted into a format ready for insertion into the index.
    *
    * @see {Lunr.Word}
    * @returns {Array} an array of all word objects ready for insertion into the index's wordStore.
@@ -250,32 +370,24 @@ Lunr.Document.prototype = {
     var self = this
     var allWords = {}
 
-    Object.keys(this.fields).forEach(function (fieldName) {
-      words[fieldName] = self.original[fieldName].split(/\b/g)
-        // filter out any non word words
-        .filter(function (rawWord) {
-          return !!rawWord.match(/\w/)
-        })
-        // convert each raw word into a search word
-        .map(function (rawWord) {
-          var word = new Lunr.Word(rawWord)
-          if (!word.isStopWord()) return word.toString()
-        })
-        // filter out any stop words
-        .filter(function (word) {
-          return word
-        })
-        // create the total score
-        .forEach(function (word) {
-          if (!allWords[word]) { allWords[word] = {score: 0, ref: self.ref} }
-          allWords[word].score = allWords[word].score + self.fields[fieldName].multiplier
-        })
+    Lunr.utils.forEachKey(this.fields, function (fieldName) {
+      var wordObjs = Lunr.Word.fromString(self.original[fieldName]),
+          numberOfWords = wordObjs.length
+
+      for (var i=0; i < numberOfWords; i++) {
+        var word = wordObjs[i].toString()
+
+        if (!(word in allWords)) {
+          allWords[word] = { score: 0, ref: self.ref }
+        };
+
+        allWords[word].score = allWords[word].score + self.fields[fieldName].multiplier
+      };
     })
 
-    return Object.keys(allWords).map(function (word) {
+    return Lunr.utils.mapKeys(allWords, function (word) {
       return {id: word, doc: {score: allWords[word].score, documentId: self.ref} }
     })
-
   }
 };
 Lunr.Trie = (function () {
@@ -308,8 +420,8 @@ Lunr.Trie = (function () {
       var keys = this.keys(key)
       var self = this
 
-      return keys.reduce(function (res, k) {
-        self.getNode(k).values.forEach(function (v) {
+      return Lunr.utils.reduce(keys, function (res, k) {
+        Lunr.utils.forEach(self.getNode(k).values, function (v) {
           var val = Lunr.utils.copy(v)
           if (key === k) val.exact = true
           res.push(val)
@@ -334,7 +446,7 @@ Lunr.Trie = (function () {
       var getKeys = function (node, term) {
         if (node.values.length) keys.push(term)
 
-        Object.keys(node.children).forEach(function (childKey) {
+        Lunr.utils.forEachKey(node.children, function (childKey) {
           getKeys(node.children[childKey], term + childKey)
         })
       }
@@ -364,7 +476,7 @@ Lunr.Trie = (function () {
 /**
 * ## Lunr.Word
 * A Lunr.Word wraps a string and provides methods to convert the string into a form ready for insertion
-* into the word index.  It handles exclusion of stop word as well as performing any language based algorithms.
+* into the index.  It handles exclusion of stop word as well as performing any language based algorithms.
 *
 * @constructor
 * @param {String} raw - the raw word to be used as the base of a search word.
@@ -380,6 +492,20 @@ Lunr.Word = function (raw) {
  */
 Lunr.Word.stopWords = ["the", "of", "to", "and", "a", "in", "is", "it", "you", "that", "this"]
 
+Lunr.Word.fromString = function (str, splitter) {
+  var splitter = splitter || /\b/g,
+      splitStr = str.split(splitter),
+      splitStrLen = splitStr.length,
+      out = []
+
+  for (var i=0; i < splitStrLen; i++) {
+    var word = new Lunr.Word (splitStr[i])
+    if (!word.isStopWord()) out.push(word)
+  };
+
+  return out
+}
+
 Lunr.Word.prototype = {
 
   /**
@@ -394,7 +520,9 @@ Lunr.Word.prototype = {
 
   /**
    * ## Lunr.Word.prototype.toString
-   * Converts the search word into a string representation
+   * Converts the search word into a string representation.
+   *
+   * @returns {String}
    */
   toString: function () {
     if (this.isStopWord()) return
