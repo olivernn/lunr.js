@@ -1,3 +1,29 @@
+/*!
+ * Lunr - js-model adaptor
+ * Copyright (C) 2011 Oliver Nightingale
+ * MIT Licensed
+ */
+ 
+/**
+* Model.Lunr is a plugin for js-model to make integrating your model with a lunr search index easy.
+*
+* This adds a search method for querying the index, and returns model instances instead of ids.  It also
+* automatically manages the index after models have been updated, deleted or added.
+*
+* @param {Object} config the config object for defining the index, see Lunr.Index docs.
+*
+* Example:
+*
+*     var Post = Model('post', function () {
+*       this.use(Model.Lunr(function () {
+*         this.field('title', {multiplier: 10})
+*         this.field('body')
+*       }))
+*     })
+*
+*     Post.search(query)
+*
+*/
 Model.Lunr = function (config) {
 
   var index = Lunr('name', config)

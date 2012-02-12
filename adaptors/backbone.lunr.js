@@ -1,3 +1,25 @@
+/*!
+ * Lunr - backbone adaptor
+ * Copyright (C) 2011 Oliver Nightingale
+ * MIT Licensed
+ */
+ 
+/**
+* A plugin for Backbone to make integrating your collections with a lunr search index easy.
+*
+* This adds a search method for querying the index, and returns model instances instead of ids.  It also
+* automatically manages the index after models are updated or removed/added from the collection.
+*
+* Example:
+*
+*     todos.initSearch(function () {
+*       this.field('content')
+*     })
+*
+*     todos.search(query)
+*
+*/
+
 ;(function (Backbone) {
 
   var toDocument = function (model) {
