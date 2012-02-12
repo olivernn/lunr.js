@@ -50,11 +50,22 @@ body {
 	box-shadow: rgba(0, 0, 0, 0.2) 0 5px 6px 0;
 }
 #todoapp h1 {
-	font-size: 36px;
-	font-weight: bold;
-	text-align: center;
-	padding: 20px 0 30px 0;
-	line-height: 1;
+  font-size: 36px;
+  font-weight: bold;
+  text-align: center;
+  padding: 20px 0 5px 0;
+  line-height: 1;
+}
+
+#todoapp #search-todos {
+  text-align: center;
+  padding: 15px 0 30px 0;
+  line-height: 1;
+}
+
+#todoapp #search-todos input {
+  width: 100%;
+  font-size: 1.2em;
 }
 
 #create-todo {
