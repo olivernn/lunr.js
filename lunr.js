@@ -16,7 +16,8 @@ var Lunr = function (name, config) {
   config.call(index, index)
   return index
 };
-/*!
+
+Lunr.version = "0.1.0"/*!
  * Lunr - utils
  * Copyright (C) 2011 Oliver Nightingale
  * MIT Licensed
@@ -199,10 +200,14 @@ Lunr.utils = {
  * MIT Licensed
  */
 
-var Lunr.Index = (function () {
+Lunr.Index = (function () {
 
   /**
    * Lunr.Index provides the public api for the Lunr library.
+   *
+   * A Lunr.Index is returned from using the convinience wrapper `Lunr`.  It holds the configuration
+   * regarding which fields from a document to index, and the weight to apply to those fields.  It also
+   * manages the store for the index.
    *
    * @constructor
    * @param {String} name - the name of this search index.
@@ -785,4 +790,4 @@ Lunr.Word = (function () {
   })()
 
   return Word
-})
+})()
