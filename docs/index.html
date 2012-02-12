@@ -1,0 +1,1358 @@
+<head>
+  <script>
+    var raw = [{"id":"10-1328980313881","name":"Index","signiture":"Index()","type":"function","ctx":{"type":"function","name":"Index","string":"Index()"},"description":{"full":"<p>Lunr.Index provides the public api for the Lunr library.</p>","summary":"<p>Lunr.Index provides the public api for the Lunr library.</p>","body":""},"full_description":"<p>Lunr.Index provides the public api for the Lunr library.</p>","code":"var Index = function (name) {\n    this.name = name\n    this.refName = \"id\"\n    this.fields = {} // by default no fields will be indexed\n    this.trie = new Lunr.Trie ()\n  }","params":[{"type":"param","types":["String"],"name":"name","description":"- the name of this search index."}],"has_params":true,"tags":[{"type":"constructor"},{"type":"param","types":["String"],"name":"name","description":"- the name of this search index."}],"module":true,"related":{"href":""},"has_related":true,"methods":[{"id":"11-1328980313881","name":"add","signiture":"Index.prototype.add()","type":"method","ctx":{"type":"method","constructor":"Index","name":"add","string":"Index.prototype.add()"},"description":{"full":"<p>Adds objects to the search index.</p>\n\n<p>It will convert the passed JSON object and convert it into a Lunr.Document.<br />The words from the document will then be extracted and added to the index.</p>","summary":"<p>Adds objects to the search index.</p>","body":"<p>It will convert the passed JSON object and convert it into a Lunr.Document.<br />The words from the document will then be extracted and added to the index.</p>"},"full_description":"<p>Adds objects to the search index.</p>\n\n<p>It will convert the passed JSON object and convert it into a Lunr.Document. The words from the document will then be extracted and added to the index.</p>","code":"Index.prototype.add = function (obj) {\n    var doc = new Lunr.Document(obj, this.refName, this.fields)\n    var words = doc.words()\n\n    for (var i=0; i < words.length; i++) {\n      var word = words[i]\n      this.trie.set(word.id, word.doc)\n    };\n  }","params":[{"type":"param","types":["Object"],"name":"obj","description":"the object to add to the index."}],"has_params":true,"tags":[{"type":"param","types":["Object"],"name":"obj","description":"the object to add to the index."},{"type":"see","local":"Lunr.Document","visibility":"Lunr.Document"}],"module":false,"parent":"Index","related":{"href":""},"has_related":true},{"id":"12-1328980313881","name":"field","signiture":"Index.prototype.field()","type":"method","ctx":{"type":"method","constructor":"Index","name":"field","string":"Index.prototype.field()"},"description":{"full":"<p>Adds fields to the index.</p>\n\n<p>Use this method to describe which fields from a document should be part of the index.<br />An options object can be passed as the second argument that will change the way that<br />a particular field is indexed.</p>\n\n<p><code>multiplier</code> is a multiplier to apply to a field, you can use this to make sure certain fields are<br />considered more important, e.g. a documents title.</p>","summary":"<p>Adds fields to the index.</p>","body":"<p>Use this method to describe which fields from a document should be part of the index.<br />An options object can be passed as the second argument that will change the way that<br />a particular field is indexed.</p>\n\n<p><code>multiplier</code> is a multiplier to apply to a field, you can use this to make sure certain fields are<br />considered more important, e.g. a documents title.</p>"},"full_description":"<p>Adds fields to the index.</p>\n\n<p>Use this method to describe which fields from a document should be part of the index. An options object can be passed as the second argument that will change the way that a particular field is indexed.</p>\n\n<p><code>multiplier</code> is a multiplier to apply to a field, you can use this to make sure certain fields are considered more important, e.g. a documents title.</p>","code":"Index.prototype.field = function (name, opts) {\n    this.fields[name] = opts || {multiplier: 1}\n  }","params":[{"type":"param","types":["String"],"name":"name","description":"the name of the field to index in a document"},{"type":"param","types":["Object"],"name":"opts","description":"options for indexing this particular field"}],"has_params":true,"tags":[{"type":"param","types":["String"],"name":"name","description":"the name of the field to index in a document"},{"type":"param","types":["Object"],"name":"opts","description":"options for indexing this particular field"},{"type":""},{"type":"Example:"},{"type":""},{"type":""},{"type":""}],"module":false,"parent":"Index","related":{"href":""},"has_related":true},{"id":"13-1328980313881","name":"ref","signiture":"Index.prototype.ref()","type":"method","ctx":{"type":"method","constructor":"Index","name":"ref","string":"Index.prototype.ref()"},"description":{"full":"<p>Sets the ref for the index.</p>\n\n<p>Use this method to select the property by which objects added to the index can be uniquely identified.</p>","summary":"<p>Sets the ref for the index.</p>","body":"<p>Use this method to select the property by which objects added to the index can be uniquely identified.</p>"},"full_description":"<p>Sets the ref for the index.</p>\n\n<p>Use this method to select the property by which objects added to the index can be uniquely identified.</p>","code":"Index.prototype.ref = function (name) {\n    this.refName = name\n  }","params":[{"type":"param","types":["String"],"name":"name","description":"the name of the field to index in a document"}],"has_params":true,"tags":[{"type":"param","types":["String"],"name":"name","description":"the name of the field to index in a document"},{"type":""},{"type":"Example:"},{"type":""},{"type":""}],"module":false,"parent":"Index","related":{"href":""},"has_related":true},{"id":"14-1328980313881","name":"search","signiture":"Index.prototype.search()","type":"method","ctx":{"type":"method","constructor":"Index","name":"search","string":"Index.prototype.search()"},"description":{"full":"<p>Searches the index for a term.</p>\n\n<p>You can pass in a string of words separated by spaces.  By default the search is an AND search,<br />so if you searched for 'foo bar' the results would be those documents in the index that contain<br />both the word foo AND the word bar.</p>","summary":"<p>Searches the index for a term.</p>","body":"<p>You can pass in a string of words separated by spaces.  By default the search is an AND search,<br />so if you searched for 'foo bar' the results would be those documents in the index that contain<br />both the word foo AND the word bar.</p>"},"full_description":"<p>Searches the index for a term.</p>\n\n<p>You can pass in a string of words separated by spaces.  By default the search is an AND search, so if you searched for 'foo bar' the results would be those documents in the index that contain both the word foo AND the word bar.</p>","code":"Index.prototype.search = function (term) {\n    if (!term) return []\n\n    var docIds = Lunr.utils.map(Lunr.Word.fromString(term), function (word) {\n      var docs = this.trie\n        .get(word.toString())\n        .sort(function (a, b) {\n          if (a.exact && b.exact === undefined) return -1\n          if (b.exact && a.exact === undefined) return 1\n          if (a.score < b.score) return 1\n          if (a.score > b.score) return -1\n          return 0\n        })\n\n      return Lunr.utils.map(docs, function (doc) { return doc.documentId })\n    }, this)\n\n    return Lunr.utils.intersect.apply(Lunr.utils, docIds)\n  }","params":[{"type":"param","types":["String"],"name":"term","description":"the term or terms to search the index for."}],"has_params":true,"tags":[{"type":"param","types":["String"],"name":"term","description":"the term or terms to search the index for."},{"type":"returns"}],"module":false,"parent":"Index","related":{"href":""},"has_related":true},{"id":"15-1328980313881","name":"empty","signiture":"Index.prototype.empty()","type":"method","ctx":{"type":"method","constructor":"Index","name":"empty","string":"Index.prototype.empty()"},"description":{"full":"<p>Empties the index.</p>\n\n<p>It will delete the index store and create a new, empty one in its place.</p>","summary":"<p>Empties the index.</p>","body":"<p>It will delete the index store and create a new, empty one in its place.</p>"},"full_description":"<p>Empties the index.</p>\n\n<p>It will delete the index store and create a new, empty one in its place.</p>","code":"Index.prototype.empty = function () {\n    delete this.trie\n    this.trie = new Lunr.Trie\n  }","params":[],"has_params":false,"tags":[],"module":false,"parent":"Index","has_related":false}]},{"id":"16-1328980313881","name":"Document","signiture":"Document()","type":"function","ctx":{"type":"function","name":"Document","string":"Document()"},"description":{"full":"<p>Lunr.Document wraps any document that is added to the index.  It extracts any words from the document<br />fields that need indexing and formats the document in a way ready for insertion into the Lunr.Index<br />docStore.</p>","summary":"<p>Lunr.Document wraps any document that is added to the index.  It extracts any words from the document<br />fields that need indexing and formats the document in a way ready for insertion into the Lunr.Index<br />docStore.</p>","body":""},"full_description":"<p>Lunr.Document wraps any document that is added to the index.  It extracts any words from the document fields that need indexing and formats the document in a way ready for insertion into the Lunr.Index docStore.</p>","code":"var Document = function (original, refName, fields) {\n    this.original = original\n    this.fields = fields\n    this.ref = original[refName]\n  }","params":[{"type":"param","types":["Object"],"name":"original","description":"- the document to be added to the search index."},{"type":"param","types":["String"],"name":"refName","description":"- the name of the property that can be used as a reference to this document in the index."},{"type":"param","types":["Object"],"name":"fields","description":"- the fields object from the index, indicationg which fields from the document need indexing."}],"has_params":true,"tags":[{"type":"constructor"},{"type":"param","types":["Object"],"name":"original","description":"- the document to be added to the search index."},{"type":"param","types":["String"],"name":"refName","description":"- the name of the property that can be used as a reference to this document in the index."},{"type":"param","types":["Object"],"name":"fields","description":"- the fields object from the index, indicationg which fields from the document need indexing."}],"module":true,"related":{"href":""},"has_related":true,"methods":[{"id":"17-1328980313881","name":"asJSON","signiture":"Document.prototype.asJSON()","type":"method","ctx":{"type":"method","constructor":"Document","name":"asJSON","string":"Document.prototype.asJSON()"},"description":{"full":"<p>Returns a json representation of the document.</p>\n\n<p>Converts this instance of Lunr.Document into a plain object ready for insertion into the index.<br />The returned object consists of three properties, an id, an array of Lunr.Word ids and the<br />original document.</p>","summary":"<p>Returns a json representation of the document.</p>","body":"<p>Converts this instance of Lunr.Document into a plain object ready for insertion into the index.<br />The returned object consists of three properties, an id, an array of Lunr.Word ids and the<br />original document.</p>"},"full_description":"<p>Returns a json representation of the document.</p>\n\n<p>Converts this instance of Lunr.Document into a plain object ready for insertion into the index. The returned object consists of three properties, an id, an array of Lunr.Word ids and the original document.</p>","code":"Document.prototype.asJSON = function () {\n    return {\n      id: this.ref,\n      words: Lunr.utils.map(this.words(), function (word) { return word.id }),\n      original: this.original\n    }\n  }","params":[],"has_params":false,"tags":[{"type":"returns"}],"module":false,"parent":"Document","related":{"href":""},"has_related":true},{"id":"18-1328980313881","name":"words","signiture":"Document.prototype.words()","type":"method","ctx":{"type":"method","constructor":"Document","name":"words","string":"Document.prototype.words()"},"description":{"full":"<p>Retrurns a list of words within the document.</p>\n\n<p>For each field in the original document that requires indexing this method will create an instance of<br />Lunr.Word and then tally the total score for that word in the document as a whole.  At this time any<br />multiplier specified in the fields object will be applied.</p>\n\n<p>The list of words will then be converted into a format ready for insertion into the index.</p>","summary":"<p>Retrurns a list of words within the document.</p>","body":"<p>For each field in the original document that requires indexing this method will create an instance of<br />Lunr.Word and then tally the total score for that word in the document as a whole.  At this time any<br />multiplier specified in the fields object will be applied.</p>\n\n<p>The list of words will then be converted into a format ready for insertion into the index.</p>"},"full_description":"<p>Retrurns a list of words within the document.</p>\n\n<p>For each field in the original document that requires indexing this method will create an instance of Lunr.Word and then tally the total score for that word in the document as a whole.  At this time any multiplier specified in the fields object will be applied.</p>\n\n<p>The list of words will then be converted into a format ready for insertion into the index.</p>","code":"Document.prototype.words = function () {\n    var words = {}\n    var self = this\n    var allWords = {}\n\n    Lunr.utils.forEachKey(this.fields, function (fieldName) {\n      var wordObjs = Lunr.Word.fromString(self.original[fieldName]),\n          numberOfWords = wordObjs.length\n\n      for (var i=0; i < numberOfWords; i++) {\n        var word = wordObjs[i].toString()\n\n        if (!(word in allWords)) {\n          allWords[word] = { score: 0, ref: self.ref }\n        };\n\n        allWords[word].score = allWords[word].score + self.fields[fieldName].multiplier\n      };\n    })\n\n    return Lunr.utils.mapKeys(allWords, function (word) {\n      return {id: word, doc: {score: allWords[word].score, documentId: self.ref} }\n    })\n  }\n\n  return Document\n})()","params":[],"has_params":false,"tags":[{"type":"see","local":"Lunr.Word","visibility":"Lunr.Word"},{"type":"returns"}],"module":false,"parent":"Document","related":{"name":"Lunr.Word","href":"Word"},"has_related":true}]},{"id":"19-1328980313881","name":"Node","signiture":"Node()","type":"function","ctx":{"type":"function","name":"Node","string":"Node()"},"description":{"full":"<p>A node in the trie</p>","summary":"<p>A node in the trie</p>","body":""},"full_description":"<p>A node in the trie</p>","code":"var Node = function () {\n    this.children = {}\n    this.values = []\n  }","params":[],"has_params":false,"tags":[{"type":"constructor"},{"type":"private"}],"module":true,"related":{"href":""},"has_related":true,"methods":[{"id":"20-1328980313881","name":"childForKey","signiture":"Node.prototype.childForKey()","type":"method","ctx":{"type":"method","constructor":"Node","name":"childForKey","string":"Node.prototype.childForKey()"},"description":{"full":"<p>Returns the correct child node for the given key.</p>","summary":"<p>Returns the correct child node for the given key.</p>","body":""},"full_description":"<p>Returns the correct child node for the given key.</p>","code":"Node.prototype.childForKey = function (key) {\n\n    var child = this.children[key]\n\n    if (!child) {\n      child = new Node ()\n      this.children[key] = child\n    };\n\n    return child\n  }","params":[],"has_params":false,"tags":[{"type":"private"},{"type":"params"},{"type":"returns"}],"module":false,"parent":"Node","related":{"href":""},"has_related":true}]},{"id":"21-1328980313881","name":"Trie","signiture":"Trie()","type":"function","ctx":{"type":"function","name":"Trie","string":"Trie()"},"description":{"full":"<p>Lunr.Trie stores the built search index.  It handles lookups against the index and the building of the index.</p>","summary":"<p>Lunr.Trie stores the built search index.  It handles lookups against the index and the building of the index.</p>","body":""},"full_description":"<p>Lunr.Trie stores the built search index.  It handles lookups against the index and the building of the index.</p>","code":"var Trie = function () {\n    this.root = new Node ()\n  }","params":[],"has_params":false,"tags":[{"type":"constructor"}],"module":true,"related":{"href":""},"has_related":true,"methods":[{"id":"22-1328980313881","name":"get","signiture":"Trie.prototype.get()","type":"method","ctx":{"type":"method","constructor":"Trie","name":"get","string":"Trie.prototype.get()"},"description":{"full":"<p>Gets objects from the trie which match the passed key.</p>\n\n<p>Takes a key and gets all objects from the trie which could match the key.</p>","summary":"<p>Gets objects from the trie which match the passed key.</p>","body":"<p>Takes a key and gets all objects from the trie which could match the key.</p>"},"full_description":"<p>Gets objects from the trie which match the passed key.</p>\n\n<p>Takes a key and gets all objects from the trie which could match the key.</p>","code":"Trie.prototype.get = function (key) {\n    var keys = this.keys(key)\n    var self = this\n\n    return Lunr.utils.reduce(keys, function (res, k) {\n      Lunr.utils.forEach(self.getNode(k).values, function (v) {\n        var val = Lunr.utils.copy(v)\n        if (key === k) val.exact = true\n        res.push(val)\n      })\n      return res\n    }, [])\n  }","params":[{"type":"param","types":["String"],"name":"key","description":"the key will be used to lookup values"}],"has_params":true,"tags":[{"type":"param","types":["String"],"name":"key","description":"the key will be used to lookup values"},{"type":"returns"}],"module":false,"parent":"Trie","related":{"href":""},"has_related":true},{"id":"23-1328980313881","name":"getNode","signiture":"Trie.prototype.getNode()","type":"method","ctx":{"type":"method","constructor":"Trie","name":"getNode","string":"Trie.prototype.getNode()"},"description":{"full":"<p>Gets nodes from the trie for the given key.</p>\n\n<p>Takes a key and gets the node for that key.</p>","summary":"<p>Gets nodes from the trie for the given key.</p>","body":"<p>Takes a key and gets the node for that key.</p>"},"full_description":"<p>Gets nodes from the trie for the given key.</p>\n\n<p>Takes a key and gets the node for that key.</p>","code":"Trie.prototype.getNode = function (key) {\n    var recursiveGet = function (node, key) {\n      if (!key.length) return node\n      return recursiveGet(node.childForKey(key.charAt(0)), key.slice(1))\n    }\n\n    return recursiveGet(this.root, key)\n  }","params":[{"type":"param","types":["String"],"name":"key","description":"the key will be used to lookup values"}],"has_params":true,"tags":[{"type":"param","types":["String"],"name":"key","description":"the key will be used to lookup values"},{"type":"returns"}],"module":false,"parent":"Trie","related":{"href":""},"has_related":true},{"id":"24-1328980313881","name":"keys","signiture":"Trie.prototype.keys()","type":"method","ctx":{"type":"method","constructor":"Trie","name":"keys","string":"Trie.prototype.keys()"},"description":{"full":"<p>Gets all keys from the trie that have a given prefix.</p>\n\n<p>Takes the given prefix and walks the trie, returning all keys which contain the prefix.</p>","summary":"<p>Gets all keys from the trie that have a given prefix.</p>","body":"<p>Takes the given prefix and walks the trie, returning all keys which contain the prefix.</p>"},"full_description":"<p>Gets all keys from the trie that have a given prefix.</p>\n\n<p>Takes the given prefix and walks the trie, returning all keys which contain the prefix.</p>","code":"Trie.prototype.keys = function (term) {\n    var keys = [],\n        term = term || \"\"\n\n    var getKeys = function (node, term) {\n      if (node.values.length) keys.push(term)\n\n      Lunr.utils.forEachKey(node.children, function (childKey) {\n        getKeys(node.children[childKey], term + childKey)\n      })\n    }\n\n    getKeys(this.getNode(term), term)\n    return keys\n  }","params":[{"type":"param","types":["String"],"name":"term","description":"the prefix to search with"}],"has_params":true,"tags":[{"type":"param","types":["String"],"name":"term","description":"the prefix to search with"},{"type":"returns"}],"module":false,"parent":"Trie","related":{"href":""},"has_related":true},{"id":"25-1328980313881","name":"set","signiture":"Trie.prototype.set()","type":"method","ctx":{"type":"method","constructor":"Trie","name":"set","string":"Trie.prototype.set()"},"description":{"full":"<p>Set a key to the passed value.</p>\n\n<p>Takes a key and a value, walks through the trie to the right node and adds the<br />given value to that node.</p>","summary":"<p>Set a key to the passed value.</p>","body":"<p>Takes a key and a value, walks through the trie to the right node and adds the<br />given value to that node.</p>"},"full_description":"<p>Set a key to the passed value.</p>\n\n<p>Takes a key and a value, walks through the trie to the right node and adds the given value to that node.</p>","code":"Trie.prototype.set = function (key, value) {\n    var recursiveSet = function (node, key) {\n      if (!key.length) return node.values.push(value)\n      recursiveSet(node.childForKey(key.charAt(0)), key.slice(1))\n    }\n\n    return recursiveSet(this.root, key)\n  }\n\n  return Trie\n})();","params":[{"type":"param","types":["String"],"name":"key","description":"the key under which the value should be stored"},{"type":"param","types":["Object"],"name":"value","description":"the value to store"}],"has_params":true,"tags":[{"type":"param","types":["String"],"name":"key","description":"the key under which the value should be stored"},{"type":"param","types":["Object"],"name":"value","description":"the value to store"}],"module":false,"parent":"Trie","related":{"href":""},"has_related":true}]},{"id":"26-1328980313881","name":"Word","signiture":"Word()","type":"function","ctx":{"type":"function","name":"Word","string":"Word()"},"description":{"full":"<p>A Lunr.Word wraps a string and provides methods to convert the string into a form ready for insertion<br />into the index.  It handles exclusion of stop word as well as performing any language based algorithms.</p>","summary":"<p>A Lunr.Word wraps a string and provides methods to convert the string into a form ready for insertion<br />into the index.  It handles exclusion of stop word as well as performing any language based algorithms.</p>","body":""},"full_description":"<p>A Lunr.Word wraps a string and provides methods to convert the string into a form ready for insertion into the index.  It handles exclusion of stop word as well as performing any language based algorithms.</p>","code":"var Word = function (raw) {\n    this.raw = raw\n    this.out = this.raw.replace(/^\\W+/, \"\").replace(/\\W+$/, \"\").toLowerCase()\n  }\n\n  Word.fromString = function (str, splitter) {\n    var splitter = splitter || /\\b/g,\n        splitStr = str.split(splitter),\n        splitStrLen = splitStr.length,\n        out = []\n\n    for (var i=0; i < splitStrLen; i++) {\n      var word = new Lunr.Word (splitStr[i])\n      if (!word.isStopWord()) out.push(word)\n    };\n\n    return out\n  }","params":[{"type":"param","types":["String"],"name":"raw","description":"- the raw word to be used as the base of a search word."}],"has_params":true,"tags":[{"type":"constructor"},{"type":"param","types":["String"],"name":"raw","description":"- the raw word to be used as the base of a search word."}],"module":true,"related":{"href":""},"has_related":true,"methods":[{"id":"27-1328980313881","name":"isStopWord","signiture":"Word.prototype.isStopWord()","type":"method","ctx":{"type":"method","constructor":"Word","name":"isStopWord","string":"Word.prototype.isStopWord()"},"description":{"full":"<p>Determines whether or not this word is a stop word.</p>","summary":"<p>Determines whether or not this word is a stop word.</p>","body":""},"full_description":"<p>Determines whether or not this word is a stop word.</p>","code":"Word.prototype.isStopWord = function () {\n    return (stopWords.indexOf(this.raw.toLowerCase()) !== -1)\n  }","params":[],"has_params":false,"tags":[{"type":"returns"}],"module":false,"parent":"Word","related":{"href":""},"has_related":true},{"id":"28-1328980313881","name":"toString","signiture":"Word.prototype.toString()","type":"method","ctx":{"type":"method","constructor":"Word","name":"toString","string":"Word.prototype.toString()"},"description":{"full":"<p>Converts the search word into a string representation.</p>","summary":"<p>Converts the search word into a string representation.</p>","body":""},"full_description":"<p>Converts the search word into a string representation.</p>","code":"Word.prototype.toString = function () {\n    if (this.isStopWord()) return\n    this.stem()\n    return this.out\n  }","params":[],"has_params":false,"tags":[{"type":"returns"}],"module":false,"parent":"Word","related":{"href":""},"has_related":true},{"id":"29-1328980313881","name":"stem","signiture":"Word.prototypestem","type":"property","ctx":{"type":"property","constructor":"Word","name":"stem","value":"(function () {","string":"Word.prototypestem"},"description":{"full":"<p>Stems the current word.</p>\n\n<p>Stemming is the process for reducing inflected (or sometimes derived) words to their stem, base or root<br />form. Porter stemming is designed for the English language.</p>\n\n<p>This code has been slighly adapted from Martin Porter's examples.<br /> - <a href='http://tartarus.org/~martin/PorterStemmer/'>http://tartarus.org/~martin/PorterStemmer/</a></p>\n\n<p>Please assume any errors found in the below code are translation errors<br />inserted by myself and not those of the original authors.</p>","summary":"<p>Stems the current word.</p>","body":"<p>Stemming is the process for reducing inflected (or sometimes derived) words to their stem, base or root<br />form. Porter stemming is designed for the English language.</p>\n\n<p>This code has been slighly adapted from Martin Porter's examples.<br /> - <a href='http://tartarus.org/~martin/PorterStemmer/'>http://tartarus.org/~martin/PorterStemmer/</a></p>\n\n<p>Please assume any errors found in the below code are translation errors<br />inserted by myself and not those of the original authors.</p>"},"full_description":"<p>Stems the current word.</p>\n\n<p>Stemming is the process for reducing inflected (or sometimes derived) words to their stem, base or root form. Porter stemming is designed for the English language.</p>\n\n<p>This code has been slighly adapted from Martin Porter's examples.  - <a href='http://tartarus.org/~martin/PorterStemmer/'>http://tartarus.org/~martin/PorterStemmer/</a></p>\n\n<p>Please assume any errors found in the below code are translation errors inserted by myself and not those of the original authors.</p>","code":"Word.prototype.stem = (function () {\n    var step2list = {\n      \"ational\" : \"ate\",\n      \"tional\"  : \"tion\",\n      \"enci\"    : \"ence\",\n      \"anci\"    : \"ance\",\n      \"izer\"    : \"ize\",\n      \"bli\"     : \"ble\",\n      \"alli\"    : \"al\",\n      \"entli\"   : \"ent\",\n      \"eli\"     : \"e\",\n      \"ousli\"   : \"ous\",\n      \"ization\" : \"ize\",\n      \"ation\"   : \"ate\",\n      \"ator\"    : \"ate\",\n      \"alism\"   : \"al\",\n      \"iveness\" : \"ive\",\n      \"fulness\" : \"ful\",\n      \"ousness\" : \"ous\",\n      \"aliti\"   : \"al\",\n      \"iviti\"   : \"ive\",\n      \"biliti\"  : \"ble\",\n      \"logi\"    : \"log\"\n    }\n\n    var step3list = {\n      \"icate\" : \"ic\",\n      \"ative\" : \"\",\n      \"alize\" : \"al\",\n      \"iciti\" : \"ic\",\n      \"ical\"  : \"ic\",\n      \"ful\"   : \"\",\n      \"ness\"  : \"\"\n    }\n\n    var c = \"[^aeiou]\";          // consonant\n    var v = \"[aeiouy]\";          // vowel\n    var C = c + \"[^aeiouy]*\";    // consonant sequence\n    var V = v + \"[aeiou]*\";      // vowel sequence\n\n    var mgr0 = \"^(\" + C + \")?\" + V + C;               // [C]VC... is m>0\n    var meq1 = \"^(\" + C + \")?\" + V + C + \"(\" + V + \")?$\";  // [C]VC[V] is m=1\n    var mgr1 = \"^(\" + C + \")?\" + V + C + V + C;       // [C]VCVC... is m>1\n    var s_v   = \"^(\" + C + \")?\" + v;                   // vowel in stem\n\n    return function () {\n      var stem;\n      var suffix;\n      var firstch;\n      var origword = this.out;\n      var w = this.out;\n\n      if (origword.length < 3) return origword\n\n      var re;\n      var re2;\n      var re3;\n      var re4;\n\n      firstch = origword.substr(0,1);\n      if (firstch == \"y\") {\n        w = firstch.toUpperCase() + w.substr(1);\n      }\n\n      // Step 1a\n      re = /^(.+?)(ss|i)es$/;\n      re2 = /^(.+?)([^s])s$/;\n\n      if (re.test(w)) { \n        w = w.replace(re,\"$1$2\");\n      } else if (re2.test(w)) { \n        w = w.replace(re2,\"$1$2\");\n      }\n\n      // Step 1b\n      re = /^(.+?)eed$/;\n      re2 = /^(.+?)(ed|ing)$/;\n      if (re.test(w)) {\n        var fp = re.exec(w);\n        re = new RegExp(mgr0);\n        if (re.test(fp[1])) {\n          re = /.$/;\n          w = w.replace(re,\"\");\n        }\n      } else if (re2.test(w)) {\n        var fp = re2.exec(w);\n        stem = fp[1];\n        re2 = new RegExp(s_v);\n        if (re2.test(stem)) {\n          w = stem;\n          re2 = /(at|bl|iz)$/;\n          re3 = new RegExp(\"([^aeiouylsz])\\\\1$\");\n          re4 = new RegExp(\"^\" + C + v + \"[^aeiouwxy]$\");\n          if (re2.test(w)) {  w = w + \"e\"; }\n          else if (re3.test(w)) { re = /.$/; w = w.replace(re,\"\"); }\n          else if (re4.test(w)) { w = w + \"e\"; }\n        }\n      }\n\n      // Step 1c\n      re = /^(.+?)y$/;\n      if (re.test(w)) {\n        var fp = re.exec(w);\n        stem = fp[1];\n        re = new RegExp(s_v);\n        if (re.test(stem)) { w = stem + \"i\"; }\n      }\n\n      // Step 2\n      re = /^(.+?)(ational|tional|enci|anci|izer|bli|alli|entli|eli|ousli|ization|ation|ator|alism|iveness|fulness|ousness|aliti|iviti|biliti|logi)$/;\n      if (re.test(w)) {\n        var fp = re.exec(w);\n        stem = fp[1];\n        suffix = fp[2];\n        re = new RegExp(mgr0);\n        if (re.test(stem)) {\n          w = stem + step2list[suffix];\n        }\n      }\n\n      // Step 3\n      re = /^(.+?)(icate|ative|alize|iciti|ical|ful|ness)$/;\n      if (re.test(w)) {\n        var fp = re.exec(w);\n        stem = fp[1];\n        suffix = fp[2];\n        re = new RegExp(mgr0);\n        if (re.test(stem)) {\n          w = stem + step3list[suffix];\n        }\n      }\n\n      // Step 4\n      re = /^(.+?)(al|ance|ence|er|ic|able|ible|ant|ement|ment|ent|ou|ism|ate|iti|ous|ive|ize)$/;\n      re2 = /^(.+?)(s|t)(ion)$/;\n      if (re.test(w)) {\n        var fp = re.exec(w);\n        stem = fp[1];\n        re = new RegExp(mgr1);\n        if (re.test(stem)) {\n          w = stem;\n        }\n      } else if (re2.test(w)) {\n        var fp = re2.exec(w);\n        stem = fp[1] + fp[2];\n        re2 = new RegExp(mgr1);\n        if (re2.test(stem)) {\n          w = stem;\n        }\n      }\n\n      // Step 5\n      re = /^(.+?)e$/;\n      if (re.test(w)) {\n        var fp = re.exec(w);\n        stem = fp[1];\n        re = new RegExp(mgr1);\n        re2 = new RegExp(meq1);\n        re3 = new RegExp(\"^\" + C + v + \"[^aeiouwxy]$\");\n        if (re.test(stem) || (re2.test(stem) && !(re3.test(stem)))) {\n          w = stem;\n        }\n      }\n\n      re = /ll$/;\n      re2 = new RegExp(mgr1);\n      if (re.test(w) && re2.test(w)) {\n        re = /.$/;\n        w = w.replace(re,\"\");\n      }\n\n      if (firstch == \"y\") {\n        w = firstch.toLowerCase() + w.substr(1);\n      }\n\n      this.out = w;\n    }\n\n  })()\n\n  return Word\n})","params":[],"has_params":false,"tags":[{"type":"author"},{"type":""},{"type":"June"},{"type":"Additions"}],"module":false,"parent":"Word","related":{"href":""},"has_related":true}]}]
+  </script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+
+  <script type="text/javascript" charset="utf-8">
+    // lunr.js version: 0.0.4
+    // (c) 2011 Oliver Nightingale
+    //
+    //  Released under MIT license.
+    //
+    var Lunr=function(c,f){var b=new Lunr.Index(c);f.call(b,b);return b};
+    Lunr.utils={uniq:function(c){if(!c)return[];return c.reduce(function(c,b){c.indexOf(b)===-1&&c.push(b);return c},[])},intersect:function(c){var f=[].slice.call(arguments,1);return this.uniq(c).filter(function(b){return f.every(function(a){return a.indexOf(b)>=0})})},detect:function(c,f,b){for(var a=c.length,g=null,d=0;d<a;d++)if(f.call(b,c[d],d,c)){g=c[d];break}return g},copy:function(c){return Object.keys(c).reduce(function(f,b){f[b]=c[b];return f},{})}};
+    Lunr.Trie=function(){var c=function(){this.children={};this.values=[]};c.prototype={childForKey:function(b){var a=this.children[b];a||(a=new c,this.children[b]=a);return a}};var f=function(){this.root=new c};f.prototype={get:function(b){var a=this;return this.keys(b).reduce(function(c,d){a.getNode(d).values.forEach(function(a){a=Lunr.utils.copy(a);if(b===d)a.exact=!0;c.push(a)});return c},[])},getNode:function(b){var a=function(b,d){if(!d.length)return b;return a(b.childForKey(d.charAt(0)),d.slice(1))};
+    return a(this.root,b)},keys:function(b){var a=[];b=b||"";var c=function(b,e){b.values.length&&a.push(e);Object.keys(b.children).forEach(function(a){c(b.children[a],e+a)})};c(this.getNode(b),b);return a},set:function(b,a){var c=function(b,e){if(!e.length)return b.values.push(a);c(b.childForKey(e.charAt(0)),e.slice(1))};return c(this.root,b)}};return f}();Lunr.Index=function(c){this.name=c;this.refName="id";this.fields={};this.trie=new Lunr.Trie};
+    Lunr.Index.prototype={add:function(c){(new Lunr.Document(c,this.refName,this.fields)).words().forEach(function(c){this.trie.set(c.id,c.docs[0])},this)},field:function(c,f){this.fields[c]=f||{multiplier:1}},ref:function(c){this.refName=c},search:function(c){if(!c)return[];c=c.split(" ").map(function(c){c=new Lunr.Word(c);if(!c.isStopWord())return c.toString()}).filter(function(c){return c}).map(function(c){return this.trie.get(c).sort(function(b,a){if(b.exact&&a.exact===void 0)return-1;if(a.exact&&
+    b.exact===void 0)return 1;if(b.score<a.score)return 1;if(b.score>a.score)return-1;return 0}).map(function(b){return b.documentId})},this);return Lunr.utils.intersect.apply(Lunr.utils,c)}};Lunr.Document=function(c,f,b){this.original=c;this.fields=b;this.ref=c[f]};
+    Lunr.Document.prototype={asJSON:function(){return{id:this.ref,words:this.words().map(function(c){return c.id}),original:this.original}},words:function(){var c=this,f={};Object.keys(this.fields).forEach(function(b){c.original[b].split(/\b/g).filter(function(a){return!!a.match(/\w/)}).map(function(a){a=new Lunr.Word(a);if(!a.isStopWord())return a.toString()}).filter(function(a){return a}).forEach(function(a){f[a]||(f[a]={score:0,ref:c.ref});f[a].score+=c.fields[b].multiplier})});return Object.keys(f).map(function(b){return{id:b,
+    docs:[{score:f[b].score,documentId:c.ref}]}})}};Lunr.Word=function(c){this.raw=c;this.out=this.raw.replace(/^\W+/,"").replace(/\W+$/,"").toLowerCase()};Lunr.Word.stopWords=["the","of","to","and","a","in","is","it","you","that","this"];
+    Lunr.Word.prototype={isStopWord:function(){return Lunr.Word.stopWords.indexOf(this.raw.toLowerCase())!==-1},toString:function(){if(!this.isStopWord())return this.stem(),this.out},stem:function(){var c={ational:"ate",tional:"tion",enci:"ence",anci:"ance",izer:"ize",bli:"ble",alli:"al",entli:"ent",eli:"e",ousli:"ous",ization:"ize",ation:"ate",ator:"ate",alism:"al",iveness:"ive",fulness:"ful",ousness:"ous",aliti:"al",iviti:"ive",biliti:"ble",logi:"log"},f={icate:"ic",ative:"",alize:"al",iciti:"ic",ical:"ic",
+    ful:"",ness:""};return function(){var b,a,g,d=g=this.out;if(g.length<3)return g;var e,h;g=g.substr(0,1);g=="y"&&(d=g.toUpperCase()+d.substr(1));e=/^(.+?)(ss|i)es$/;a=/^(.+?)([^s])s$/;e.test(d)?d=d.replace(e,"$1$2"):a.test(d)&&(d=d.replace(a,"$1$2"));e=/^(.+?)eed$/;a=/^(.+?)(ed|ing)$/;e.test(d)?(a=e.exec(d),e=/^([^aeiou][^aeiouy]*)?[aeiouy][aeiou]*[^aeiou][^aeiouy]*/,e.test(a[1])&&(e=/.$/,d=d.replace(e,""))):a.test(d)&&(a=a.exec(d),b=a[1],a=/^([^aeiou][^aeiouy]*)?[aeiouy]/,a.test(b)&&(d=b,a=/(at|bl|iz)$/,
+    h=/([^aeiouylsz])\1$/,b=/^[^aeiou][^aeiouy]*[aeiouy][^aeiouwxy]$/,a.test(d)?d+="e":h.test(d)?(e=/.$/,d=d.replace(e,"")):b.test(d)&&(d+="e")));e=/^(.+?)y$/;e.test(d)&&(a=e.exec(d),b=a[1],e=/^([^aeiou][^aeiouy]*)?[aeiouy]/,e.test(b)&&(d=b+"i"));e=/^(.+?)(ational|tional|enci|anci|izer|bli|alli|entli|eli|ousli|ization|ation|ator|alism|iveness|fulness|ousness|aliti|iviti|biliti|logi)$/;e.test(d)&&(a=e.exec(d),b=a[1],a=a[2],e=/^([^aeiou][^aeiouy]*)?[aeiouy][aeiou]*[^aeiou][^aeiouy]*/,e.test(b)&&(d=b+c[a]));
+    e=/^(.+?)(icate|ative|alize|iciti|ical|ful|ness)$/;e.test(d)&&(a=e.exec(d),b=a[1],a=a[2],e=/^([^aeiou][^aeiouy]*)?[aeiouy][aeiou]*[^aeiou][^aeiouy]*/,e.test(b)&&(d=b+f[a]));e=/^(.+?)(al|ance|ence|er|ic|able|ible|ant|ement|ment|ent|ou|ism|ate|iti|ous|ive|ize)$/;a=/^(.+?)(s|t)(ion)$/;e.test(d)?(a=e.exec(d),b=a[1],e=/^([^aeiou][^aeiouy]*)?[aeiouy][aeiou]*[^aeiou][^aeiouy]*[aeiouy][aeiou]*[^aeiou][^aeiouy]*/,e.test(b)&&(d=b)):a.test(d)&&(a=a.exec(d),b=a[1]+a[2],a=/^([^aeiou][^aeiouy]*)?[aeiouy][aeiou]*[^aeiou][^aeiouy]*[aeiouy][aeiou]*[^aeiou][^aeiouy]*/,
+    a.test(b)&&(d=b));e=/^(.+?)e$/;if(e.test(d)&&(a=e.exec(d),b=a[1],e=/^([^aeiou][^aeiouy]*)?[aeiouy][aeiou]*[^aeiou][^aeiouy]*[aeiouy][aeiou]*[^aeiou][^aeiouy]*/,a=/^([^aeiou][^aeiouy]*)?[aeiouy][aeiou]*[^aeiou][^aeiouy]*([aeiouy][aeiou]*)?$/,h=/^[^aeiou][^aeiouy]*[aeiouy][^aeiouwxy]$/,e.test(b)||a.test(b)&&!h.test(b)))d=b;e=/ll$/;a=/^([^aeiou][^aeiouy]*)?[aeiouy][aeiou]*[^aeiou][^aeiouy]*[aeiouy][aeiou]*[^aeiou][^aeiouy]*/;e.test(d)&&a.test(d)&&(e=/.$/,d=d.replace(e,""));g=="y"&&(d=g.toLowerCase()+
+    d.substr(1));this.out=d}}()};
+  </script>
+
+  <script type="text/javascript" charset="utf-8">
+    var idx = Lunr('methods', function () {
+      this.ref('id')
+      this.field('name', { multiplier: 10 })
+      this.field('parent', { multiplier: 5 })
+      this.field('full_description')
+    })
+
+    var methods = raw.reduce(function (memo, module) {
+      return memo.concat(module.methods)
+    }, [])
+
+    methods.forEach(function (method) {
+      idx.add(method)
+    })
+
+    $(document).ready(function () {
+
+      var search = function (term) {
+        return idx.search(term).map(function (id) {
+          return methods.filter(function (method) {
+            return method.id === id
+          })[0]
+        })
+      }
+
+      var searchResults = $('#search-results')
+
+      $('#search-input').keyup(function () {
+        var query = $(this).val(),
+            results = search(query)
+
+        if (!results.length) {
+          searchResults.empty()
+          return
+        };
+
+        var resultsList = results.reduce(function (ul, result) {
+          var li = $('<li>').append($('<a>', {
+            href: '#' + result.name,
+            text: result.name
+          }))
+
+          ul.append(li)
+
+          return ul
+        }, $('<ul>'))
+
+        searchResults.html(resultsList)
+      })
+    })
+  </script>
+
+  <style type="text/css" media="screen">
+    body {
+      font-family: 'Helvetica Neue';
+      color: #333;
+    }
+
+    a {
+      color: #0f4bf0;
+    }
+
+    header h1 {
+      border-top: 4px solid #333;
+      font-size: 2.6em;
+    }
+
+    header .version {
+      font-size: 0.6em;
+    }
+
+    .main > header {
+      margin-bottom: 40px;
+    }
+
+    article {
+      margin-bottom: 10px;
+      padding-bottom: 30px;
+    }
+
+    article header h2 {
+      border-top: 3px solid #333;
+      font-size: 2em;
+      padding-top: 5px;
+    }
+
+    article > section {
+      margin-bottom: 30px;
+    }
+
+    article section h3 {
+      font-size: 1em;
+    }
+
+    article section header h3 {
+      padding-top: 2px;
+      font-size: 1.2em;
+      margin-bottom: 5px;
+      border-top: 2px solid #333;
+    }
+
+    article section header h4 {
+      font-size: 0.9em;
+      font-family: courier;
+      margin: 2px 0 5px 0;
+    }
+
+    @-webkit-keyframes highlight {
+      from {
+        background-color: #Ffff66;
+      }
+
+      to {
+        background-color: white;
+      }
+    }
+
+    section.method:target {
+      -webkit-animation-duration: 1s;
+      -webkit-animation-name: highlight;
+    }
+
+    section header .type, section header .related {
+      margin-top: 0px;
+      font-size: 0.8em;
+    }
+
+    section.params h4, section.source h4 {
+      margin-top: 5px;
+      margin-bottom: 2px;
+      font-size: 0.9em;
+    }
+
+    section.params ul {
+      margin-top: 2px;
+    }
+
+    a.show-source {
+      font-size: 0.8em;
+    }
+
+    .wrap {
+      width: 960px;
+      margin: 0 auto;
+    }
+
+    .main {
+      width: 760px;
+      float: left;
+    }
+
+    .search {
+      margin-top: 10px;
+      float: right;
+    }
+
+    #search-input {
+      width: 200px;
+    }
+
+    #search-results {
+      position: relative;
+    }
+
+    #search-results ul {
+      width: 200px;
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      background-color: white;
+      border: 1px solid #ccc;
+      list-style: none;
+      padding: 0;
+      margin-top: 0;
+      font-size: 0.9em;
+    }
+
+    #search-results li {
+      padding: 5px;
+    }
+
+    #search-results li:hover {
+      background-color: #eee;
+      cursor: pointer;
+    }
+
+    #search-results li a {
+      text-decoration: none;
+      width: 200px;
+      display: block;
+    }
+
+    p {
+      line-height: 1.4em;
+    }
+
+    nav {
+      padding-top: 15px;
+      float: left;
+      width: 165px;
+      margin-right: 30px;
+      text-align: right;
+      font-size: 0.8em;
+    }
+
+    nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav ul h3 {
+      margin-bottom: 5px;
+      border-top: 2px solid #CCC;
+      padding-top: 2px;
+    }
+
+    nav ul ul li {
+      padding: 2px 0;
+    }
+
+    pre {
+      background-color: rgba(0,0,0,0.1);
+      padding: 8px;
+    }
+
+    code .keyword, code .special {
+      font-weight: bold;
+      color: black;
+    }
+
+    code .string, code .regexp {
+      color: green
+    }
+
+    code .class { 
+      color: blue
+    }
+
+    code .number {
+      color: red
+    }
+
+    code .comment {
+      color: grey;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class='wrap'>
+
+
+    <nav>
+      <ul>
+        
+          <li>
+            <a href='#Index'>
+              <h3>Index</h3>
+            </a>
+
+            <ul>
+              
+                <li><a href='#add'>add</a></li>
+              
+                <li><a href='#field'>field</a></li>
+              
+                <li><a href='#ref'>ref</a></li>
+              
+                <li><a href='#search'>search</a></li>
+              
+                <li><a href='#empty'>empty</a></li>
+              
+            </ul>
+          </li>
+        
+          <li>
+            <a href='#Document'>
+              <h3>Document</h3>
+            </a>
+
+            <ul>
+              
+                <li><a href='#asJSON'>asJSON</a></li>
+              
+                <li><a href='#words'>words</a></li>
+              
+            </ul>
+          </li>
+        
+          <li>
+            <a href='#Node'>
+              <h3>Node</h3>
+            </a>
+
+            <ul>
+              
+                <li><a href='#childForKey'>childForKey</a></li>
+              
+            </ul>
+          </li>
+        
+          <li>
+            <a href='#Trie'>
+              <h3>Trie</h3>
+            </a>
+
+            <ul>
+              
+                <li><a href='#get'>get</a></li>
+              
+                <li><a href='#getNode'>getNode</a></li>
+              
+                <li><a href='#keys'>keys</a></li>
+              
+                <li><a href='#set'>set</a></li>
+              
+            </ul>
+          </li>
+        
+          <li>
+            <a href='#Word'>
+              <h3>Word</h3>
+            </a>
+
+            <ul>
+              
+                <li><a href='#isStopWord'>isStopWord</a></li>
+              
+                <li><a href='#toString'>toString</a></li>
+              
+                <li><a href='#stem'>stem</a></li>
+              
+            </ul>
+          </li>
+        
+      </ul>
+    </nav>
+
+    <div class='main'>
+      <header>
+        <div class='search'>
+          <input type="search" id="search-input" placeholder="Search"></input>
+          <div id="search-results"></div>
+        </div>
+        <h1>Lunr.js <span class='version'>0.1.0</span></h1>
+      </header>
+
+      
+        <article id='Index'>
+          <header>
+            <h2>Index</h2>
+          </header>
+
+          <section>
+            <p>Lunr.Index provides the public api for the Lunr library.</p>
+          </section>
+
+          
+            <section class='method' id='add'>
+              <header>
+                <h3>add</h3>
+                <h4>Index.prototype.add()</h4>
+                <p class='type'>method</p>
+                
+                  <p class='related'>See: <a href='#'></a></p>
+                
+              </header>
+
+              <section class='params'>
+                
+                  <h4>Params</h4>
+                
+                <ul>
+                  
+                    <li>obj - the object to add to the index.</li>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Adds objects to the search index.</p>
+
+<p>It will convert the passed JSON object and convert it into a Lunr.Document. The words from the document will then be extracted and added to the index.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Index.prototype.add = function (obj) {
+    var doc = new Lunr.Document(obj, this.refName, this.fields)
+    var words = doc.words()
+
+    for (var i=0; i &lt; words.length; i++) {
+      var word = words[i]
+      this.trie.set(word.id, word.doc)
+    };
+  }</code></pre>
+              </section>
+              
+            </section>
+          
+            <section class='method' id='field'>
+              <header>
+                <h3>field</h3>
+                <h4>Index.prototype.field()</h4>
+                <p class='type'>method</p>
+                
+                  <p class='related'>See: <a href='#'></a></p>
+                
+              </header>
+
+              <section class='params'>
+                
+                  <h4>Params</h4>
+                
+                <ul>
+                  
+                    <li>name - the name of the field to index in a document</li>
+                  
+                    <li>opts - options for indexing this particular field</li>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Adds fields to the index.</p>
+
+<p>Use this method to describe which fields from a document should be part of the index. An options object can be passed as the second argument that will change the way that a particular field is indexed.</p>
+
+<p><code>multiplier</code> is a multiplier to apply to a field, you can use this to make sure certain fields are considered more important, e.g. a documents title.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Index.prototype.field = function (name, opts) {
+    this.fields[name] = opts || {multiplier: 1}
+  }</code></pre>
+              </section>
+              
+            </section>
+          
+            <section class='method' id='ref'>
+              <header>
+                <h3>ref</h3>
+                <h4>Index.prototype.ref()</h4>
+                <p class='type'>method</p>
+                
+                  <p class='related'>See: <a href='#'></a></p>
+                
+              </header>
+
+              <section class='params'>
+                
+                  <h4>Params</h4>
+                
+                <ul>
+                  
+                    <li>name - the name of the field to index in a document</li>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Sets the ref for the index.</p>
+
+<p>Use this method to select the property by which objects added to the index can be uniquely identified.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Index.prototype.ref = function (name) {
+    this.refName = name
+  }</code></pre>
+              </section>
+              
+            </section>
+          
+            <section class='method' id='search'>
+              <header>
+                <h3>search</h3>
+                <h4>Index.prototype.search()</h4>
+                <p class='type'>method</p>
+                
+                  <p class='related'>See: <a href='#'></a></p>
+                
+              </header>
+
+              <section class='params'>
+                
+                  <h4>Params</h4>
+                
+                <ul>
+                  
+                    <li>term - the term or terms to search the index for.</li>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Searches the index for a term.</p>
+
+<p>You can pass in a string of words separated by spaces.  By default the search is an AND search, so if you searched for 'foo bar' the results would be those documents in the index that contain both the word foo AND the word bar.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Index.prototype.search = function (term) {
+    if (!term) return []
+
+    var docIds = Lunr.utils.map(Lunr.Word.fromString(term), function (word) {
+      var docs = this.trie
+        .get(word.toString())
+        .sort(function (a, b) {
+          if (a.exact &amp;&amp; b.exact === undefined) return -1
+          if (b.exact &amp;&amp; a.exact === undefined) return 1
+          if (a.score &lt; b.score) return 1
+          if (a.score &gt; b.score) return -1
+          return 0
+        })
+
+      return Lunr.utils.map(docs, function (doc) { return doc.documentId })
+    }, this)
+
+    return Lunr.utils.intersect.apply(Lunr.utils, docIds)
+  }</code></pre>
+              </section>
+              
+            </section>
+          
+            <section class='method' id='empty'>
+              <header>
+                <h3>empty</h3>
+                <h4>Index.prototype.empty()</h4>
+                <p class='type'>method</p>
+                
+              </header>
+
+              <section class='params'>
+                
+                <ul>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Empties the index.</p>
+
+<p>It will delete the index store and create a new, empty one in its place.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Index.prototype.empty = function () {
+    delete this.trie
+    this.trie = new Lunr.Trie
+  }</code></pre>
+              </section>
+              
+            </section>
+          
+        </article>
+      
+        <article id='Document'>
+          <header>
+            <h2>Document</h2>
+          </header>
+
+          <section>
+            <p>Lunr.Document wraps any document that is added to the index.  It extracts any words from the document fields that need indexing and formats the document in a way ready for insertion into the Lunr.Index docStore.</p>
+          </section>
+
+          
+            <section class='method' id='asJSON'>
+              <header>
+                <h3>asJSON</h3>
+                <h4>Document.prototype.asJSON()</h4>
+                <p class='type'>method</p>
+                
+                  <p class='related'>See: <a href='#'></a></p>
+                
+              </header>
+
+              <section class='params'>
+                
+                <ul>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Returns a json representation of the document.</p>
+
+<p>Converts this instance of Lunr.Document into a plain object ready for insertion into the index. The returned object consists of three properties, an id, an array of Lunr.Word ids and the original document.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Document.prototype.asJSON = function () {
+    return {
+      id: this.ref,
+      words: Lunr.utils.map(this.words(), function (word) { return word.id }),
+      original: this.original
+    }
+  }</code></pre>
+              </section>
+              
+            </section>
+          
+            <section class='method' id='words'>
+              <header>
+                <h3>words</h3>
+                <h4>Document.prototype.words()</h4>
+                <p class='type'>method</p>
+                
+                  <p class='related'>See: <a href='#Word'>Lunr.Word</a></p>
+                
+              </header>
+
+              <section class='params'>
+                
+                <ul>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Retrurns a list of words within the document.</p>
+
+<p>For each field in the original document that requires indexing this method will create an instance of Lunr.Word and then tally the total score for that word in the document as a whole.  At this time any multiplier specified in the fields object will be applied.</p>
+
+<p>The list of words will then be converted into a format ready for insertion into the index.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Document.prototype.words = function () {
+    var words = {}
+    var self = this
+    var allWords = {}
+
+    Lunr.utils.forEachKey(this.fields, function (fieldName) {
+      var wordObjs = Lunr.Word.fromString(self.original[fieldName]),
+          numberOfWords = wordObjs.length
+
+      for (var i=0; i &lt; numberOfWords; i++) {
+        var word = wordObjs[i].toString()
+
+        if (!(word in allWords)) {
+          allWords[word] = { score: 0, ref: self.ref }
+        };
+
+        allWords[word].score = allWords[word].score + self.fields[fieldName].multiplier
+      };
+    })
+
+    return Lunr.utils.mapKeys(allWords, function (word) {
+      return {id: word, doc: {score: allWords[word].score, documentId: self.ref} }
+    })
+  }
+
+  return Document
+})()</code></pre>
+              </section>
+              
+            </section>
+          
+        </article>
+      
+        <article id='Node'>
+          <header>
+            <h2>Node</h2>
+          </header>
+
+          <section>
+            <p>A node in the trie</p>
+          </section>
+
+          
+            <section class='method' id='childForKey'>
+              <header>
+                <h3>childForKey</h3>
+                <h4>Node.prototype.childForKey()</h4>
+                <p class='type'>method</p>
+                
+                  <p class='related'>See: <a href='#'></a></p>
+                
+              </header>
+
+              <section class='params'>
+                
+                <ul>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Returns the correct child node for the given key.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Node.prototype.childForKey = function (key) {
+
+    var child = this.children[key]
+
+    if (!child) {
+      child = new Node ()
+      this.children[key] = child
+    };
+
+    return child
+  }</code></pre>
+              </section>
+              
+            </section>
+          
+        </article>
+      
+        <article id='Trie'>
+          <header>
+            <h2>Trie</h2>
+          </header>
+
+          <section>
+            <p>Lunr.Trie stores the built search index.  It handles lookups against the index and the building of the index.</p>
+          </section>
+
+          
+            <section class='method' id='get'>
+              <header>
+                <h3>get</h3>
+                <h4>Trie.prototype.get()</h4>
+                <p class='type'>method</p>
+                
+                  <p class='related'>See: <a href='#'></a></p>
+                
+              </header>
+
+              <section class='params'>
+                
+                  <h4>Params</h4>
+                
+                <ul>
+                  
+                    <li>key - the key will be used to lookup values</li>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Gets objects from the trie which match the passed key.</p>
+
+<p>Takes a key and gets all objects from the trie which could match the key.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Trie.prototype.get = function (key) {
+    var keys = this.keys(key)
+    var self = this
+
+    return Lunr.utils.reduce(keys, function (res, k) {
+      Lunr.utils.forEach(self.getNode(k).values, function (v) {
+        var val = Lunr.utils.copy(v)
+        if (key === k) val.exact = true
+        res.push(val)
+      })
+      return res
+    }, [])
+  }</code></pre>
+              </section>
+              
+            </section>
+          
+            <section class='method' id='getNode'>
+              <header>
+                <h3>getNode</h3>
+                <h4>Trie.prototype.getNode()</h4>
+                <p class='type'>method</p>
+                
+                  <p class='related'>See: <a href='#'></a></p>
+                
+              </header>
+
+              <section class='params'>
+                
+                  <h4>Params</h4>
+                
+                <ul>
+                  
+                    <li>key - the key will be used to lookup values</li>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Gets nodes from the trie for the given key.</p>
+
+<p>Takes a key and gets the node for that key.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Trie.prototype.getNode = function (key) {
+    var recursiveGet = function (node, key) {
+      if (!key.length) return node
+      return recursiveGet(node.childForKey(key.charAt(0)), key.slice(1))
+    }
+
+    return recursiveGet(this.root, key)
+  }</code></pre>
+              </section>
+              
+            </section>
+          
+            <section class='method' id='keys'>
+              <header>
+                <h3>keys</h3>
+                <h4>Trie.prototype.keys()</h4>
+                <p class='type'>method</p>
+                
+                  <p class='related'>See: <a href='#'></a></p>
+                
+              </header>
+
+              <section class='params'>
+                
+                  <h4>Params</h4>
+                
+                <ul>
+                  
+                    <li>term - the prefix to search with</li>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Gets all keys from the trie that have a given prefix.</p>
+
+<p>Takes the given prefix and walks the trie, returning all keys which contain the prefix.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Trie.prototype.keys = function (term) {
+    var keys = [],
+        term = term || &quot;&quot;
+
+    var getKeys = function (node, term) {
+      if (node.values.length) keys.push(term)
+
+      Lunr.utils.forEachKey(node.children, function (childKey) {
+        getKeys(node.children[childKey], term + childKey)
+      })
+    }
+
+    getKeys(this.getNode(term), term)
+    return keys
+  }</code></pre>
+              </section>
+              
+            </section>
+          
+            <section class='method' id='set'>
+              <header>
+                <h3>set</h3>
+                <h4>Trie.prototype.set()</h4>
+                <p class='type'>method</p>
+                
+                  <p class='related'>See: <a href='#'></a></p>
+                
+              </header>
+
+              <section class='params'>
+                
+                  <h4>Params</h4>
+                
+                <ul>
+                  
+                    <li>key - the key under which the value should be stored</li>
+                  
+                    <li>value - the value to store</li>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Set a key to the passed value.</p>
+
+<p>Takes a key and a value, walks through the trie to the right node and adds the given value to that node.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Trie.prototype.set = function (key, value) {
+    var recursiveSet = function (node, key) {
+      if (!key.length) return node.values.push(value)
+      recursiveSet(node.childForKey(key.charAt(0)), key.slice(1))
+    }
+
+    return recursiveSet(this.root, key)
+  }
+
+  return Trie
+})();</code></pre>
+              </section>
+              
+            </section>
+          
+        </article>
+      
+        <article id='Word'>
+          <header>
+            <h2>Word</h2>
+          </header>
+
+          <section>
+            <p>A Lunr.Word wraps a string and provides methods to convert the string into a form ready for insertion into the index.  It handles exclusion of stop word as well as performing any language based algorithms.</p>
+          </section>
+
+          
+            <section class='method' id='isStopWord'>
+              <header>
+                <h3>isStopWord</h3>
+                <h4>Word.prototype.isStopWord()</h4>
+                <p class='type'>method</p>
+                
+                  <p class='related'>See: <a href='#'></a></p>
+                
+              </header>
+
+              <section class='params'>
+                
+                <ul>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Determines whether or not this word is a stop word.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Word.prototype.isStopWord = function () {
+    return (stopWords.indexOf(this.raw.toLowerCase()) !== -1)
+  }</code></pre>
+              </section>
+              
+            </section>
+          
+            <section class='method' id='toString'>
+              <header>
+                <h3>toString</h3>
+                <h4>Word.prototype.toString()</h4>
+                <p class='type'>method</p>
+                
+                  <p class='related'>See: <a href='#'></a></p>
+                
+              </header>
+
+              <section class='params'>
+                
+                <ul>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Converts the search word into a string representation.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Word.prototype.toString = function () {
+    if (this.isStopWord()) return
+    this.stem()
+    return this.out
+  }</code></pre>
+              </section>
+              
+            </section>
+          
+            <section class='method' id='stem'>
+              <header>
+                <h3>stem</h3>
+                <h4>Word.prototypestem</h4>
+                <p class='type'>property</p>
+                
+                  <p class='related'>See: <a href='#'></a></p>
+                
+              </header>
+
+              <section class='params'>
+                
+                <ul>
+                  
+                </ul>
+              </section>
+
+              
+
+              <section>
+                <p>Stems the current word.</p>
+
+<p>Stemming is the process for reducing inflected (or sometimes derived) words to their stem, base or root form. Porter stemming is designed for the English language.</p>
+
+<p>This code has been slighly adapted from Martin Porter's examples.  - <a href='http://tartarus.org/~martin/PorterStemmer/'>http://tartarus.org/~martin/PorterStemmer/</a></p>
+
+<p>Please assume any errors found in the below code are translation errors inserted by myself and not those of the original authors.</p>
+              </section>
+
+              <section class='source'>
+                <h4>Source</h4>
+                <pre><code>Word.prototype.stem = (function () {
+    var step2list = {
+      &quot;ational&quot; : &quot;ate&quot;,
+      &quot;tional&quot;  : &quot;tion&quot;,
+      &quot;enci&quot;    : &quot;ence&quot;,
+      &quot;anci&quot;    : &quot;ance&quot;,
+      &quot;izer&quot;    : &quot;ize&quot;,
+      &quot;bli&quot;     : &quot;ble&quot;,
+      &quot;alli&quot;    : &quot;al&quot;,
+      &quot;entli&quot;   : &quot;ent&quot;,
+      &quot;eli&quot;     : &quot;e&quot;,
+      &quot;ousli&quot;   : &quot;ous&quot;,
+      &quot;ization&quot; : &quot;ize&quot;,
+      &quot;ation&quot;   : &quot;ate&quot;,
+      &quot;ator&quot;    : &quot;ate&quot;,
+      &quot;alism&quot;   : &quot;al&quot;,
+      &quot;iveness&quot; : &quot;ive&quot;,
+      &quot;fulness&quot; : &quot;ful&quot;,
+      &quot;ousness&quot; : &quot;ous&quot;,
+      &quot;aliti&quot;   : &quot;al&quot;,
+      &quot;iviti&quot;   : &quot;ive&quot;,
+      &quot;biliti&quot;  : &quot;ble&quot;,
+      &quot;logi&quot;    : &quot;log&quot;
+    }
+
+    var step3list = {
+      &quot;icate&quot; : &quot;ic&quot;,
+      &quot;ative&quot; : &quot;&quot;,
+      &quot;alize&quot; : &quot;al&quot;,
+      &quot;iciti&quot; : &quot;ic&quot;,
+      &quot;ical&quot;  : &quot;ic&quot;,
+      &quot;ful&quot;   : &quot;&quot;,
+      &quot;ness&quot;  : &quot;&quot;
+    }
+
+    var c = &quot;[^aeiou]&quot;;          // consonant
+    var v = &quot;[aeiouy]&quot;;          // vowel
+    var C = c + &quot;[^aeiouy]*&quot;;    // consonant sequence
+    var V = v + &quot;[aeiou]*&quot;;      // vowel sequence
+
+    var mgr0 = &quot;^(&quot; + C + &quot;)?&quot; + V + C;               // [C]VC... is m&gt;0
+    var meq1 = &quot;^(&quot; + C + &quot;)?&quot; + V + C + &quot;(&quot; + V + &quot;)?$&quot;;  // [C]VC[V] is m=1
+    var mgr1 = &quot;^(&quot; + C + &quot;)?&quot; + V + C + V + C;       // [C]VCVC... is m&gt;1
+    var s_v   = &quot;^(&quot; + C + &quot;)?&quot; + v;                   // vowel in stem
+
+    return function () {
+      var stem;
+      var suffix;
+      var firstch;
+      var origword = this.out;
+      var w = this.out;
+
+      if (origword.length &lt; 3) return origword
+
+      var re;
+      var re2;
+      var re3;
+      var re4;
+
+      firstch = origword.substr(0,1);
+      if (firstch == &quot;y&quot;) {
+        w = firstch.toUpperCase() + w.substr(1);
+      }
+
+      // Step 1a
+      re = /^(.+?)(ss|i)es$/;
+      re2 = /^(.+?)([^s])s$/;
+
+      if (re.test(w)) { 
+        w = w.replace(re,&quot;$1$2&quot;);
+      } else if (re2.test(w)) { 
+        w = w.replace(re2,&quot;$1$2&quot;);
+      }
+
+      // Step 1b
+      re = /^(.+?)eed$/;
+      re2 = /^(.+?)(ed|ing)$/;
+      if (re.test(w)) {
+        var fp = re.exec(w);
+        re = new RegExp(mgr0);
+        if (re.test(fp[1])) {
+          re = /.$/;
+          w = w.replace(re,&quot;&quot;);
+        }
+      } else if (re2.test(w)) {
+        var fp = re2.exec(w);
+        stem = fp[1];
+        re2 = new RegExp(s_v);
+        if (re2.test(stem)) {
+          w = stem;
+          re2 = /(at|bl|iz)$/;
+          re3 = new RegExp(&quot;([^aeiouylsz])\\1$&quot;);
+          re4 = new RegExp(&quot;^&quot; + C + v + &quot;[^aeiouwxy]$&quot;);
+          if (re2.test(w)) {  w = w + &quot;e&quot;; }
+          else if (re3.test(w)) { re = /.$/; w = w.replace(re,&quot;&quot;); }
+          else if (re4.test(w)) { w = w + &quot;e&quot;; }
+        }
+      }
+
+      // Step 1c
+      re = /^(.+?)y$/;
+      if (re.test(w)) {
+        var fp = re.exec(w);
+        stem = fp[1];
+        re = new RegExp(s_v);
+        if (re.test(stem)) { w = stem + &quot;i&quot;; }
+      }
+
+      // Step 2
+      re = /^(.+?)(ational|tional|enci|anci|izer|bli|alli|entli|eli|ousli|ization|ation|ator|alism|iveness|fulness|ousness|aliti|iviti|biliti|logi)$/;
+      if (re.test(w)) {
+        var fp = re.exec(w);
+        stem = fp[1];
+        suffix = fp[2];
+        re = new RegExp(mgr0);
+        if (re.test(stem)) {
+          w = stem + step2list[suffix];
+        }
+      }
+
+      // Step 3
+      re = /^(.+?)(icate|ative|alize|iciti|ical|ful|ness)$/;
+      if (re.test(w)) {
+        var fp = re.exec(w);
+        stem = fp[1];
+        suffix = fp[2];
+        re = new RegExp(mgr0);
+        if (re.test(stem)) {
+          w = stem + step3list[suffix];
+        }
+      }
+
+      // Step 4
+      re = /^(.+?)(al|ance|ence|er|ic|able|ible|ant|ement|ment|ent|ou|ism|ate|iti|ous|ive|ize)$/;
+      re2 = /^(.+?)(s|t)(ion)$/;
+      if (re.test(w)) {
+        var fp = re.exec(w);
+        stem = fp[1];
+        re = new RegExp(mgr1);
+        if (re.test(stem)) {
+          w = stem;
+        }
+      } else if (re2.test(w)) {
+        var fp = re2.exec(w);
+        stem = fp[1] + fp[2];
+        re2 = new RegExp(mgr1);
+        if (re2.test(stem)) {
+          w = stem;
+        }
+      }
+
+      // Step 5
+      re = /^(.+?)e$/;
+      if (re.test(w)) {
+        var fp = re.exec(w);
+        stem = fp[1];
+        re = new RegExp(mgr1);
+        re2 = new RegExp(meq1);
+        re3 = new RegExp(&quot;^&quot; + C + v + &quot;[^aeiouwxy]$&quot;);
+        if (re.test(stem) || (re2.test(stem) &amp;&amp; !(re3.test(stem)))) {
+          w = stem;
+        }
+      }
+
+      re = /ll$/;
+      re2 = new RegExp(mgr1);
+      if (re.test(w) &amp;&amp; re2.test(w)) {
+        re = /.$/;
+        w = w.replace(re,&quot;&quot;);
+      }
+
+      if (firstch == &quot;y&quot;) {
+        w = firstch.toLowerCase() + w.substr(1);
+      }
+
+      this.out = w;
+    }
+
+  })()
+
+  return Word
+})</code></pre>
+              </section>
+              
+            </section>
+          
+        </article>
+      
+    </div>
+  </div>
+  <script>
+    (function (hijs) {
+    //
+    // hijs - JavaScript Syntax Highlighter
+    //
+    // Copyright (c) 2010 Alexis Sellier
+    //
+
+    // All elements which match this will be syntax highlighted.
+    var selector = hijs || 'code';
+
+    var keywords = ('var function if else for while break switch case do new null in with void '
+                   +'continue delete return this true false throw catch typeof with instanceof').split(' '),
+        special  = ('eval window document undefined NaN Infinity parseInt parseFloat '
+                   +'encodeURI decodeURI encodeURIComponent decodeURIComponent').split(' ');
+
+    // Syntax definition
+    // The key becomes the class name of the <span>
+    // around the matched block of code.
+    var syntax = [
+      ['comment', /(\/\*(?:[^*\n]|\*+[^\/*])*\*+\/)/g],
+      ['comment', /(\/\/[^\n]*)/g],
+      ['string' , /("(?:(?!")[^\\\n]|\\.)*"|'(?:(?!')[^\\\n]|\\.)*')/g],
+      ['regexp' , /(\/.+\/[mgi]*)(?!\s*\w)/g],
+      ['class'  , /\b([A-Z][a-zA-Z]+)\b/g],
+      ['number' , /\b([0-9]+(?:\.[0-9]+)?)\b/g],
+      ['keyword', new(RegExp)('\\b(' + keywords.join('|') + ')\\b', 'g')],
+      ['special', new(RegExp)('\\b(' + special.join('|') + ')\\b', 'g')]
+    ];
+    var nodes, table = {};
+
+    if (/^[a-z]+$/.test(selector)) {
+        nodes = document.getElementsByTagName(selector);
+    } else if (/^\.[\w-]+$/.test(selector)) {
+        nodes = document.getElementsByClassName(selector.slice(1));
+    } else if (document.querySelectorAll) {
+        nodes = document.querySelectorAll(selector);
+    } else {
+        nodes = [];
+    }
+
+    for (var i = 0, children; i < nodes.length; i++) {
+        children = nodes[i].childNodes;
+
+        for (var j = 0, str; j < children.length; j++) {
+            code = children[j];
+
+            if (code.length >= 0) { // It's a text node
+                // Don't highlight command-line snippets
+                if (! /^\$/.test(code.nodeValue.trim())) {
+                    syntax.forEach(function (s) {
+                        var k = s[0], v = s[1];
+                        code.nodeValue = code.nodeValue.replace(v, function (_, m) {
+                            return '\u00ab' + encode(k) + '\u00b7'
+                                            + encode(m) +
+                                   '\u00b7' + encode(k) + '\u00bb';
+                        });
+                    });
+                }
+            }
+        }
+    }
+    for (var i = 0; i < nodes.length; i++) {
+        nodes[i].innerHTML =
+            nodes[i].innerHTML.replace(/\u00ab(.+?)\u00b7(.+?)\u00b7\1\u00bb/g, function (_, name, value) {
+                value = value.replace(/\u00ab[^\u00b7]+\u00b7/g, '').replace(/\u00b7[^\u00bb]+\u00bb/g, '');
+                return '<span class="' + decode(name) + '">' + escape(decode(value)) + '</span>';
+        });
+    }
+
+    function escape(str) {
+        return str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Encode ASCII characters to, and from Braille
+    function encode (str, encoded) {
+        table[encoded = str.split('').map(function (s) {
+            if (s.charCodeAt(0) > 127) { return s }
+            return String.fromCharCode(s.charCodeAt(0) + 0x2800);
+        }).join('')] = str;
+        return encoded;
+    }
+    function decode (str) {
+        if (str in table) {
+            return table[str];
+        } else {
+            return str.trim().split('').map(function (s) {
+                if (s.charCodeAt(0) - 0x2800 > 127) { return s }
+                return String.fromCharCode(s.charCodeAt(0) - 0x2800);
+            }).join('');
+        }
+    }
+
+    })(window.hijs);
+  </script>
+</body>

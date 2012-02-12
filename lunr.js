@@ -1,13 +1,9 @@
-// lunr.js version: 0.1.0
-// (c) 2011 Oliver Nightingale
-//
-//  Released under MIT license.
-//
 /*!
- * Lunr
+ * Lunr - 0.1.0
  * Copyright (C) 2011 Oliver Nightingale
  * MIT Licensed
  */
+;
 
 /**
  * Convinience method for instantiating and configuring a new Lunr index
@@ -203,32 +199,32 @@ Lunr.utils = {
  * MIT Licensed
  */
 
-/**
- * Lunr.Index provides the public api for the Lunr library.
- *
- * @constructor
- * @param {String} name - the name of this search index.
- *
- */
-Lunr.Index = function (name) {
-  this.name = name
-  this.refName = "id"
-  this.fields = {} // by default no fields will be indexed
-  this.trie = new Lunr.Trie ()
-}
+var Lunr.Index = (function () {
 
-Lunr.Index.prototype = {
   /**
-   * ## Lunr.Index.prototype.add
-   * This method is the primary way of adding objects to the search index.  It will convert the passed
-   * JSON object and convert it into a Lunr.Document.  The words from the document will then be extracted
-   * add added to the index.
+   * Lunr.Index provides the public api for the Lunr library.
    *
-   * @see Lunr.Document
+   * @constructor
+   * @param {String} name - the name of this search index.
    *
-   * @params {Object} obj - the object to add to the index.
    */
-  add: function (obj) {
+  var Index = function (name) {
+    this.name = name
+    this.refName = "id"
+    this.fields = {} // by default no fields will be indexed
+    this.trie = new Lunr.Trie ()
+  }
+
+  /**
+   * Adds objects to the search index.
+   *
+   * It will convert the passed JSON object and convert it into a Lunr.Document.
+   * The words from the document will then be extracted and added to the index.
+   *
+   * @param {Object} obj the object to add to the index.
+   * @see Lunr.Document
+   */
+  Index.prototype.add = function (obj) {
     var doc = new Lunr.Document(obj, this.refName, this.fields)
     var words = doc.words()
 
@@ -236,55 +232,58 @@ Lunr.Index.prototype = {
       var word = words[i]
       this.trie.set(word.id, word.doc)
     };
-  },
+  }
 
   /**
-   * ## Lunr.Index.prototype.field
-   * A method that is part of the DSL for setting up an index.  Use this method to describe which fields
-   * from a document should be part of the index.  An options object can be passed as the second argument
-   * that will change the way that a particular field is indexed.
+   * Adds fields to the index.
    *
-   * Currently the supported options are:
-   * * __multiplier__ - a multiplier to apply to a field, you can use this to make sure certain fields are
+   * Use this method to describe which fields from a document should be part of the index.
+   * An options object can be passed as the second argument that will change the way that
+   * a particular field is indexed.
+   *
+   * `multiplier` is a multiplier to apply to a field, you can use this to make sure certain fields are
    * considered more important, e.g. a documents title.
    *
-   * @params {String} name - the name of the field to index in a document
-   * @params {Object} opts - options for indexing this particular field
+   * @param {String} name the name of the field to index in a document
+   * @param {Object} opts options for indexing this particular field
    *
-   * ### Example
+   * Example:
+   *
    *     this.field('title', { multiplier: 10 })
    *     this.field('body')
    *
    */
-  field: function (name, opts) {
+  Index.prototype.field = function (name, opts) {
     this.fields[name] = opts || {multiplier: 1}
-  },
+  }
 
   /**
-   * ## Lunr.Index.prototype.ref
-   * A method that is part of the DSL for setting up an index.  Use this method to select the property by which objects
-   * added to the index can be uniquely identified.
+   * Sets the ref for the index.
    *
-   * @params {String} name - the name of the field to index in a document
+   * Use this method to select the property by which objects added to the index can be uniquely identified.
    *
-   * ### Example
+   * @param {String} name the name of the field to index in a document
+   *
+   * Example:
+   *
    *     this.ref('cid')
    *
    */
-  ref: function (name) {
+  Index.prototype.ref = function (name) {
     this.refName = name
-  },
+  }
 
   /**
-   * ## Lunr.Index.prototype.search
-   * This method is the main interface for searching documents in the index.  You can pass in a string of words
-   * separated by spaces.  By default the search is an AND search, so if you searched for 'foo bar' the results
-   * would be those documents in the index that contain both the word foo AND the word bar.
+   * Searches the index for a term.
    *
-   * @params {String} term - the term or terms to search the index for.
+   * You can pass in a string of words separated by spaces.  By default the search is an AND search,
+   * so if you searched for 'foo bar' the results would be those documents in the index that contain
+   * both the word foo AND the word bar.
+   *
+   * @param {String} term the term or terms to search the index for.
    * @returns {Array} an array of references to documents in the index, this will be the property as defined by ref.
    */
-  search: function (term) {
+  Index.prototype.search = function (term) {
     if (!term) return []
 
     var docIds = Lunr.utils.map(Lunr.Word.fromString(term), function (word) {
@@ -302,70 +301,79 @@ Lunr.Index.prototype = {
     }, this)
 
     return Lunr.utils.intersect.apply(Lunr.utils, docIds)
-  },
+  }
 
   /**
-   * ## Lunr.Index.prototype.empty
+   * Empties the index.
    *
-   * This method empties the index, it will delete the index store and create a new, empty one in its place.
+   * It will delete the index store and create a new, empty one in its place.
    */
-  empty: function () {
+  Index.prototype.empty = function () {
     delete this.trie
     this.trie = new Lunr.Trie
   }
-};
+
+  /*!
+   * exposing the constructor
+   * @private
+   */
+  return Index
+})()
 /*!
  * Lunr - Document
  * Copyright (C) 2011 Oliver Nightingale
  * MIT Licensed
  */
 
-/**
- * Lunr.Document wraps any document that is added to the index.  It extracts any words from the document
- * fields that need indexing and formats the document in a way ready for insertion into the Lunr.Index
- * docStore.
- *
- * @constructor
- * @param {Object} original - the document to be added to the search index.
- * @param {String} refName - the name of the property that can be used as a reference to this document in the index.
- * @param {Object} fields - the fields object from the index, indicationg which fields from the document need indexing.
- *
- */
-Lunr.Document = function (original, refName, fields) {
-  this.original = original
-  this.fields = fields
-  this.ref = original[refName]
-}
+Lunr.Document = (function () {
 
-Lunr.Document.prototype = {
   /**
-   * ## Lunr.Document.prototype.asJSON
+   * Lunr.Document wraps any document that is added to the index.  It extracts any words from the document
+   * fields that need indexing and formats the document in a way ready for insertion into the Lunr.Index
+   * docStore.
+   *
+   * @constructor
+   * @param {Object} original - the document to be added to the search index.
+   * @param {String} refName - the name of the property that can be used as a reference to this document in the index.
+   * @param {Object} fields - the fields object from the index, indicationg which fields from the document need indexing.
+   *
+   */
+  var Document = function (original, refName, fields) {
+    this.original = original
+    this.fields = fields
+    this.ref = original[refName]
+  }
+
+  /**
+   * Returns a json representation of the document.
+   *
    * Converts this instance of Lunr.Document into a plain object ready for insertion into the index.
    * The returned object consists of three properties, an id, an array of Lunr.Word ids and the
    * original document.
    *
    * @returns {Object} the plain object representation of the Lunr.Document.
    */
-  asJSON: function () {
+  Document.prototype.asJSON = function () {
     return {
       id: this.ref,
       words: Lunr.utils.map(this.words(), function (word) { return word.id }),
       original: this.original
     }
-  },
+  }
 
   /**
-   * ## Lunr.Document.prototype.words
+   * Retrurns a list of words within the document.
+   *
    * For each field in the original document that requires indexing this method will create an instance of
    * Lunr.Word and then tally the total score for that word in the document as a whole.  At this time any
    * multiplier specified in the fields object will be applied.
    *
    * The list of words will then be converted into a format ready for insertion into the index.
    *
-   * @see {Lunr.Word}
+   * @see Lunr.Word
    * @returns {Array} an array of all word objects ready for insertion into the index's wordStore.
    */
-  words: function () {
+  Document.prototype.words = function () {
     var words = {}
     var self = this
     var allWords = {}
@@ -389,80 +397,135 @@ Lunr.Document.prototype = {
       return {id: word, doc: {score: allWords[word].score, documentId: self.ref} }
     })
   }
-};
+
+  return Document
+})()
+/*!
+ * Lunr - Trie
+ * Copyright (C) 2011 Oliver Nightingale
+ * MIT Licensed
+ */
+
 Lunr.Trie = (function () {
 
+  /**
+   * A node in the trie
+   *
+   * @constructor
+   * @private
+   */
   var Node = function () {
     this.children = {}
     this.values = []
   }
+  
+  /**
+   * Returns the correct child node for the given key.
+   *
+   * @private
+   * @params {String} key - the key for the child
+   * @returns {Node} the node for the given key.
+   */
+  Node.prototype.childForKey = function (key) {
 
-  Node.prototype = {
-    childForKey: function (key) {
+    var child = this.children[key]
 
-      var child = this.children[key]
+    if (!child) {
+      child = new Node ()
+      this.children[key] = child
+    };
 
-      if (!child) {
-        child = new Node ()
-        this.children[key] = child
-      };
-
-      return child
-    }
+    return child
   }
 
+  /**
+   * Lunr.Trie stores the built search index.  It handles lookups against the index and the building of the index.
+   *
+   * @constructor
+   */
   var Trie = function () {
     this.root = new Node ()
   }
 
-  Trie.prototype = {
-    get: function (key) {
-      var keys = this.keys(key)
-      var self = this
+  /**
+   * Gets objects from the trie which match the passed key.
+   *
+   * Takes a key and gets all objects from the trie which could match the key.
+   *
+   * @param {String} key the key will be used to lookup values
+   * @returns {Array} an array of values found in the trie
+   */
+  Trie.prototype.get = function (key) {
+    var keys = this.keys(key)
+    var self = this
 
-      return Lunr.utils.reduce(keys, function (res, k) {
-        Lunr.utils.forEach(self.getNode(k).values, function (v) {
-          var val = Lunr.utils.copy(v)
-          if (key === k) val.exact = true
-          res.push(val)
-        })
-        return res
-      }, [])
-    },
+    return Lunr.utils.reduce(keys, function (res, k) {
+      Lunr.utils.forEach(self.getNode(k).values, function (v) {
+        var val = Lunr.utils.copy(v)
+        if (key === k) val.exact = true
+        res.push(val)
+      })
+      return res
+    }, [])
+  }
 
-    getNode: function (key) {
-      var recursiveGet = function (node, key) {
-        if (!key.length) return node
-        return recursiveGet(node.childForKey(key.charAt(0)), key.slice(1))
-      }
-
-      return recursiveGet(this.root, key)
-    },
-
-    keys: function (term) {
-      var keys = [],
-          term = term || ""
-
-      var getKeys = function (node, term) {
-        if (node.values.length) keys.push(term)
-
-        Lunr.utils.forEachKey(node.children, function (childKey) {
-          getKeys(node.children[childKey], term + childKey)
-        })
-      }
-
-      getKeys(this.getNode(term), term)
-      return keys
-    },
-
-    set: function (key, value) {
-      var recursiveSet = function (node, key) {
-        if (!key.length) return node.values.push(value)
-        recursiveSet(node.childForKey(key.charAt(0)), key.slice(1))
-      }
-
-      return recursiveSet(this.root, key)
+  /**
+   * Gets nodes from the trie for the given key.
+   *
+   * Takes a key and gets the node for that key.
+   *
+   * @param {String} key the key will be used to lookup values
+   * @returns {Node} a node in the trie that matches the key
+   */
+  Trie.prototype.getNode = function (key) {
+    var recursiveGet = function (node, key) {
+      if (!key.length) return node
+      return recursiveGet(node.childForKey(key.charAt(0)), key.slice(1))
     }
+
+    return recursiveGet(this.root, key)
+  }
+
+  /**
+   * Gets all keys from the trie that have a given prefix.
+   *
+   * Takes the given prefix and walks the trie, returning all keys which contain the prefix.
+   *
+   * @param {String} term the prefix to search with
+   * @returns {Array} a list of keys that match the prefix
+   */
+  Trie.prototype.keys = function (term) {
+    var keys = [],
+        term = term || ""
+
+    var getKeys = function (node, term) {
+      if (node.values.length) keys.push(term)
+
+      Lunr.utils.forEachKey(node.children, function (childKey) {
+        getKeys(node.children[childKey], term + childKey)
+      })
+    }
+
+    getKeys(this.getNode(term), term)
+    return keys
+  }
+
+  /**
+   * Set a key to the passed value.
+   *
+   * Takes a key and a value, walks through the trie to the right node and adds the
+   * given value to that node.
+   *
+   * @param {String} key the key under which the value should be stored
+   * @param {Object} value the value to store
+   */
+  Trie.prototype.set = function (key, value) {
+    var recursiveSet = function (node, key) {
+      if (!key.length) return node.values.push(value)
+      recursiveSet(node.childForKey(key.charAt(0)), key.slice(1))
+    }
+
+    return recursiveSet(this.root, key)
   }
 
   return Trie
@@ -473,65 +536,59 @@ Lunr.Trie = (function () {
  * MIT Licensed
  */
 
-/**
-* ## Lunr.Word
-* A Lunr.Word wraps a string and provides methods to convert the string into a form ready for insertion
-* into the index.  It handles exclusion of stop word as well as performing any language based algorithms.
-*
-* @constructor
-* @param {String} raw - the raw word to be used as the base of a search word.
-*/
-Lunr.Word = function (raw) {
-  this.raw = raw
-  this.out = this.raw.replace(/^\W+/, "").replace(/\W+$/, "").toLowerCase()
-}
+Lunr.Word = (function () {
 
-/**
- * ## Lunr.Word.stopWords
- * A list of words that will be considered stop words.
- */
-Lunr.Word.stopWords = ["the", "of", "to", "and", "a", "in", "is", "it", "you", "that", "this"]
-
-Lunr.Word.fromString = function (str, splitter) {
-  var splitter = splitter || /\b/g,
-      splitStr = str.split(splitter),
-      splitStrLen = splitStr.length,
-      out = []
-
-  for (var i=0; i < splitStrLen; i++) {
-    var word = new Lunr.Word (splitStr[i])
-    if (!word.isStopWord()) out.push(word)
-  };
-
-  return out
-}
-
-Lunr.Word.prototype = {
+  var stopWords = ["the", "of", "to", "and", "a", "in", "is", "it", "you", "that", "this"]
 
   /**
-   * ## Lunr.Word.prototype.isStopWord
+  * A Lunr.Word wraps a string and provides methods to convert the string into a form ready for insertion
+  * into the index.  It handles exclusion of stop word as well as performing any language based algorithms.
+  *
+  * @constructor
+  * @param {String} raw - the raw word to be used as the base of a search word.
+  */
+  var Word = function (raw) {
+    this.raw = raw
+    this.out = this.raw.replace(/^\W+/, "").replace(/\W+$/, "").toLowerCase()
+  }
+
+  Word.fromString = function (str, splitter) {
+    var splitter = splitter || /\b/g,
+        splitStr = str.split(splitter),
+        splitStrLen = splitStr.length,
+        out = []
+
+    for (var i=0; i < splitStrLen; i++) {
+      var word = new Lunr.Word (splitStr[i])
+      if (!word.isStopWord()) out.push(word)
+    };
+
+    return out
+  }
+
+  /**
    * Determines whether or not this word is a stop word.
    *
    * @returns {Boolean}
    */
-  isStopWord: function () {
-    return (Lunr.Word.stopWords.indexOf(this.raw.toLowerCase()) !== -1)
-  },
+  Word.prototype.isStopWord = function () {
+    return (stopWords.indexOf(this.raw.toLowerCase()) !== -1)
+  }
 
   /**
-   * ## Lunr.Word.prototype.toString
    * Converts the search word into a string representation.
    *
    * @returns {String}
    */
-  toString: function () {
+  Word.prototype.toString = function () {
     if (this.isStopWord()) return
     this.stem()
     return this.out
-    },
+  }
 
   /**
-   * 18 May 2008
+   * Stems the current word.
+   *
    * Stemming is the process for reducing inflected (or sometimes derived) words to their stem, base or root
    * form. Porter stemming is designed for the English language.
    * 
@@ -547,7 +604,7 @@ Lunr.Word.prototype = {
    * Additions and modifications by Oliver Nightingale
    *
    */
-  stem: (function () {
+  Word.prototype.stem = (function () {
     var step2list = {
       "ational" : "ate",
       "tional"  : "tion",
@@ -726,4 +783,6 @@ Lunr.Word.prototype = {
     }
 
   })()
-};
+
+  return Word
+})
