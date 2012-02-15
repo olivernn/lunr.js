@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<head>
+  <link rel="stylesheet" href="/styles.css" type="text/css">
+</head>
+<body>
+  <div class='wrap'>
+    <header>
+      <h1>Lunr<span>.js</span></h1>
+      <h2>Simple full-text search in your browser</h2>
+      <br/>
+    </header>
+
+    <nav>
+      <ul>
+        <li><a href="/docs">Docs</a></li>
+        <li><a href="/example">Examples</a></li>
+        <li><a href="">Adaptors</a></li>
+      </ul>
+    </nav>
+
+    <article class='left'>
+      <header>
+        <h3>Get Started</h3>
+      </header>
+
+      <p>Set up an index for your notes:</p>
+      <pre>
+var index = Lunr(function () {
+  this.field('title', {multiplier: 10})
+  this.field('body')
+  this.ref('id')
+})</pre>
+
+      <p>Add documents to your index</p>
+      <pre>
+index.add({
+  id: 1,
+  title: 'Foo',
+  body: 'Foo foo foo!'
+})
+
+index.add({
+  id: 2,
+  title: 'Bar',
+  body: 'Bar bar bar!'
+})</pre>
+
+      <p>Search your documents</p>
+      <pre>
+index.search('foo')</pre>
+    </article>
+
+    <article class='right'>
+      <header>
+        <h3>About</h3>
+      </header>
+
+      <p>Lunr.js is a simple full text search engine for your client side apps.  Search is often handled by a server side process, such as Solr or ElasticSearch.
+      </p>
+
+      <p>Whilst these services give you a lot of power and flexibility they are another service to manage and maintain.  Lunr.js works in your browser and is therefore simpler to maintain and available even when the browsers network connection is lost.</p>
+    </article>
+
+    <article class='right'>
+      <header>
+        <h3>Download</h3>
+      </header>
+
+      <ul>
+        <li><a href="">lunr.js</a> - uncompressed</li>
+        <li><a href="">lunr.min.js</a> - minified</li>
+      </ul>
+
+      <p>Alternatively you can clone the project from github using git: <pre>$ git clone git://github.com/olivernn/lunr.js</pre></p>
+    </article>
+  </div>
+</body>
