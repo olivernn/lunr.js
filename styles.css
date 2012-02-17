@@ -38,7 +38,7 @@ h1, h2 {
   margin: 0;
 }
 
-span {
+header span {
   font-size: 0.5em;
   font-weight: normal;
 }
@@ -100,4 +100,26 @@ p {
 
 article {
   margin-top: 40px;
+}
+
+pre .keyword, pre .special {
+  font-weight: bold;
+  color: #2076c7
+}
+
+pre .string, pre .regexp {
+  color: #728a06
+}
+
+pre .class { 
+  color: #A57707;
+}
+
+pre .number {
+  color: #D11c24
+}
+
+pre .comment {
+  color: grey;
+  font-style: italic;
 }
