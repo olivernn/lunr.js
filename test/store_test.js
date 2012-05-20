@@ -31,3 +31,13 @@ test("counting the number of items for a key", function () {
  
   equal(store.count('test', store.root), 2)
 })
+
+test("handling wildcards when getting", function() {
+  var store = new lunr.Store
+
+  store.set('foo', store.root, 'a')
+  store.set('food', store.root, 'a')
+
+  var nodes = store.get('foo*', store.root)
+  equal(nodes.length, 2)
+})
