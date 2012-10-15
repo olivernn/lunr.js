@@ -87,7 +87,7 @@ Lunr.utils = {
    */
   copy: function (obj) {
     var out = {}
-    for (prop in obj) {
+    for (var prop in obj) {
       if (!obj.hasOwnProperty(prop)) return
       out[prop] = obj[prop]
     }
@@ -105,7 +105,7 @@ Lunr.utils = {
    * @params {Obj} ctx - an optional context object for fn.
    */
   forEachKey: function (obj, fn, ctx) {
-    for (prop in obj) {
+    for (var prop in obj) {
       fn.call(ctx, prop)
     }
   },
