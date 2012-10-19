@@ -1,5 +1,5 @@
 /*!
- * Lunr - 0.1.0
+ * Lunr - 0.1.1
  * Copyright (C) 2011 Oliver Nightingale
  * MIT Licensed
  */
@@ -17,7 +17,7 @@ var Lunr = function (name, config) {
   return index
 };
 
-Lunr.version = "0.1.0"/*!
+Lunr.version = "0.1.1"/*!
  * Lunr - utils
  * Copyright (C) 2011 Oliver Nightingale
  * MIT Licensed
@@ -87,7 +87,7 @@ Lunr.utils = {
    */
   copy: function (obj) {
     var out = {}
-    for (prop in obj) {
+    for (var prop in obj) {
       if (!obj.hasOwnProperty(prop)) return
       out[prop] = obj[prop]
     }
@@ -105,7 +105,7 @@ Lunr.utils = {
    * @params {Obj} ctx - an optional context object for fn.
    */
   forEachKey: function (obj, fn, ctx) {
-    for (prop in obj) {
+    for (var prop in obj) {
       fn.call(ctx, prop)
     }
   },
