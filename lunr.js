@@ -1,5 +1,5 @@
 /*!
- * Lunr - 0.1.0
+ * Lunr - 0.1.1
  * Copyright (C) 2011 Oliver Nightingale
  * MIT Licensed
  */
@@ -17,7 +17,7 @@ var Lunr = function (name, config) {
   return index
 };
 
-Lunr.version = "0.1.0"/*!
+Lunr.version = "0.1.1"/*!
  * Lunr - utils
  * Copyright (C) 2011 Oliver Nightingale
  * MIT Licensed
