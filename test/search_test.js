@@ -44,3 +44,12 @@ test('search contains one term not in the index', function () {
 
   deepEqual(resultSetA, resultSetB, 'search terms not in the index should just be ignored')
 })
+
+test('search takes into account boosts', function () {
+  var results = this.idx.search('professor')
+
+  equal(results.length, 2)
+  equal(results[0].ref, 'c')
+
+  ok(results[0].score > 10 * results[1].score)
+})
