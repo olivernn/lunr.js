@@ -4,7 +4,19 @@ test("defining what fields to index", function () {
   var idx = new lunr.Index
   idx.field('foo')
 
-  same(idx._fields[0], {name: 'foo', options: undefined})
+  same(idx._fields[0], {name: 'foo', boost: 1})
+})
+
+test("giving a particular field a weighting", function () {
+  var idx = new lunr.Index
+  idx.field('foo', 10)
+
+  same(idx._fields[0], {name: 'foo', boost: 10})
+})
+
+test('default reference should be id', function () {
+  var idx = new lunr.Index
+  equal(idx._ref, 'id')
 })
 
 test("defining the reference field for the index", function () {
@@ -14,28 +26,14 @@ test("defining the reference field for the index", function () {
   same(idx._ref, 'foo')
 })
 
-test("searching for a document in the index", function() {
+test('adding a document to the index', function () {
   var idx = new lunr.Index,
-      doc1 = {title: 'foo bar baz', id: 1},
-      doc2 = {title: 'foo foo foo', id: 2},
-      doc3 = {title: 'wont be found', id: 3}
+      doc = {id: 1, body: 'this is a test'}
 
-  idx.field('title')
+  idx.field('body')
+  idx.add(doc)
 
-  idx.add(doc1)
-  idx.add(doc2)
-  idx.add(doc3)
-
-  var results = idx.search('foo')
-  same(results, ["2", "1"])
+  equal(idx.documentStore.length, 1)
+  ok(!!idx.documentStore.get(1))
 })
 
-test("searching for a document that doesn't exist", function () {
-  var idx = new lunr.Index,
-      doc1 = {title: 'foo bar baz', id: 1}
-
-  idx.field('title')
-  idx.add(doc1)
-
-  same(idx.search('test'), [])
-})

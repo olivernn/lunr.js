@@ -1,43 +1,34 @@
-module('store')
+module('lunr.Store')
 
-test("setting and getting items from the store", function () {
-  var store = new lunr.Store
+test('adding document tokens to the document store', function () {
+  var docStore = new lunr.Store,
+      tokens = ['eggs', 'ham']
 
-  equal(store.get('test', store.root)._values.length, 0)
-
-  store.set('test', store.root, 1)
-  equal(store.get('test', store.root)._values.length, 1)
-  equal(store.get('test', store.root)._values[0], 1)
+  docStore.set(1, tokens)
+  deepEqual(docStore.get(1), tokens)
 })
 
-test("can store many items with the same key", function () {
-  var store = new lunr.Store
+test('getting the number of items in the document store', function () {
+  var docStore = new lunr.Store
 
-  store.set('test', store.root, 'foo')
-  store.set('test', store.root, 'bar')
-  store.set('test', store.root, 'baz')
-
-  equal(store.get('test', store.root)._values.length, 3)
-  equal(store.get('test', store.root)._values[0], 'foo')
-  equal(store.get('test', store.root)._values[1], 'bar')
-  equal(store.get('test', store.root)._values[2], 'baz')
+  equal(docStore.length, 0)
+  docStore.set(1, 'foo')
+  equal(docStore.length, 1)
 })
 
-test("counting the number of items for a key", function () {
+test('pushing a value to an empty key', function () {
   var store = new lunr.Store
- 
-  store.set('test', store.root, 'foo')
-  store.set('test', store.root, 'bar')
- 
-  equal(store.count('test', store.root), 2)
+
+  ok(!store.get('foo'))
+  store.push('foo', 1)
+  ok(!!store.get('foo'))
+  deepEqual(store.get('foo'), [1])
 })
 
-test("handling wildcards when getting", function() {
+test('checking whether the store contains a key', function () {
   var store = new lunr.Store
 
-  store.set('foo', store.root, 'a')
-  store.set('food', store.root, 'a')
-
-  var nodes = store.get('foo*', store.root)
-  equal(nodes.length, 2)
+  ok(!store.has('foo'))
+  store.set('foo', 1)
+  ok(store.has('foo'))
 })
