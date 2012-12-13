@@ -51,3 +51,20 @@ test('removing a document from the index', function () {
   equal(idx.documentStore.length, 0)
   equal(idx.tokenStore.length, 0)
 })
+
+test('updating a document', function () {
+  var idx = new lunr.Index,
+      doc = {id: 1, body: 'foo'}
+
+  idx.field('body')
+  idx.add(doc)
+  equal(idx.documentStore.length, 1)
+  ok(idx.tokenStore.has('foo'))
+
+  doc.body = 'bar'
+  idx.update(doc)
+
+  equal(idx.documentStore.length, 1)
+  ok(idx.tokenStore.has('bar'))
+  ok(!idx.tokenStore.has('foo'))
+})
