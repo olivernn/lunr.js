@@ -37,3 +37,17 @@ test('adding a document to the index', function () {
   ok(!!idx.documentStore.get(1))
 })
 
+test('removing a document from the index', function () {
+  var idx = new lunr.Index,
+      doc = {id: 1, body: 'this is a test'}
+
+  idx.field('body')
+  equal(idx.documentStore.length, 0)
+
+  idx.add(doc)
+  equal(idx.documentStore.length, 1)
+
+  idx.remove(doc)
+  equal(idx.documentStore.length, 0)
+  equal(idx.tokenStore.length, 0)
+})

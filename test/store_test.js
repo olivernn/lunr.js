@@ -32,3 +32,27 @@ test('checking whether the store contains a key', function () {
   store.set('foo', 1)
   ok(store.has('foo'))
 })
+
+test('removing an element from the store', function () {
+  var store = new lunr.Store
+
+  store.set('foo', 1)
+  ok(store.has('foo'))
+  equal(store.length, 1)
+  store.remove('foo')
+  ok(!store.has('foo'))
+  equal(store.length, 0)
+})
+
+test('rejecting an element from an array in the store', function () {
+  var store = new lunr.Store
+
+  store.push('foo', 1)
+  ok(store.has('foo'))
+  equal(store.length, 1)
+  equal(store.get('foo').length, 1)
+
+  store.reject('foo', function (el) { return el == 1 })
+  ok(!store.has('foo'))
+  equal(store.length, 0)
+})
