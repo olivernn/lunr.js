@@ -7,6 +7,13 @@ test("splitting simple strings into tokens", function () {
   same(tokens, ['this', 'is', 'a', 'simple', 'string'])
 })
 
+test('downcasing tokens', function () {
+  var simpleString = 'FOO BAR',
+      tokens = lunr.tokenizer(simpleString)
+
+  deepEqual(tokens, ['foo', 'bar'])
+})
+
 test('handling arrays', function () {
   var tags = ['foo', 'bar'],
       tokens = lunr.tokenizer(tags)
