@@ -4,14 +4,14 @@ test("defining what fields to index", function () {
   var idx = new lunr.Index
   idx.field('foo')
 
-  same(idx._fields[0], {name: 'foo', boost: 1})
+  deepEqual(idx._fields[0], {name: 'foo', boost: 1})
 })
 
 test("giving a particular field a weighting", function () {
   var idx = new lunr.Index
   idx.field('foo', 10)
 
-  same(idx._fields[0], {name: 'foo', boost: 10})
+  deepEqual(idx._fields[0], {name: 'foo', boost: 10})
 })
 
 test('default reference should be id', function () {
@@ -23,7 +23,7 @@ test("defining the reference field for the index", function () {
   var idx = new lunr.Index
   idx.ref('foo')
 
-  same(idx._ref, 'foo')
+  deepEqual(idx._ref, 'foo')
 })
 
 test('adding a document to the index', function () {

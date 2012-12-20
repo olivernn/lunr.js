@@ -34,7 +34,7 @@ test("adding an item to the pipeline before another item", function () {
   pipeline.add(fn1)
   pipeline.before(fn1, fn2)
 
-  same(pipeline.toArray(), [fn2, fn1])
+  deepEqual(pipeline.toArray(), [fn2, fn1])
 })
 
 test("adding an item to the pipeline after another item", function () {
@@ -46,7 +46,7 @@ test("adding an item to the pipeline after another item", function () {
   pipeline.add(fn1, fn2)
   pipeline.after(fn1, fn3)
 
-  same(pipeline.toArray(), [fn1, fn3, fn2])
+  deepEqual(pipeline.toArray(), [fn1, fn3, fn2])
 })
 
 test("run calls each member of the pipeline for each input", function () {
@@ -74,7 +74,7 @@ test("run should pass three inputs to the pipeline fn", function () {
 
   equal(input, 'a')
   equal(index, 0)
-  same(arr, ['a'])
+  deepEqual(arr, ['a'])
 })
 
 test("run should pass the output of one into the input of the next", function () {
@@ -95,7 +95,7 @@ test("run should return the result of running the entire pipeline on each elemen
   var pipeline = new lunr.Pipeline,
       fn1 = function (t1) { return t1.toUpperCase() }
   pipeline.add(fn1)
-  same(pipeline.run(['a']), ['A'])
+  deepEqual(pipeline.run(['a']), ['A'])
 })
 
 test("run should filter out any undefined values at each stage in the pipeline", function () {
