@@ -17,6 +17,15 @@ test('adding an element that does exist into the set', function () {
   equal(set.length, 1)
 })
 
+test('sort is maintaned when adding elements to the set', function () {
+  var set = new lunr.SortedSet
+
+  set.add('b')
+  set.add('a')
+
+  deepEqual(set.elements, ['a', 'b'])
+})
+
 test('adding more than one element to the set in one go', function () {
   var set = new lunr.SortedSet
   set.add('foo', 'bar', 'baz', 'foo')
