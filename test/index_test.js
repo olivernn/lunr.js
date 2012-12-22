@@ -66,5 +66,4 @@ test('updating a document', function () {
 
   equal(idx.documentStore.length, 1)
   ok(idx.tokenStore.has('bar'))
-  ok(!idx.tokenStore.has('foo'))
 })

@@ -22,11 +22,6 @@ test("calculating the similarity between two vectors", function () {
   equal(roundedSimilarity, 0.111)
 })
 
-test("padding vectors so they have at least two elements", function() {
-  var v1 = new lunr.Vector ([1])
-  equal(v1.elements.length, 2)
-})
-
 test('zero filling vectors created with sparse arrays', function () {
   var v1 = new lunr.Vector (new Array (10))
   equal(v1.elements.length, 10)

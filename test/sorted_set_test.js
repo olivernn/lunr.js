@@ -21,9 +21,11 @@ test('sort is maintaned when adding elements to the set', function () {
   var set = new lunr.SortedSet
 
   set.add('b')
+  set.add('d')
   set.add('a')
+  set.add('c')
 
-  deepEqual(set.elements, ['a', 'b'])
+  deepEqual(set.elements, ['a', 'b', 'c', 'd'])
 })
 
 test('adding more than one element to the set in one go', function () {
@@ -57,3 +59,19 @@ test('getting the index of an item in the set', function () {
   equal(set.indexOf('bar'), 0)
   equal(set.indexOf('non member'), -1)
 })
+
+test('intersecting this set with another set', function () {
+  var set1 = new lunr.SortedSet,
+      set2 = new lunr.SortedSet,
+      setIntersect
+
+  set1.add('foo', 'bar')
+  set2.add('baz', 'foo')
+
+  setIntersect = set1.intersect(set2)
+
+  ok(setIntersect.indexOf('foo') > -1)
+  ok(setIntersect.indexOf('bar') == -1)
+  ok(setIntersect.indexOf('baz') == -1)
+})
+

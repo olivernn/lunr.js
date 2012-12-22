@@ -28,7 +28,7 @@ module('search', {
 test('returning the correct results', function () {
   var results = this.idx.search('green plant')
 
-  equal(results.length, 3)
+  equal(results.length, 2)
   equal(results[0].ref, 'b')
 })
 

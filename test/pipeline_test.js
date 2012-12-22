@@ -51,7 +51,7 @@ test("adding an item to the pipeline after another item", function () {
 
 test("run calls each member of the pipeline for each input", function () {
   var pipeline = new lunr.Pipeline,
-      count1 = 0, count2 = 0
+      count1 = 0, count2 = 0,
       fn1 = function (token) { count1++ ; return token },
       fn2 = function (token) { count2++ ; return token }
 
@@ -65,7 +65,7 @@ test("run calls each member of the pipeline for each input", function () {
 
 test("run should pass three inputs to the pipeline fn", function () {
   var pipeline = new lunr.Pipeline,
-      input, index, arr
+      input, index, arr,
       fn1 = function () { input = arguments[0], index = arguments[1], arr = arguments[2] }
 
   pipeline.add(fn1)
@@ -80,7 +80,7 @@ test("run should pass three inputs to the pipeline fn", function () {
 test("run should pass the output of one into the input of the next", function () {
   var pipeline = new lunr.Pipeline,
       output,
-      fn1 = function (t1) { return t1.toUpperCase() }
+      fn1 = function (t1) { return t1.toUpperCase() },
       fn2 = function (t2) { output = t2 }
 
   pipeline.add(fn1)
