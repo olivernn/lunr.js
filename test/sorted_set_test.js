@@ -75,3 +75,20 @@ test('intersecting this set with another set', function () {
   ok(setIntersect.indexOf('baz') == -1)
 })
 
+test('unioning this set with another set', function () {
+  var set1 = new lunr.SortedSet,
+      set2 = new lunr.SortedSet,
+      setUnion
+
+  set1.add('foo', 'bar')
+  set2.add('baz', 'foo')
+
+  setUnion = set1.union(set2)
+
+  ok(setUnion.indexOf('foo') > -1)
+  ok(setUnion.indexOf('bar') > -1)
+  ok(setUnion.indexOf('baz') > -1)
+
+  equal(setUnion.length ,3)
+})
+
