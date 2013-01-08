@@ -1,4 +1,4 @@
-module("vector")
+module("lunr.Vector")
 
 test("calculating the magnitude of a vector", function () {
   var vector = new lunr.Vector ([4, 5, 6])

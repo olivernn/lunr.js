@@ -1,4 +1,4 @@
-module("document")
+module("lunr.Document")
 
 test("creating a document", function () {
   var doc = new lunr.Document ({id: 1, title: ['foo', 'bar', 'baz']})

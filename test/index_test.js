@@ -1,4 +1,4 @@
-module('index')
+module('lunr.Index')
 
 test("defining what fields to index", function () {
   var idx = new lunr.Index

@@ -1,4 +1,4 @@
-module('stopWordFilter')
+module('lunr.stopWordFilter')
 
 test('stops stop words', function () {
   var stopWords = ['the', 'and', 'but', 'than', 'when']

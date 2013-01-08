@@ -1,4 +1,4 @@
-module('pipeline')
+module('lunr.Pipeline')
 
 test("adding a new item to the pipeline", function () {
   var pipeline = new lunr.Pipeline
