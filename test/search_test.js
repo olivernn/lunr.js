@@ -39,10 +39,9 @@ test('search term not in the index', function () {
 })
 
 test('search contains one term not in the index', function () {
-  var resultSetA = this.idx.search('green foo'),
-      resultSetB = this.idx.search('green')
+  var results = this.idx.search('green foo')
 
-  deepEqual(resultSetA, resultSetB, 'search terms not in the index should just be ignored')
+  equal(results.length, 0)
 })
 
 test('search takes into account boosts', function () {
