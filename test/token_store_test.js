@@ -93,3 +93,18 @@ test('removing a document from a key that does not exist', function () {
   store.remove('foo', 123)
   ok(!store.has('foo'))
 })
+
+test('expand a token into all descendent tokens', function () {
+  var store = new lunr.TokenStore,
+      doc = { ref: 123, tf: 1 }
+
+  store.add('hell', doc)
+  store.add('hello', doc)
+  store.add('help', doc)
+  store.add('held', doc)
+  store.add('foo', doc)
+  store.add('bar', doc)
+
+  var tokens = store.expand('hel')
+  deepEqual(tokens, ['hell', 'hello', 'help', 'held'])
+})
