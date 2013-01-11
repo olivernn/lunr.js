@@ -8,7 +8,7 @@ test('returns a new instance of lunr.Index', function () {
 
 test('should set up the pipeline', function () {
   var index = lunr(),
-      stack = index.pipeline.toArray()
+      stack = index.pipeline._stack
 
   equal(stack.length, 2)
   equal(stack.indexOf(lunr.stopWordFilter), 0)

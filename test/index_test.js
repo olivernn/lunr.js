@@ -49,7 +49,6 @@ test('removing a document from the index', function () {
 
   idx.remove(doc)
   equal(idx.documentStore.length, 0)
-  equal(idx.tokenStore.length, 0)
 })
 
 test('updating a document', function () {

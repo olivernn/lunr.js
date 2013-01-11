@@ -2,17 +2,17 @@ module('lunr.Pipeline')
 
 test("adding a new item to the pipeline", function () {
   var pipeline = new lunr.Pipeline
-  equal(pipeline.size(), 0)
+  equal(pipeline._stack.length, 0)
 
   pipeline.add($.noop)
-  equal(pipeline.size(), 1)
+  equal(pipeline._stack.length, 1)
 })
 
 test("adding multiple items to the pipeline in one go", function () {
   var pipeline = new lunr.Pipeline
 
   pipeline.add($.noop, $.noop)
-  equal(pipeline.size(), 2)
+  equal(pipeline._stack.length, 2)
 })
 
 test("removing an item from the pipeline", function () {
@@ -20,10 +20,10 @@ test("removing an item from the pipeline", function () {
       fn = $.noop
 
   pipeline.add(fn)
-  equal(pipeline.size(), 1)
+  equal(pipeline._stack.length, 1)
 
   pipeline.remove(fn)
-  equal(pipeline.size(), 0)
+  equal(pipeline._stack.length, 0)
 })
 
 test("adding an item to the pipeline before another item", function () {
@@ -34,7 +34,7 @@ test("adding an item to the pipeline before another item", function () {
   pipeline.add(fn1)
   pipeline.before(fn1, fn2)
 
-  deepEqual(pipeline.toArray(), [fn2, fn1])
+  deepEqual(pipeline._stack, [fn2, fn1])
 })
 
 test("adding an item to the pipeline after another item", function () {
@@ -46,7 +46,7 @@ test("adding an item to the pipeline after another item", function () {
   pipeline.add(fn1, fn2)
   pipeline.after(fn1, fn3)
 
-  deepEqual(pipeline.toArray(), [fn1, fn3, fn2])
+  deepEqual(pipeline._stack, [fn1, fn3, fn2])
 })
 
 test("run calls each member of the pipeline for each input", function () {
