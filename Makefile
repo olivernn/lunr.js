@@ -26,6 +26,9 @@ lunr.min.js: lunr.js
 size: lunr.min.js
 	gzip -c lunr.min.js | wc -c
 
+test:
+	node server.js 3000
+
 docs:
 	dox < lunr.js | dox-template -n lunr.js -r ${VERSION} > docs/index.html
 
