@@ -26,13 +26,15 @@ test('removing punctuation', function () {
       innerApostrophe = "it's",
       trailingApostrophe = "james' ball",
       exclamationMark = 'stop!',
-      comma = 'first, second and third'
+      comma = 'first, second and third',
+      brackets = '[tag] non-tag'
 
   deepEqual(lunr.tokenizer(fullStop), ['hello'])
   deepEqual(lunr.tokenizer(innerApostrophe), ["it's"])
-  deepEqual(lunr.tokenizer(trailingApostrophe), ["james'", 'ball'])
+  deepEqual(lunr.tokenizer(trailingApostrophe), ["james", 'ball'])
   deepEqual(lunr.tokenizer(exclamationMark), ['stop'])
   deepEqual(lunr.tokenizer(comma), ['first', 'second', 'and', 'third'])
+  deepEqual(lunr.tokenizer(brackets), ['tag', 'non-tag'])
 })
 
 test('handling multiple white spaces', function () {
