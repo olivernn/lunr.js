@@ -9,7 +9,7 @@ test("defining what fields to index", function () {
 
 test("giving a particular field a weighting", function () {
   var idx = new lunr.Index
-  idx.field('foo', 10)
+  idx.field('foo', { boost: 10 })
 
   deepEqual(idx._fields[0], {name: 'foo', boost: 10})
 })

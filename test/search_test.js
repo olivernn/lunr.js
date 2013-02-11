@@ -2,7 +2,7 @@ module('search', {
   setup: function () {
     var idx = new lunr.Index
     idx.field('body')
-    idx.field('title', 10)
+    idx.field('title', { boost: 10 })
 
     ;([{
       id: 'a',
