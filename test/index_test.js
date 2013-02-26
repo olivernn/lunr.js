@@ -1,51 +1,68 @@
-module("Index")
+module('lunr.Index')
 
-var blankIndex = function () { return new Lunr.Index ('test') }
+test("defining what fields to index", function () {
+  var idx = new lunr.Index
+  idx.field('foo')
 
-test("an index has no fields by default", function () {
-  var idx = blankIndex()
-
-  same({}, idx.fields, "should have no fields by default")
+  deepEqual(idx._fields[0], {name: 'foo', boost: 1})
 })
 
-test("can add simple field to index", function () {
-  var idx = blankIndex()
+test("giving a particular field a weighting", function () {
+  var idx = new lunr.Index
+  idx.field('foo', { boost: 10 })
 
-  idx.field('title')
-
-  same({'title': { multiplier: 1 }}, idx.fields)
+  deepEqual(idx._fields[0], {name: 'foo', boost: 10})
 })
 
-test("can pass options for the field to index", function () {
-  var idx = blankIndex()
-
-  idx.field('title', {multiplier: 10})
-
-  same({'title': { multiplier: 10 }}, idx.fields)
+test('default reference should be id', function () {
+  var idx = new lunr.Index
+  equal(idx._ref, 'id')
 })
 
-test("performing some searches", function () {
-  idx = Lunr("barbar", function () {
-    this.ref('id')
+test("defining the reference field for the index", function () {
+  var idx = new lunr.Index
+  idx.ref('foo')
 
-    this.field('title', {
-      'multiplier': 10
-    })
+  deepEqual(idx._ref, 'foo')
+})
 
-    this.field('tags', {
-      'multiplier': 100
-    })
+test('adding a document to the index', function () {
+  var idx = new lunr.Index,
+      doc = {id: 1, body: 'this is a test'}
 
-    this.field('body')
-  })
+  idx.field('body')
+  idx.add(doc)
 
-  testDocs.forEach(function (doc) {
-    idx.add(doc)
-  })
+  equal(idx.documentStore.length, 1)
+  ok(!!idx.documentStore.get(1))
+})
 
-  same(idx.search('ruby'), [6413951, 6411778])
-  same(idx.search('ruby nested'), [6411778])
-  same(idx.search('nested'), [6411778, 6413720, 6411194])
-  same(idx.search('fix'), idx.search('fixing'))
-  same(idx.search('nonexistentterm'), [])
+test('removing a document from the index', function () {
+  var idx = new lunr.Index,
+      doc = {id: 1, body: 'this is a test'}
+
+  idx.field('body')
+  equal(idx.documentStore.length, 0)
+
+  idx.add(doc)
+  equal(idx.documentStore.length, 1)
+
+  idx.remove(doc)
+  equal(idx.documentStore.length, 0)
+})
+
+test('updating a document', function () {
+  var idx = new lunr.Index,
+      doc = {id: 1, body: 'foo'}
+
+  idx.field('body')
+  idx.add(doc)
+  equal(idx.documentStore.length, 1)
+  ok(idx.tokenStore.has('foo'))
+
+  doc.body = 'bar'
+  idx.update(doc)
+
+  equal(idx.documentStore.length, 1)
+  ok(idx.tokenStore.has('bar'))
 })

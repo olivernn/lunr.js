@@ -1,79 +1,147 @@
 <!DOCTYPE html>
 <head>
-  <title>Lunr.js - A bit like Solr, but much smaller and not as bright</title>
+  <title>lunr.js - A bit like Solr, but much smaller and not as bright</title>
   <link rel="stylesheet" href="/styles.css" type="text/css">
 </head>
 <body>
   <div class='wrap'>
     <header>
-      <h1>Lunr<span>.js</span></h1>
+      <h1>lunr<span>.js</span></h1>
       <h2>Simple full-text search in your browser</h2>
-      <br/>
     </header>
 
     <nav>
       <ul>
         <li><a href="/docs">Docs</a></li>
         <li><a href="/example">Examples</a></li>
-        <li><a href="https://github.com/olivernn/lunr.js/tree/master/adaptors">Adaptors</a></li>
+        <li><a href="http://github.com/olivernn/lunr.js">Code</a></li>
       </ul>
     </nav>
 
-    <article class='left'>
-      <header>
-        <h3>Get Started</h3>
-      </header>
+    <section class="columns">
+      <article>
+        <header>
+          <h3>Get Started</h3>
+        </header>
 
-      <p>Set up an index for your notes:</p>
-      <pre>
-var index = Lunr(function () {
-  this.field('title', {multiplier: 10})
-  this.field('body')
-  this.ref('id')
-})</pre>
+        <p>Set up an index for your notes:</p>
+        <pre>
+  var index = lunr(function () {
+    this.field('title', {boost: 10})
+    this.field('body')
+    this.ref('id')
+  })</pre>
 
-      <p>Add documents to your index</p>
-      <pre>
-index.add({
-  id: 1,
-  title: 'Foo',
-  body: 'Foo foo foo!'
-})
+        <p>Add documents to your index</p>
+        <pre>
+  index.add({
+    id: 1,
+    title: 'Foo',
+    body: 'Foo foo foo!'
+  })
 
-index.add({
-  id: 2,
-  title: 'Bar',
-  body: 'Bar bar bar!'
-})</pre>
+  index.add({
+    id: 2,
+    title: 'Bar',
+    body: 'Bar bar bar!'
+  })</pre>
 
-      <p>Search your documents</p>
-      <pre>
-index.search('foo')</pre>
-    </article>
+        <p>Search your documents</p>
+        <pre>
+  index.search('foo')</pre>
+      </article>
 
-    <article class='right'>
-      <header>
-        <h3>About</h3>
-      </header>
+      <article>
+        <header>
+          <h3>About</h3>
+        </header>
 
-      <p>Lunr.js is a simple full text search engine for your client side apps.  Search is often handled by a server side process, such as Solr or ElasticSearch.
-      </p>
+        <p>lunr.js is a simple full text search engine for your client side applications. It is designed to be small, yet full featured, enabling you to provide a great search experience without the need for external, server side, search services.</p>
 
-      <p>Whilst these services give you a lot of power and flexibility they are another service to manage and maintain.  Lunr.js works in your browser and is therefore simpler to maintain and available even when the browsers network connection is lost.</p>
-    </article>
+        <p>lunr.js has no external dependencies, although it does require a modern browser with ES5 support. In older browsers you can use an ES5 shim, such as <a href="http://augmentjs.com">augment.js</a>, to provide any missing JavaScript functionality.</p>
+      </article>
 
-    <article class='right'>
-      <header>
-        <h3>Download</h3>
-      </header>
+      <article class="download">
+        <header>
+          <h3>Download</h3>
+        </header>
 
+        <ul>
+          <li><a href="https://raw.github.com/olivernn/lunr.js/master/lunr.js">lunr.js</a> - uncompressed</li>
+          <li><a href="https://raw.github.com/olivernn/lunr.js/master/lunr.min.js">lunr.min.js</a> - minified</li>
+        </ul>
+      </article>
+    </section>
+
+    <section>
+      <article>
+        <header>
+          <h3>Pipeline</h3>
+        </header>
+
+        <p>Every document and search query that enters lunr is passed through a text <a href="/docs#Pipeline">processing pipeline</a>.  The pipeline is simply a stack of functions that perform some processing on the text. Pipeline functions act on the text one token at a time, and what they return is passed to the next function in the pipeline.</p>
+
+        <p>By default lunr adds a <a href="/docs#stopWordFilter">stop word filter</a> and <a href="/docs#stemmer">stemmer</a> to the pipeline. You can also add your own processors or remove the default ones depending on your requirements. The stemmer currently used is an English language stemmer, which could be replaced with a non-English language stemmer if required, or a <a href="http://en.wikipedia.org/wiki/Metaphone">Metaphoning</a> processor could be added.</p>
+
+
+        <pre>
+  var index = lunr(function () {
+    this.pipeline.add(function (token, tokenIndex, tokens) {
+      // text processing in here
+    })
+
+    this.pipeline.after(lunr.stopWordFilter, function (token, tokenIndex, tokens) {
+      // text processing in here
+    })
+  })
+        </pre>
+
+        <p>Functions in the pipeline are called with three arguments: the current token being processed; the index of that token in the array of tokens, and the whole list of tokens part of the document being processed. This enables simple unigram processing of tokens as well as more sophisticated n-gram processing.</p>
+
+        <p>The function should return the processed version of the text, which will in turn be passed to the next function in the pipeline. Returning <code>undefined</code> will prevent any further processing of the token, and that token will not make it to the index.</p>
+      </article>
+    </section>
+
+    <section class="columns">
+      <article>
+        <header>
+          <h3>Tokenization</h3>
+        </header>
+
+        <p>Tokenization is how lunr converts documents and searches into individual tokens, ready to be run through the text processing pipeline and entered or looked up in the index.</p>
+
+        <p>The default tokenizer included with lunr is designed to handle general english text well, although application, or language specific tokenizers can be used instead.</p>
+      </article>
+
+      <article>
+        <header>
+          <h3>Stemming</h3>
+        </header>
+
+        <p>Stemming increases the recall of the search index by reducing related words down to their stem, so that non-exact search terms still match relevant documents. For example 'search', 'searching' and 'searched' all get reduced to the stem 'search'.</p>
+
+        <p>lunr automatically includes a stemmer based on <a href="http://tartarus.org/martin/PorterStemmer/">Martin Porter's</a> algorithms.</p>
+      </article>
+
+      <article>
+        <header>
+          <h3>Stop words</h3>
+        </header>
+
+        <p>Stop words are words that are very common and are not useful in differentiating between documents. These are automatically removed by lunr.  This helps to reduce the size of the index and improve search speed and accuracy.</p>
+
+        <p>The default stop word filter contains a large list of very common words in English. For best results a corpus specific stop word filter can also be added to the pipeline. The search algorithm already penalises more common words, but preventing them from entering the index at all can be very beneficial for both space and speed performance.</p>
+      </article>
+
+    </section>
+    <footer>
       <ul>
-        <li><a href="https://raw.github.com/olivernn/lunr.js/master/lunr.js">lunr.js</a> - uncompressed</li>
-        <li><a href="https://raw.github.com/olivernn/lunr.js/master/lunr.min.js">lunr.min.js</a> - minified</li>
+        <li>Code by <a href="http://twitter.com/olivernn">Oliver Nightingale</a></li>
+        <li><a href="http://github.com/olivernn/lunr.js">Code</a></li>
+        <li><a href="/docs">Documentation</a></li>
+        <li><a href="http://github.com/olivernn/lunr.js/issues">Issues</a></li>
       </ul>
-
-      <p>Alternatively you can clone the project from github using git: <pre>$ git clone git://github.com/olivernn/lunr.js</pre></p>
-    </article>
+    </footer>
   </div>
 
   <script>

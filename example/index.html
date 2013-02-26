@@ -5,12 +5,7 @@
   <script src="/example/mustache.js" type="text/javascript" charset="utf-8"></script>
 
   <!-- Lunr -->
-  <script src="/lib/lunr.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/lib/utils.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/lib/trie.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/lib/index.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/lib/document.js" type="text/javascript" charset="utf-8"></script>
-  <script src="/lib/word.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/lunr.js" type="text/javascript" charset="utf-8"></script>
 
   <script id="question-list-template" type="text/mustache">
     <div>
@@ -36,16 +31,11 @@
   <script type="text/javascript" charset="utf-8">
 
     // set up the index, specifying that we want to index the title, tags and body fields of documents.
-    var idx = Lunr("barbar", function () {
+    var idx = lunr(function () {
       this.ref('id')
 
-      this.field('title', {
-        'multiplier': 10
-      })
-
-      this.field('tags', {
-        'multiplier': 100
-      })
+      this.field('title', 10)
+      this.field('tags', 100)
 
       this.field('body')
     })
@@ -105,15 +95,28 @@
           $('input').val('')
         })
 
-        $('input').bind('keyup', function () {
+        var debounce = function (fn) {
+          var timeout
+          return function () {
+            var args = Array.prototype.slice.call(arguments),
+                ctx = this
+
+            clearTimeout(timeout)
+            timeout = setTimeout(function () {
+              fn.apply(ctx, args)
+            }, 100)
+          }
+        }
+
+        $('input').bind('keyup', debounce(function () {
           if ($(this).val() < 2) return
           var query = $(this).val()
-          var results = idx.search(query).map(function (id) {
-            return questions.filter(function (q) { return q.id === id})[0]
+          var results = idx.search(query).map(function (result) {
+            return questions.filter(function (q) { return q.id === parseInt(result.ref, 10) })[0]
           })
 
           renderQuestionList(results)
-        })
+        }))
 
         // clicking a list item displays it in the main view
         $("#question-list-container").delegate('li', 'click', function () {
