@@ -17,7 +17,7 @@ test('adding an element that does exist into the set', function () {
   equal(set.length, 1)
 })
 
-test('sort is maintaned when adding elements to the set', function () {
+test('sort is maintained when adding elements to the set', function () {
   var set = new lunr.SortedSet
 
   set.add('b')
