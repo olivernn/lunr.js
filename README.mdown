@@ -54,7 +54,7 @@ Browsers that do not support ES5 will require a JavaScript shim for Lunr to work
 
 Contributions are very welcome, to make the process as easy as possible please follow these steps:
 
-* Open an issue detailing the bug you've found, or the feature you wish to add.  Simplified working examples using something like [jsFiddle](http://jsfiddle.com) make it easier to diagnose your problem.
+* Open an issue detailing the bug you've found, or the feature you wish to add.  Simplified working examples using something like [jsFiddle](http://jsfiddle.net) make it easier to diagnose your problem.
 * Add tests for your code (so I don't accidentally break it in the future)
 * Don't change version numbers or make new builds as part of your changes
 
