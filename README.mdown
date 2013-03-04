@@ -6,33 +6,39 @@ A bit like Solr, but much smaller and not as bright.
 
 A very simple search index can be created using the following:
 
-    var idx = lunr(function () {
-        this.field('title', { boost: 10 })
-        this.field('body')
-    })
-    
+```javascript
+var idx = lunr(function () {
+    this.field('title', { boost: 10 })
+    this.field('body')
+})
+```
+
 Adding documents to be indexed is as simple as:
 
-    var doc = {
-        "title": "Twelfth-Night",
-        "body": "If music be the food of love, play on: Give me excess of it…",
-        "author": "William Shakespeare",
-        "id": 1
-    }
-    
-    idx.add(doc)
-
+```javascript
+var doc = {
+    "title": "Twelfth-Night",
+    "body": "If music be the food of love, play on: Give me excess of it…",
+    "author": "William Shakespeare",
+    "id": 1
+}    
+idx.add(doc)
+```
 
 Then searching is as simple:
 
-    idx.search("love")
+```javascript
+idx.search("love")
+```
 
 This returns a list of matching documents with a score of how closely they match the search query:
 
-    [{
-        "ref": 1,
-        "score": 0.87533
-    }]
+```javascript
+[{
+    "ref": 1,
+    "score": 0.87533
+}]
+```
 
 [API documentation](http://lunrjs.com/docs) is available, as well as a full working example.
 
