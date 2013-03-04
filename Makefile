@@ -10,10 +10,12 @@ SRC = lib/lunr.js \
 	lib/stop_word_filter.js \
 	lib/token_store.js
 
+BOWER_COMPONENT = '{"name": "lunr.js", "version": "@VERSION", "main": "./lunr.js"}'
+
 YEAR = $(shell date +%Y)
 VERSION = $(shell cat VERSION)
 
-all: lunr.js lunr.min.js docs
+all: lunr.js lunr.min.js docs component.json
 
 lunr.js: $(SRC)
 	cat $^ | \
@@ -22,6 +24,9 @@ lunr.js: $(SRC)
 
 lunr.min.js: lunr.js
 	uglifyjs < $< > $@
+
+component.json:
+	echo $(BOWER_COMPONENT) | sed "s/@VERSION/${VERSION}/" > $@
 
 size: lunr.min.js
 	gzip -c lunr.min.js | wc -c
@@ -34,5 +39,6 @@ docs:
 
 clean:
 	rm -f lunr{.min,}.js
+	rm component.json
 
 .PHONY: test clean docs
