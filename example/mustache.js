@@ -228,7 +228,7 @@ var Mustache = function() {
       if(value !== undefined) {
         return value;
       }
-      // silently ignore unkown variables
+      // silently ignore unknown variables
       return "";
     },
 
