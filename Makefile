@@ -13,7 +13,7 @@ SRC = lib/lunr.js \
 YEAR = $(shell date +%Y)
 VERSION = $(shell cat VERSION)
 
-all: lunr.js lunr.min.js docs
+all: lunr.js lunr.min.js docs component.json package.json
 
 lunr.js: $(SRC)
 	cat $^ | \
@@ -21,18 +21,29 @@ lunr.js: $(SRC)
 	sed "s/@VERSION/${VERSION}/" > $@
 
 lunr.min.js: lunr.js
-	uglifyjs < $< > $@
+	uglifyjs --compress --mangle --comments < $< > $@
+
+component.json:
+	cat build/component.json.template | sed "s/@VERSION/${VERSION}/" > $@
+
+package.json:
+	cat build/package.json.template | sed "s/@VERSION/${VERSION}/" > $@
 
 size: lunr.min.js
 	gzip -c lunr.min.js | wc -c
 
-test:
+test_server:
 	node server.js 3000
+
+test:
+	phantomjs test/env/runner.js http://localhost:3000/test
 
 docs:
 	dox < lunr.js | dox-template -n lunr.js -r ${VERSION} > docs/index.html
 
 clean:
 	rm -f lunr{.min,}.js
+	rm component.json
+	rm package.json
 
 .PHONY: test clean docs

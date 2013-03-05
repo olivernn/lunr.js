@@ -1,0 +1,9 @@
+# Changelog
+
+## 0.2.1
+
+* Changes to the build process.
+* Add component.json and package.json
+* Add phantomjs test runner
+* Remove redundant attributes
+* Many [spelling corrections](https://github.com/olivernn/lunr.js/pull/8), thanks [Pascal Borreli](https://github.com/pborreli)

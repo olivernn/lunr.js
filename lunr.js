@@ -1,15 +1,15 @@
-/*!
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.2.0
+/**
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.2.1
  * Copyright (C) 2013 Oliver Nightingale
  * MIT Licensed
+ * @license
  */
-;
 
 /**
- * Convinience function for instantiating a new lunr index and configuring it
+ * Convenience function for instantiating a new lunr index and configuring it
  * with the default pipeline functions and the passed config function.
  *
- * When using this convinience function a new index will be created with the
+ * When using this convenience function a new index will be created with the
  * following functions already in the pipeline:
  *
  * lunr.StopWordFilter - filters out any stop words before they enter the
@@ -27,7 +27,7 @@
  *       this.ref('cid')
  *       
  *       this.pipeline.add(function () {
- *         // some custome pipeline function
+ *         // some custom pipeline function
  *       })
  *       
  *     })
@@ -50,15 +50,18 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.2.0"
+lunr.version = "0.2.1"
 
+if (typeof module !== 'undefined') {
+  module.exports = lunr
+}
 /*!
  * lunr.tokenizer
  * Copyright (C) 2013 Oliver Nightingale
  */
 
 /**
- * A function for splitting a string into tokens ready to be insterted into
+ * A function for splitting a string into tokens ready to be inserted into
  * the search index.
  *
  * @module
@@ -68,8 +71,7 @@ lunr.version = "0.2.0"
 lunr.tokenizer = function (str) {
   if (Array.isArray(str)) return str
 
-  var trailingPunctuationRegex = /[\!|\,|\.|\?]+$/,
-      whiteSpaceSplitRegex = /\s+/
+  var whiteSpaceSplitRegex = /\s+/
 
   return str.split(whiteSpaceSplitRegex).map(function (token) {
     return token.replace(/^\W+/, '').replace(/\W+$/, '').toLowerCase()
@@ -212,7 +214,7 @@ lunr.Vector.prototype.magnitude = function () {
   var sumOfSquares = 0,
       elems = this.elements,
       len = elems.length,
-      magnitude, el
+      el
 
   for (var i = 0; i < len; i++) {
     el = elems[i]
@@ -350,7 +352,7 @@ lunr.SortedSet.prototype.forEach = function (fn, ctx) {
  * @memberOf SortedSet
  */
 lunr.SortedSet.prototype.indexOf = function (elem, startIndex) {
-  return this.elements.indexOf(elem)
+  return this.elements.indexOf(elem, startIndex)
 }
 
 /**
@@ -507,7 +509,7 @@ lunr.Index.prototype.field = function (fieldName, opts) {
 }
 
 /**
- * Sets the property used to uniquely indetify documents added to the index,
+ * Sets the property used to uniquely identify documents added to the index,
  * by default this property is 'id'.
  *
  * This should only be changed before adding documents to the index, changing
@@ -568,7 +570,7 @@ lunr.Index.prototype.add = function (doc) {
  * removed from the index using this method.
  *
  * The document passed only needs to have the same ref property value as the
- * document that was added to the index, they could be completly different
+ * document that was added to the index, they could be completely different
  * objects.
  *
  * @param {Object} doc The document to remove from the index.
@@ -630,7 +632,7 @@ lunr.Index.prototype.idf = function (term) {
  * documents containing both 'foo' and 'bar'.
  *
  * All query tokens are passed through the same pipeline that document tokens
- * are passed through, so any lanugage processing involved will be run on every
+ * are passed through, so any language processing involved will be run on every
  * query term.
  *
  * Each query term is expanded, so that the term 'he' might be expanded to
@@ -849,8 +851,7 @@ lunr.stemmer = (function(){
       re,
       re2,
       re3,
-      re4,
-      origword = w;
+      re4;
 
     if (w.length < 3) { return w; }
 
@@ -981,7 +982,7 @@ lunr.stemmer = (function(){
  * lunr.stopWordFilter is an English language stop word list filter, any words
  * contained in the list will not be passed through the filter.
  *
- * This is intented to be used in the Pipeline. If the token does not pass the
+ * This is intended to be used in the Pipeline. If the token does not pass the
  * filter then undefined will be returned.
  *
  * @module
@@ -1222,7 +1223,7 @@ lunr.TokenStore.prototype.getNode = function (token, root) {
  * @memberOf TokenStore
  */
 lunr.TokenStore.prototype.get = function (token, root) {
-  return this.getNode(token).docs || {}
+  return this.getNode(token, root).docs || {}
 }
 
 /**

@@ -350,7 +350,7 @@ QUnit = {
 		test.queue();
 	},
 
-	// Specify the number of expected assertions to gurantee that failed test (no assertions are run at all) don't slip through.
+	// Specify the number of expected assertions to guarantee that failed test (no assertions are run at all) don't slip through.
 	expect: function( asserts ) {
 		if (arguments.length === 1) {
 			config.current.expected = asserts;
@@ -403,7 +403,7 @@ QUnit = {
 	}
 };
 
-// Asssert helpers
+// Assert helpers
 // All of these must call either QUnit.push() or manually do:
 // - runLoggingCallbacks( "log", .. );
 // - config.current.assertions.push({ .. });
@@ -1010,7 +1010,7 @@ QUnit.load = function() {
 		// `label` initialized at top of scope
 		label = document.createElement( "label" );
 		label.setAttribute( "for", "qunit-filter-pass" );
-		label.setAttribute( "title", "Only show tests and assertons that fail. Stored in sessionStorage." );
+		label.setAttribute( "title", "Only show tests and assertions that fail. Stored in sessionStorage." );
 		label.innerHTML = "Hide passed tests";
 		toolbar.appendChild( label );
 
@@ -1055,7 +1055,7 @@ addEvent( window, "load", QUnit.load );
 onErrorFnPrev = window.onerror;
 
 // Cover uncaught exceptions
-// Returning true will surpress the default browser handler,
+// Returning true will suppress the default browser handler,
 // returning false will let it run.
 window.onerror = function ( error, filePath, linerNr ) {
 	var ret = false;
@@ -1064,7 +1064,7 @@ window.onerror = function ( error, filePath, linerNr ) {
 	}
 
 	// Treat return value as window.onerror itself does,
-	// Only do our handling if not surpressed.
+	// Only do our handling if not suppressed.
 	if ( ret !== true ) {
 		if ( QUnit.config.current ) {
 			if ( QUnit.config.current.ignoreGlobalErrors ) {
@@ -1415,7 +1415,7 @@ QUnit.equiv = (function() {
 			// for string, boolean, number and null
 			function useStrictEquality( b, a ) {
 				if ( b instanceof a.constructor || a instanceof b.constructor ) {
-					// to catch short annotaion VS 'new' annotation of a
+					// to catch short annotation VS 'new' annotation of a
 					// declaration
 					// e.g. var i = 1;
 					// var j = new Number(1);
@@ -1444,7 +1444,7 @@ QUnit.equiv = (function() {
 					return QUnit.objectType( b ) === "regexp" &&
 						// the regex itself
 						a.source === b.source &&
-						// and its modifers
+						// and its modifiers
 						a.global === b.global &&
 						// (gmi) ...
 						a.ignoreCase === b.ignoreCase &&
@@ -1480,7 +1480,7 @@ QUnit.equiv = (function() {
 						loop = false;
 						for ( j = 0; j < parents.length; j++ ) {
 							if ( parents[j] === a[i] ) {
-								loop = true;// dont rewalk array
+								loop = true;// don't rewalk array
 							}
 						}
 						if ( !loop && !innerEquiv(a[i], b[i]) ) {
@@ -1968,7 +1968,7 @@ QUnit.diff = (function() {
 	};
 }());
 
-// for CommonJS enviroments, export everything
+// for CommonJS environments, export everything
 if ( typeof exports !== "undefined" ) {
 	extend(exports, QUnit);
 }
