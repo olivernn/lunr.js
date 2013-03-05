@@ -66,8 +66,15 @@ Contributions are very welcome, to make the process as easy as possible please f
 
 ### Developer Dependencies
 
-A JavaScript runtime is required for building the library.  A browser is required for running the tests.  A simple server is provided for running the tests:
+A JavaScript runtime is required for building the library.
+
+Run the tests with, this will use phantomjs to run the tests:
 
     make test
 
-This will start a local test server on port 3000, to run the tests point a browser at `http://localhost:3000/`
+The tests can also be run in the browser by starting the test server:
+
+    make test_server
+
+This will start a server on port 3000, the tests are then available at '/test'
+
