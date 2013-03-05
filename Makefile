@@ -10,12 +10,10 @@ SRC = lib/lunr.js \
 	lib/stop_word_filter.js \
 	lib/token_store.js
 
-BOWER_COMPONENT = '{"name": "lunr.js", "version": "@VERSION", "main": "./lunr.js"}'
-
 YEAR = $(shell date +%Y)
 VERSION = $(shell cat VERSION)
 
-all: lunr.js lunr.min.js docs component.json
+all: lunr.js lunr.min.js docs component.json package.json
 
 lunr.js: $(SRC)
 	cat $^ | \
@@ -23,16 +21,22 @@ lunr.js: $(SRC)
 	sed "s/@VERSION/${VERSION}/" > $@
 
 lunr.min.js: lunr.js
-	uglifyjs < $< > $@
+	uglifyjs --compress --mangle --comments < $< > $@
 
 component.json:
-	echo $(BOWER_COMPONENT) | sed "s/@VERSION/${VERSION}/" > $@
+	cat build/component.json.template | sed "s/@VERSION/${VERSION}/" > $@
+
+package.json:
+	cat build/package.json.template | sed "s/@VERSION/${VERSION}/" > $@
 
 size: lunr.min.js
 	gzip -c lunr.min.js | wc -c
 
-test:
+test_server:
 	node server.js 3000
+
+test:
+	phantomjs test/env/runner.js http://localhost:3000/test
 
 docs:
 	dox < lunr.js | dox-template -n lunr.js -r ${VERSION} > docs/index.html
@@ -40,5 +44,6 @@ docs:
 clean:
 	rm -f lunr{.min,}.js
 	rm component.json
+	rm package.json
 
 .PHONY: test clean docs
