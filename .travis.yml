@@ -1,0 +1,8 @@
+language: node_js
+before_script:
+  - node server.js &
+  - sleep 5
+node_js:
+  - 0.8
+script:
+  - npm test
