@@ -94,3 +94,22 @@ test('serialising', function () {
     corpusTokens: 'corpusTokens'
   })
 })
+
+test('loading a serialised index', function () {
+  var serialisedData = {
+    version: '@VERSION', // this is what the lunr version is set to before being built
+    fields: [
+      { name: 'title', boost: 10 },
+      { name: 'body', boost: 1 }
+    ],
+    ref: 'id',
+    documentStore: { store: {}, length: 0 },
+    tokenStore: { root: {}, length: 0 },
+    corpusTokens: []
+  }
+
+  var idx = lunr.Index.load(serialisedData)
+
+  deepEqual(idx._fields, serialisedData.fields)
+  equal(idx._ref, 'id')
+})
