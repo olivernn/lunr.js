@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+
+* Boost exact term matches so they are better ranked than expanded term matches, fixes [#10](https://github.com/olivernn/lunr.js/issues/10), thanks [ssured](https://github.com/ssured)
+
 ## 0.2.1
 
 * Changes to the build process.
