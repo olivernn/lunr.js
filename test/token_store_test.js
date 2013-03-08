@@ -134,3 +134,27 @@ test('serialisation', function () {
     }
   )
 })
+
+test('loading a serialised story', function () {
+  var serialisedData = {
+    root: {
+      docs: {},
+      f: {
+        docs: {},
+        o: {
+          docs: {},
+          o: {
+            docs: { 123: { ref: 123, tf: 1 } }
+          }
+        }
+      }
+    },
+    length: 1
+  }
+
+  var store = lunr.TokenStore.load(serialisedData),
+      documents = store.get('foo')
+
+  equal(store.length, 1)
+  deepEqual(documents, { 123: { ref: 123, tf: 1 }})
+})

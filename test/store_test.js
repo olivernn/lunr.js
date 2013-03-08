@@ -45,3 +45,16 @@ test('serialising', function () {
   deepEqual(store.toJSON(), { store: { 1: ['eggs', 'ham'] }, length: 1 })
 })
 
+test('loading serialised data', function () {
+  var serialisedData = {
+    length: 1,
+    store: {
+      1: ['eggs', 'ham']
+    }
+  }
+
+  var store = lunr.Store.load(serialisedData)
+
+  equal(store.length, 1)
+  deepEqual(store.get(1), lunr.SortedSet.load(['eggs', 'ham']))
+})

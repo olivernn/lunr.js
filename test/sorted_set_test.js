@@ -109,3 +109,10 @@ test('serialising', function () {
   deepEqual(nonEmptySet.toJSON(), [1,2,3,4])
 })
 
+test('loading serialised dump', function () {
+  var serialisedData = [1,2,3,4],
+      set = lunr.SortedSet.load(serialisedData)
+
+  equal(set.length, 4)
+  deepEqual(set.elements, [1,2,3,4])
+})
