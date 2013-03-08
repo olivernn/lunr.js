@@ -66,3 +66,31 @@ test('updating a document', function () {
   equal(idx.documentStore.length, 1)
   ok(idx.tokenStore.has('bar'))
 })
+
+test('serialising', function () {
+  var idx = new lunr.Index,
+      mockDocumentStore = { toJSON: function () { return 'documentStore' }},
+      mockTokenStore = { toJSON: function () { return 'tokenStore' }},
+      mockCorpusTokens = { toJSON: function () { return 'corpusTokens' }}
+
+  idx.documentStore = mockDocumentStore
+  idx.tokenStore = mockTokenStore
+  idx.corpusTokens = mockCorpusTokens
+
+  idx.ref('id')
+
+  idx.field('title', { boost: 10 })
+  idx.field('body')
+
+  deepEqual(idx.toJSON(), {
+    version: '@VERSION', // this is what the lunr version is set to before being built
+    fields: [
+      { name: 'title', boost: 10 },
+      { name: 'body', boost: 1 }
+    ],
+    ref: 'id',
+    documentStore: 'documentStore',
+    tokenStore: 'tokenStore',
+    corpusTokens: 'corpusTokens'
+  })
+})

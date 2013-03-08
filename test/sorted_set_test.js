@@ -99,3 +99,13 @@ test('unioning this set with another set', function () {
   equal(setUnion.length ,3)
 })
 
+test('serialising', function () {
+  var emptySet = new lunr.SortedSet,
+      nonEmptySet = new lunr.SortedSet
+
+  nonEmptySet.add(1,2,3,4)
+
+  deepEqual(emptySet.toJSON(), [])
+  deepEqual(nonEmptySet.toJSON(), [1,2,3,4])
+})
+
