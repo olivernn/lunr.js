@@ -35,3 +35,13 @@ test('removing an element from the store', function () {
   equal(store.length, 0)
 })
 
+test('serialising', function () {
+  var store = new lunr.Store
+
+  deepEqual(store.toJSON(), { store: {}, length: 0 })
+
+  store.set(1, ['eggs', 'ham'])
+
+  deepEqual(store.toJSON(), { store: { 1: ['eggs', 'ham'] }, length: 1 })
+})
+
