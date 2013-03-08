@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.2.1
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.2.2
  * Copyright (C) 2013 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -50,7 +50,7 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.2.1"
+lunr.version = "0.2.2"
 
 if (typeof module !== 'undefined') {
   module.exports = lunr
@@ -664,10 +664,15 @@ lunr.Index.prototype.search = function (query) {
       var set = this.tokenStore.expand(token).reduce(function (memo, key) {
         var pos = self.corpusTokens.indexOf(key),
             idf = self.idf(key),
+            exactMatchBoost = (key === token ? 10 : 1),
             set = new lunr.SortedSet
 
-        if (pos > -1) queryArr[pos] = tf * idf
+        // calculate the query tf-idf score for this token
+        // applying an exactMatchBoost to ensure these rank
+        // higher than expanded terms
+        if (pos > -1) queryArr[pos] = tf * idf * exactMatchBoost
 
+        // add all the documents that have this key into a set
         Object.keys(self.tokenStore.get(key)).forEach(function (ref) { set.add(ref) })
 
         return memo.union(set)

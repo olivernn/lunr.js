@@ -1,5 +1,7 @@
 # Lunr.js
 
+[![Build Status](https://travis-ci.org/olivernn/lunr.js.png?branch=master)](https://travis-ci.org/olivernn/lunr.js)
+
 A bit like Solr, but much smaller and not as bright.
 
 ## Example

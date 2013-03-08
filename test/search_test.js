@@ -19,6 +19,14 @@ module('search', {
       title: 'Scarlett helps Professor',
       body: 'Miss Scarlett watered Professor Plumbs green plant while he was away from his office last week.',
       wordCount: 16
+    },{
+      id: 'd',
+      title: '',
+      body: 'handsome',
+    },{
+      id: 'e',
+      title: '',
+      body: 'hand',
     }]).forEach(function (doc) { idx.add(doc) })
 
     this.idx = idx
@@ -51,4 +59,13 @@ test('search takes into account boosts', function () {
   equal(results[0].ref, 'c')
 
   ok(results[0].score > 10 * results[1].score)
+})
+
+test('search boosts exact matches', function () {
+  var results = this.idx.search('hand')
+
+  equal(results.length, 2)
+  equal(results[0].ref, 'e')
+
+  ok(results[0].score > results[1].score)
 })
