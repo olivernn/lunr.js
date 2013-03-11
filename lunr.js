@@ -282,6 +282,15 @@ lunr.SortedSet = function () {
   this.elements = []
 }
 
+lunr.SortedSet.load = function (serialisedData) {
+  var set = new this
+
+  set.elements = serialisedData
+  set.length = serialisedData.length
+
+  return set
+}
+
 /**
  * Inserts new items into the set in the correct position to maintain the
  * order.
@@ -461,6 +470,10 @@ lunr.SortedSet.prototype.union = function (otherSet) {
 
   return unionSet
 }
+
+lunr.SortedSet.prototype.toJSON = function () {
+  return this.toArray()
+}
 /*!
  * lunr.Index
  * Copyright (C) 2013 Oliver Nightingale
@@ -480,6 +493,19 @@ lunr.Index = function () {
   this.documentStore = new lunr.Store
   this.tokenStore = new lunr.TokenStore
   this.corpusTokens = new lunr.SortedSet
+}
+
+lunr.Index.load = function (serialisedData) {
+  var idx = new this
+
+  idx._fields = serialisedData.fields
+  idx._ref = serialisedData.ref
+
+  idx.documentStore = lunr.Store.load(serialisedData.documentStore)
+  idx.tokenStore = lunr.TokenStore.load(serialisedData.tokenStore)
+  idx.corpusTokens = lunr.SortedSet.load(serialisedData.corpusTokens)
+
+  return idx
 }
 
 /**
@@ -729,6 +755,17 @@ lunr.Index.prototype.documentVector = function (documentRef) {
 
   return new lunr.Vector (documentArr)
 }
+
+lunr.Index.prototype.toJSON = function () {
+  return {
+    version: lunr.version,
+    fields: this._fields,
+    ref: this._ref,
+    documentStore: this.documentStore.toJSON(),
+    tokenStore: this.tokenStore.toJSON(),
+    corpusTokens: this.corpusTokens.toJSON()
+  }
+}
 /*!
  * lunr.Store
  * Copyright (C) 2013 Oliver Nightingale
@@ -744,6 +781,18 @@ lunr.Index.prototype.documentVector = function (documentRef) {
 lunr.Store = function () {
   this.store = {}
   this.length = 0
+}
+
+lunr.Store.load = function (serialisedData) {
+  var store = new this
+
+  store.length = serialisedData.length
+  store.store = Object.keys(serialisedData.store).reduce(function (memo, key) {
+    memo[key] = lunr.SortedSet.load(serialisedData.store[key])
+    return memo
+  }, {})
+
+  return store
 }
 
 /**
@@ -791,6 +840,13 @@ lunr.Store.prototype.remove = function (id) {
 
   delete this.store[id]
   this.length--
+}
+
+lunr.Store.prototype.toJSON = function () {
+  return {
+    store: this.store,
+    length: this.length
+  }
 }
 
 /*!
@@ -1141,6 +1197,15 @@ lunr.TokenStore = function () {
   this.length = 0
 }
 
+lunr.TokenStore.load = function (serialisedData) {
+  var store = new this
+
+  store.root = serialisedData.root
+  store.length = serialisedData.length
+
+  return store
+}
+
 /**
  * Adds a new token doc pair to the store.
  *
@@ -1284,5 +1349,12 @@ lunr.TokenStore.prototype.expand = function (token, memo) {
     }, this)
 
   return memo
+}
+
+lunr.TokenStore.prototype.toJSON = function () {
+  return {
+    root: this.root,
+    length: this.length
+  }
 }
 
