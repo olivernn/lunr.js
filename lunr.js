@@ -107,6 +107,41 @@ lunr.Pipeline = function () {
   this._stack = []
 }
 
+lunr.Pipeline.registeredFunctions = {}
+
+lunr.Pipeline.registerFunction = function (fn, label) {
+  if (console && console.warn && (label in this.registeredFunctions)) {
+    console.warn('Overwriting existing registered function: ' + label)
+  }
+
+  fn.label = label
+  lunr.Pipeline.registeredFunctions[fn.label] = fn
+}
+
+lunr.Pipeline.warnIfFunctionNotRegistered = function (fn) {
+  var isRegistered = fn.label && (fn.label in this.registeredFunctions)
+
+  if (!isRegistered && console && console.warn) {
+    console.warn('Function is not registered with pipeline. This may cause problems when serialising the index.\n', fn)
+  }
+}
+
+lunr.Pipeline.load = function (serialised) {
+  var pipeline = new lunr.Pipeline
+
+  serialised.forEach(function (fnName) {
+    var fn = lunr.Pipeline.registeredFunctions[fnName]
+
+    if (fn) {
+      pipeline.add(fn)
+    } else {
+      throw new Error ('Cannot load un-registered function: ' + fnName)
+    }
+  })
+
+  return pipeline
+}
+
 /**
  * Adds new functions to the end of the pipeline.
  *
@@ -115,7 +150,11 @@ lunr.Pipeline = function () {
  */
 lunr.Pipeline.prototype.add = function () {
   var fns = Array.prototype.slice.call(arguments)
-  Array.prototype.push.apply(this._stack, fns)
+
+  fns.forEach(function (fn) {
+    lunr.Pipeline.warnIfFunctionNotRegistered(fn)
+    this._stack.push(fn)
+  }, this)
 }
 
 /**
@@ -127,6 +166,8 @@ lunr.Pipeline.prototype.add = function () {
  * @memberOf Pipeline
  */
 lunr.Pipeline.prototype.after = function (existingFn, newFn) {
+  lunr.Pipeline.warnIfFunctionNotRegistered(newFn)
+
   var pos = this._stack.indexOf(existingFn) + 1
   this._stack.splice(pos, 0, newFn)
 }
@@ -140,6 +181,8 @@ lunr.Pipeline.prototype.after = function (existingFn, newFn) {
  * @memberOf Pipeline
  */
 lunr.Pipeline.prototype.before = function (existingFn, newFn) {
+  lunr.Pipeline.warnIfFunctionNotRegistered(newFn)
+
   var pos = this._stack.indexOf(existingFn)
   this._stack.splice(pos, 0, newFn)
 }
@@ -182,6 +225,13 @@ lunr.Pipeline.prototype.run = function (tokens) {
   return out
 }
 
+lunr.Pipeline.prototype.toJSON = function () {
+  return this._stack.map(function (fn) {
+    lunr.Pipeline.warnIfFunctionNotRegistered(fn)
+
+    return fn.label
+  })
+}
 /*!
  * lunr.Vector
  * Copyright (C) 2013 Oliver Nightingale
@@ -280,6 +330,15 @@ lunr.Vector.prototype.toArray = function () {
 lunr.SortedSet = function () {
   this.length = 0
   this.elements = []
+}
+
+lunr.SortedSet.load = function (serialisedData) {
+  var set = new this
+
+  set.elements = serialisedData
+  set.length = serialisedData.length
+
+  return set
 }
 
 /**
@@ -461,6 +520,10 @@ lunr.SortedSet.prototype.union = function (otherSet) {
 
   return unionSet
 }
+
+lunr.SortedSet.prototype.toJSON = function () {
+  return this.toArray()
+}
 /*!
  * lunr.Index
  * Copyright (C) 2013 Oliver Nightingale
@@ -480,6 +543,24 @@ lunr.Index = function () {
   this.documentStore = new lunr.Store
   this.tokenStore = new lunr.TokenStore
   this.corpusTokens = new lunr.SortedSet
+}
+
+lunr.Index.load = function (serialisedData) {
+  if (serialisedData.version !== lunr.version && console && console.warn) {
+    console.warn('version mismatch: current ' + lunr.version + ' importing ' + serialisedData.version)
+  }
+
+  var idx = new this
+
+  idx._fields = serialisedData.fields
+  idx._ref = serialisedData.ref
+
+  idx.documentStore = lunr.Store.load(serialisedData.documentStore)
+  idx.tokenStore = lunr.TokenStore.load(serialisedData.tokenStore)
+  idx.corpusTokens = lunr.SortedSet.load(serialisedData.corpusTokens)
+  idx.pipeline = lunr.Pipeline.load(serialisedData.pipeline)
+
+  return idx
 }
 
 /**
@@ -729,6 +810,18 @@ lunr.Index.prototype.documentVector = function (documentRef) {
 
   return new lunr.Vector (documentArr)
 }
+
+lunr.Index.prototype.toJSON = function () {
+  return {
+    version: lunr.version,
+    fields: this._fields,
+    ref: this._ref,
+    documentStore: this.documentStore.toJSON(),
+    tokenStore: this.tokenStore.toJSON(),
+    corpusTokens: this.corpusTokens.toJSON(),
+    pipeline: this.pipeline.toJSON()
+  }
+}
 /*!
  * lunr.Store
  * Copyright (C) 2013 Oliver Nightingale
@@ -744,6 +837,18 @@ lunr.Index.prototype.documentVector = function (documentRef) {
 lunr.Store = function () {
   this.store = {}
   this.length = 0
+}
+
+lunr.Store.load = function (serialisedData) {
+  var store = new this
+
+  store.length = serialisedData.length
+  store.store = Object.keys(serialisedData.store).reduce(function (memo, key) {
+    memo[key] = lunr.SortedSet.load(serialisedData.store[key])
+    return memo
+  }, {})
+
+  return store
 }
 
 /**
@@ -791,6 +896,13 @@ lunr.Store.prototype.remove = function (id) {
 
   delete this.store[id]
   this.length--
+}
+
+lunr.Store.prototype.toJSON = function () {
+  return {
+    store: this.store,
+    length: this.length
+  }
 }
 
 /*!
@@ -982,6 +1094,8 @@ lunr.stemmer = (function(){
     return w;
   }
 })();
+
+lunr.Pipeline.registerFunction(lunr.stemmer, 'stemmer')
 /*!
  * lunr.stopWordFilter
  * Copyright (C) 2013 Oliver Nightingale
@@ -1124,6 +1238,8 @@ lunr.stopWordFilter = function (token) {
 
   if (stopWords.indexOf(token) === -1) return token
 }
+
+lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'stopWordFilter')
 /*!
  * lunr.stemmer
  * Copyright (C) 2013 Oliver Nightingale
@@ -1139,6 +1255,15 @@ lunr.stopWordFilter = function (token) {
 lunr.TokenStore = function () {
   this.root = { docs: {} }
   this.length = 0
+}
+
+lunr.TokenStore.load = function (serialisedData) {
+  var store = new this
+
+  store.root = serialisedData.root
+  store.length = serialisedData.length
+
+  return store
 }
 
 /**
@@ -1284,5 +1409,12 @@ lunr.TokenStore.prototype.expand = function (token, memo) {
     }, this)
 
   return memo
+}
+
+lunr.TokenStore.prototype.toJSON = function () {
+  return {
+    root: this.root,
+    length: this.length
+  }
 }
 
