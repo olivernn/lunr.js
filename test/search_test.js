@@ -41,7 +41,7 @@ test('returning the correct results', function () {
 })
 
 test('search term not in the index', function () {
-  var results = this.idx.search('foo')
+  var results = this.idx.search('foo bar')
 
   equal(results.length, 0)
 })
