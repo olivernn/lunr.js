@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.3
+
+* Fix issue with searching for a term not in the index [#12](https://github.com/olivernn/lunr.js/issues/12), thanks [mcnerthney](https://github.com/mcnerthney) and [makoto](https://github.com/makoto)
+
 ## 0.2.2
 
 * Boost exact term matches so they are better ranked than expanded term matches, fixes [#10](https://github.com/olivernn/lunr.js/issues/10), thanks [ssured](https://github.com/ssured)
