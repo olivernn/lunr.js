@@ -46,6 +46,12 @@ test('search term not in the index', function () {
   equal(results.length, 0)
 })
 
+test('one search term not in the index', function () {
+  var results = this.idx.search('foo green')
+
+  equal(results.length, 0)
+})
+
 test('search contains one term not in the index', function () {
   var results = this.idx.search('green foo')
 
