@@ -27,6 +27,20 @@ test('dumping and loading an index', function () {
   var dumpedIdx = JSON.stringify(idx),
       clonedIdx = lunr.Index.load(JSON.parse(dumpedIdx))
 
-  clonedIdx.search('green plant')
   deepEqual(idx.search('green plant'), clonedIdx.search('green plant'))
+})
+
+test('dumping and loading an index with a populated pipeline', function () {
+  var idx = lunr(function () {
+    this.field('title', { boost: 10 })
+    this.field('body')
+  })
+
+  this.corpus.forEach(function (doc) { idx.add(doc) })
+
+  var dumpedIdx = JSON.stringify(idx)
+      clonedIdx = lunr.Index.load(JSON.parse(dumpedIdx))
+
+  deepEqual(idx.pipeline._stack, clonedIdx.pipeline._stack)
+  deepEqual(idx.search('water'), clonedIdx.search('water'))
 })
