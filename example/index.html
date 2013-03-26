@@ -31,14 +31,7 @@
   <script type="text/javascript" charset="utf-8">
 
     // set up the index, specifying that we want to index the title, tags and body fields of documents.
-    var idx = lunr(function () {
-      this.ref('id')
-
-      this.field('title', 10)
-      this.field('tags', 100)
-
-      this.field('body')
-    })
+    var idx
 
     $(document).ready(function () {
 
@@ -67,6 +60,12 @@
         console.timeEnd('search')
       }
 
+      $.getJSON('/example/example_index.json', function (indexData) {
+        console.time("load")
+        idx = lunr.Index.load(indexData)
+        console.timeEnd("load")
+      })
+
       // load the example data
       $.getJSON('/example/example_data.json', function (data) {
 
@@ -79,13 +78,6 @@
             tags: raw.tags.join(' ')
           }
         })
-
-        console.time("load")
-        questions.forEach(function (question) {
-          idx.add(question)
-          $('.loading').hide()
-        })
-        console.timeEnd("load")
 
         renderQuestionList(questions)
         renderQuestionView(questions[0])

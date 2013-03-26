@@ -7,3 +7,8 @@ test('should stem words correctly', function () {
     equal(lunr.stemmer(testWord), expected)
   })
 })
+
+test('should be registered with lunr.Pipeline', function () {
+  equal(lunr.stemmer.label, 'stemmer')
+  deepEqual(lunr.Pipeline.registeredFunctions['stemmer'], lunr.stemmer)
+})
