@@ -1,4 +1,16 @@
-module('lunr.Pipeline')
+module('lunr.Pipeline', {
+  setup: function () {
+    this.existingRegisteredFunctions = lunr.Pipeline.registeredFunctions
+    lunr.Pipeline.registeredFunctions = {}
+
+    this.existingWarnIfFunctionNotRegistered = lunr.Pipeline.warnIfFunctionNotRegistered
+    lunr.Pipeline.warnIfFunctionNotRegistered = $.noop
+  },
+  teardown: function () {
+    lunr.Pipeline.registeredFunctions = this.existingRegisteredFunctions
+    lunr.Pipeline.warnIfFunctionNotRegistered = this.existingWarnIfFunctionNotRegistered
+  }
+})
 
 test("adding a new item to the pipeline", function () {
   var pipeline = new lunr.Pipeline
@@ -109,4 +121,53 @@ test("run should filter out any undefined values at each stage in the pipeline",
   var output = pipeline.run([0,1,2,3,4,5,6,7,8,9])
   equal(fn2Count, 5)
   equal(output.length, 5)
+})
+
+test('toJSON', function () {
+  var pipeline = new lunr.Pipeline,
+      fn1 = function () {},
+      fn2 = function () {}
+
+  lunr.Pipeline.registerFunction(fn1, 'fn1')
+  lunr.Pipeline.registerFunction(fn2, 'fn2')
+
+  pipeline.add(fn1, fn2)
+
+  deepEqual(pipeline.toJSON(), ['fn1', 'fn2'])
+})
+
+test('registering a pipeline function', function () {
+  var fn1 = function () {}
+
+  equal(Object.keys(lunr.Pipeline.registeredFunctions).length, 0)
+
+  lunr.Pipeline.registerFunction(fn1, 'fn1')
+
+  equal(fn1.label, 'fn1')
+  equal(Object.keys(lunr.Pipeline.registeredFunctions).length, 1)
+  deepEqual(lunr.Pipeline.registeredFunctions['fn1'], fn1)
+})
+
+test('load', function () {
+  var fn1 = function () {},
+      fn2 = function () {}
+
+  lunr.Pipeline.registerFunction(fn1, 'fn1')
+  lunr.Pipeline.registerFunction(fn2, 'fn2')
+
+  var serialised = ['fn1', 'fn2']
+
+  var pipeline = lunr.Pipeline.load(serialised)
+
+  equal(pipeline._stack.length, 2)
+  deepEqual(pipeline._stack[0], fn1)
+  deepEqual(pipeline._stack[1], fn2)
+})
+
+test('loading an un-registered pipeline function', function () {
+  var serialised = ['fn1']
+
+  throws(function () {
+    lunr.Pipeline.load(serialised)
+  })
 })

@@ -71,11 +71,13 @@ test('serialising', function () {
   var idx = new lunr.Index,
       mockDocumentStore = { toJSON: function () { return 'documentStore' }},
       mockTokenStore = { toJSON: function () { return 'tokenStore' }},
-      mockCorpusTokens = { toJSON: function () { return 'corpusTokens' }}
+      mockCorpusTokens = { toJSON: function () { return 'corpusTokens' }},
+      mockPipeline = { toJSON: function () { return 'pipeline' }}
 
   idx.documentStore = mockDocumentStore
   idx.tokenStore = mockTokenStore
   idx.corpusTokens = mockCorpusTokens
+  idx.pipeline = mockPipeline
 
   idx.ref('id')
 
@@ -91,7 +93,8 @@ test('serialising', function () {
     ref: 'id',
     documentStore: 'documentStore',
     tokenStore: 'tokenStore',
-    corpusTokens: 'corpusTokens'
+    corpusTokens: 'corpusTokens',
+    pipeline: 'pipeline'
   })
 })
 
@@ -105,7 +108,8 @@ test('loading a serialised index', function () {
     ref: 'id',
     documentStore: { store: {}, length: 0 },
     tokenStore: { root: {}, length: 0 },
-    corpusTokens: []
+    corpusTokens: [],
+    pipeline: ['stopWordFilter', 'stemmer']
   }
 
   var idx = lunr.Index.load(serialisedData)

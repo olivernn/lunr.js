@@ -15,3 +15,8 @@ test('non stop words pass through', function () {
     equal(lunr.stopWordFilter(word), word)
   })
 })
+
+test('should be registered with lunr.Pipeline', function () {
+  equal(lunr.stopWordFilter.label, 'stopWordFilter')
+  deepEqual(lunr.Pipeline.registeredFunctions['stopWordFilter'], lunr.stopWordFilter)
+})
