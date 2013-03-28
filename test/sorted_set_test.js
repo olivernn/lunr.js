@@ -53,7 +53,14 @@ test('mapping the set', function () {
 test('getting the index of an item in the set', function () {
   var set = new lunr.SortedSet
 
-  set.add('foo', 'bar')
+  equal(set.indexOf('non member'), -1)
+
+  set.add('foo')
+
+  equal(set.indexOf('foo'), 0)
+  equal(set.indexOf('non member'), -1)
+
+  set.add('bar')
 
   equal(set.indexOf('foo'), 1)
   equal(set.indexOf('bar'), 0)
