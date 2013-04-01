@@ -38,7 +38,7 @@ test('removing punctuation', function () {
 })
 
 test('handling multiple white spaces', function () {
-  var testString = 'foo    bar',
+  var testString = '  foo    bar  ',
       tokens = lunr.tokenizer(testString)
 
   deepEqual(tokens, ['foo', 'bar'])

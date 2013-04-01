@@ -35,3 +35,26 @@ test('removing an element from the store', function () {
   equal(store.length, 0)
 })
 
+test('serialising', function () {
+  var store = new lunr.Store
+
+  deepEqual(store.toJSON(), { store: {}, length: 0 })
+
+  store.set(1, ['eggs', 'ham'])
+
+  deepEqual(store.toJSON(), { store: { 1: ['eggs', 'ham'] }, length: 1 })
+})
+
+test('loading serialised data', function () {
+  var serialisedData = {
+    length: 1,
+    store: {
+      1: ['eggs', 'ham']
+    }
+  }
+
+  var store = lunr.Store.load(serialisedData)
+
+  equal(store.length, 1)
+  deepEqual(store.get(1), lunr.SortedSet.load(['eggs', 'ham']))
+})

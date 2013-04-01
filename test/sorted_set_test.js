@@ -53,7 +53,14 @@ test('mapping the set', function () {
 test('getting the index of an item in the set', function () {
   var set = new lunr.SortedSet
 
-  set.add('foo', 'bar')
+  equal(set.indexOf('non member'), -1)
+
+  set.add('foo')
+
+  equal(set.indexOf('foo'), 0)
+  equal(set.indexOf('non member'), -1)
+
+  set.add('bar')
 
   equal(set.indexOf('foo'), 1)
   equal(set.indexOf('bar'), 0)
@@ -92,3 +99,20 @@ test('unioning this set with another set', function () {
   equal(setUnion.length ,3)
 })
 
+test('serialising', function () {
+  var emptySet = new lunr.SortedSet,
+      nonEmptySet = new lunr.SortedSet
+
+  nonEmptySet.add(1,2,3,4)
+
+  deepEqual(emptySet.toJSON(), [])
+  deepEqual(nonEmptySet.toJSON(), [1,2,3,4])
+})
+
+test('loading serialised dump', function () {
+  var serialisedData = [1,2,3,4],
+      set = lunr.SortedSet.load(serialisedData)
+
+  equal(set.length, 4)
+  deepEqual(set.elements, [1,2,3,4])
+})
