@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.2.3
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.3.0
  * Copyright (C) 2013 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -50,7 +50,7 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.2.3"
+lunr.version = "0.3.0"
 
 if (typeof module !== 'undefined') {
   module.exports = lunr
@@ -71,11 +71,20 @@ if (typeof module !== 'undefined') {
 lunr.tokenizer = function (str) {
   if (Array.isArray(str)) return str
 
-  var whiteSpaceSplitRegex = /\s+/
+  var str = str.replace(/^\s+/, '')
 
-  return str.split(whiteSpaceSplitRegex).map(function (token) {
-    return token.replace(/^\W+/, '').replace(/\W+$/, '').toLowerCase()
-  })
+  for (var i = str.length - 1; i >= 0; i--) {
+    if (/\S/.test(str.charAt(i))) {
+      str = str.substring(0, i + 1)
+      break
+    }
+  }
+
+  return str
+    .split(/\s+/)
+    .map(function (token) {
+      return token.replace(/^\W+/, '').replace(/\W+$/, '').toLowerCase()
+    })
 }
 /*!
  * lunr.Pipeline
@@ -101,6 +110,14 @@ lunr.tokenizer = function (str) {
  * should return undefined, the rest of the pipeline will not be called with
  * this token.
  *
+ * For serialisation of pipelines to work, all functions used in an instance of
+ * a pipeline should be registered with lunr.Pipeline. Registered functions can
+ * then be loaded. If trying to load a serialised pipeline that uses functions
+ * that are not registered an error will be thrown.
+ *
+ * If not planning on serialising the pipeline then registering pipeline functions
+ * is not necessary.
+ *
  * @constructor
  */
 lunr.Pipeline = function () {
@@ -109,6 +126,19 @@ lunr.Pipeline = function () {
 
 lunr.Pipeline.registeredFunctions = {}
 
+/**
+ * Register a function with the pipeline.
+ *
+ * Functions that are used in the pipeline should be registered if the pipeline
+ * needs to be serialised, or a serialised pipeline needs to be loaded.
+ *
+ * Registering a function does not add it to a pipeline, functions must still be
+ * added to instances of the pipeline for them to be used when running a pipeline.
+ *
+ * @param {Function} fn The function to check for.
+ * @param {String} label The label to register this function with
+ * @memberOf Pipeline
+ */
 lunr.Pipeline.registerFunction = function (fn, label) {
   if (console && console.warn && (label in this.registeredFunctions)) {
     console.warn('Overwriting existing registered function: ' + label)
@@ -118,6 +148,13 @@ lunr.Pipeline.registerFunction = function (fn, label) {
   lunr.Pipeline.registeredFunctions[fn.label] = fn
 }
 
+/**
+ * Warns if the function is not registered as a Pipeline function.
+ *
+ * @param {Function} fn The function to check for.
+ * @private
+ * @memberOf Pipeline
+ */
 lunr.Pipeline.warnIfFunctionNotRegistered = function (fn) {
   var isRegistered = fn.label && (fn.label in this.registeredFunctions)
 
@@ -126,6 +163,17 @@ lunr.Pipeline.warnIfFunctionNotRegistered = function (fn) {
   }
 }
 
+/**
+ * Loads a previously serialised pipeline.
+ *
+ * All functions to be loaded must already be registered with lunr.Pipeline.
+ * If any function from the serialised data has not been registered then an
+ * error will be thrown.
+ *
+ * @param {Object} serialised The serialised pipeline to load.
+ * @returns {lunr.Pipeline}
+ * @memberOf Pipeline
+ */
 lunr.Pipeline.load = function (serialised) {
   var pipeline = new lunr.Pipeline
 
@@ -145,6 +193,8 @@ lunr.Pipeline.load = function (serialised) {
 /**
  * Adds new functions to the end of the pipeline.
  *
+ * Logs a warning if the function has not been registered.
+ *
  * @param {Function} functions Any number of functions to add to the pipeline.
  * @memberOf Pipeline
  */
@@ -161,6 +211,8 @@ lunr.Pipeline.prototype.add = function () {
  * Adds a single function after a function that already exists in the
  * pipeline.
  *
+ * Logs a warning if the function has not been registered.
+ *
  * @param {Function} existingFn A function that already exists in the pipeline.
  * @param {Function} newFn The new function to add to the pipeline.
  * @memberOf Pipeline
@@ -175,6 +227,8 @@ lunr.Pipeline.prototype.after = function (existingFn, newFn) {
 /**
  * Adds a single function before a function that already exists in the
  * pipeline.
+ *
+ * Logs a warning if the function has not been registered.
  *
  * @param {Function} existingFn A function that already exists in the pipeline.
  * @param {Function} newFn The new function to add to the pipeline.
@@ -225,6 +279,14 @@ lunr.Pipeline.prototype.run = function (tokens) {
   return out
 }
 
+/**
+ * Returns a representation of the pipeline ready for serialisation.
+ *
+ * Logs a warning if the function has not been registered.
+ *
+ * @returns {Array}
+ * @memberOf Pipeline
+ */
 lunr.Pipeline.prototype.toJSON = function () {
   return this._stack.map(function (fn) {
     lunr.Pipeline.warnIfFunctionNotRegistered(fn)
@@ -332,6 +394,13 @@ lunr.SortedSet = function () {
   this.elements = []
 }
 
+/**
+ * Loads a previously serialised sorted set.
+ *
+ * @param {Array} serialisedData The serialised set to load.
+ * @returns {lunr.SortedSet}
+ * @memberOf SortedSet
+ */
 lunr.SortedSet.load = function (serialisedData) {
   var set = new this
 
@@ -350,7 +419,7 @@ lunr.SortedSet.load = function (serialisedData) {
  */
 lunr.SortedSet.prototype.add = function () {
   Array.prototype.slice.call(arguments).forEach(function (element) {
-    if (~this.elements.indexOf(element)) return
+    if (~this.indexOf(element)) return
     this.elements.splice(this.locationFor(element), 0, element)
   }, this)
 
@@ -400,18 +469,35 @@ lunr.SortedSet.prototype.forEach = function (fn, ctx) {
 }
 
 /**
- * Returns the first index at which a given element can be found in the
+ * Returns the index at which a given element can be found in the
  * sorted set, or -1 if it is not present.
  *
- * Delegates to Array.prototype.indexOf and has the same signature.
- *
  * @param {Object} elem The object to locate in the sorted set.
- * @param {Number} startIndex The index at which to begin the search.
+ * @param {Number} start An optional index at which to start searching from
+ * within the set.
+ * @param {Number} end An optional index at which to stop search from within
+ * the set.
  * @returns {Number}
  * @memberOf SortedSet
  */
-lunr.SortedSet.prototype.indexOf = function (elem, startIndex) {
-  return this.elements.indexOf(elem, startIndex)
+lunr.SortedSet.prototype.indexOf = function (elem, start, end) {
+  var start = start || 0,
+      end = end || this.elements.length,
+      sectionLength = end - start,
+      pivot = start + Math.floor(sectionLength / 2),
+      pivotElem = this.elements[pivot]
+
+  if (sectionLength <= 1) {
+    if (pivotElem === elem) {
+      return pivot
+    } else {
+      return -1
+    }
+  }
+
+  if (pivotElem < elem) return this.indexOf(elem, pivot, end)
+  if (pivotElem > elem) return this.indexOf(elem, start, pivot)
+  if (pivotElem === elem) return pivot
 }
 
 /**
@@ -521,6 +607,12 @@ lunr.SortedSet.prototype.union = function (otherSet) {
   return unionSet
 }
 
+/**
+ * Returns a representation of the sorted set ready for serialisation.
+ *
+ * @returns {Array}
+ * @memberOf SortedSet
+ */
 lunr.SortedSet.prototype.toJSON = function () {
   return this.toArray()
 }
@@ -545,6 +637,17 @@ lunr.Index = function () {
   this.corpusTokens = new lunr.SortedSet
 }
 
+
+/**
+ * Loads a previously serialised index.
+ *
+ * Issues a warning if the index being imported was serialised
+ * by a different version of lunr.
+ *
+ * @param {Object} serialisedData The serialised set to load.
+ * @returns {lunr.Index}
+ * @memberOf Index
+ */
 lunr.Index.load = function (serialisedData) {
   if (serialisedData.version !== lunr.version && console && console.warn) {
     console.warn('version mismatch: current ' + lunr.version + ' importing ' + serialisedData.version)
@@ -811,6 +914,12 @@ lunr.Index.prototype.documentVector = function (documentRef) {
   return new lunr.Vector (documentArr)
 }
 
+/**
+ * Returns a representation of the index ready for serialisation.
+ *
+ * @returns {Object}
+ * @memberOf Index
+ */
 lunr.Index.prototype.toJSON = function () {
   return {
     version: lunr.version,
@@ -839,6 +948,13 @@ lunr.Store = function () {
   this.length = 0
 }
 
+/**
+ * Loads a previously serialised store
+ *
+ * @param {Object} serialisedData The serialised store to load.
+ * @returns {lunr.Store}
+ * @memberOf Store
+ */
 lunr.Store.load = function (serialisedData) {
   var store = new this
 
@@ -898,6 +1014,12 @@ lunr.Store.prototype.remove = function (id) {
   this.length--
 }
 
+/**
+ * Returns a representation of the store ready for serialisation.
+ *
+ * @returns {Object}
+ * @memberOf Store
+ */
 lunr.Store.prototype.toJSON = function () {
   return {
     store: this.store,
@@ -1114,130 +1236,132 @@ lunr.Pipeline.registerFunction(lunr.stemmer, 'stemmer')
  * @see lunr.Pipeline
  */
 lunr.stopWordFilter = function (token) {
-  var stopWords = [
-    "a",
-    "able",
-    "about",
-    "across",
-    "after",
-    "all",
-    "almost",
-    "also",
-    "am",
-    "among",
-    "an",
-    "and",
-    "any",
-    "are",
-    "as",
-    "at",
-    "be",
-    "because",
-    "been",
-    "but",
-    "by",
-    "can",
-    "cannot",
-    "could",
-    "dear",
-    "did",
-    "do",
-    "does",
-    "either",
-    "else",
-    "ever",
-    "every",
-    "for",
-    "from",
-    "get",
-    "got",
-    "had",
-    "has",
-    "have",
-    "he",
-    "her",
-    "hers",
-    "him",
-    "his",
-    "how",
-    "however",
-    "i",
-    "if",
-    "in",
-    "into",
-    "is",
-    "it",
-    "its",
-    "just",
-    "least",
-    "let",
-    "like",
-    "likely",
-    "may",
-    "me",
-    "might",
-    "most",
-    "must",
-    "my",
-    "neither",
-    "no",
-    "nor",
-    "not",
-    "of",
-    "off",
-    "often",
-    "on",
-    "only",
-    "or",
-    "other",
-    "our",
-    "own",
-    "rather",
-    "said",
-    "say",
-    "says",
-    "she",
-    "should",
-    "since",
-    "so",
-    "some",
-    "than",
-    "that",
-    "the",
-    "their",
-    "them",
-    "then",
-    "there",
-    "these",
-    "they",
-    "this",
-    "tis",
-    "to",
-    "too",
-    "twas",
-    "us",
-    "wants",
-    "was",
-    "we",
-    "were",
-    "what",
-    "when",
-    "where",
-    "which",
-    "while",
-    "who",
-    "whom",
-    "why",
-    "will",
-    "with",
-    "would",
-    "yet",
-    "you",
-    "your"
-  ]
-
-  if (stopWords.indexOf(token) === -1) return token
+  if (lunr.stopWordFilter.stopWords.indexOf(token) === -1) return token
 }
+
+lunr.stopWordFilter.stopWords = new lunr.SortedSet
+lunr.stopWordFilter.stopWords.length = 119
+lunr.stopWordFilter.stopWords.elements = [
+  "a",
+  "able",
+  "about",
+  "across",
+  "after",
+  "all",
+  "almost",
+  "also",
+  "am",
+  "among",
+  "an",
+  "and",
+  "any",
+  "are",
+  "as",
+  "at",
+  "be",
+  "because",
+  "been",
+  "but",
+  "by",
+  "can",
+  "cannot",
+  "could",
+  "dear",
+  "did",
+  "do",
+  "does",
+  "either",
+  "else",
+  "ever",
+  "every",
+  "for",
+  "from",
+  "get",
+  "got",
+  "had",
+  "has",
+  "have",
+  "he",
+  "her",
+  "hers",
+  "him",
+  "his",
+  "how",
+  "however",
+  "i",
+  "if",
+  "in",
+  "into",
+  "is",
+  "it",
+  "its",
+  "just",
+  "least",
+  "let",
+  "like",
+  "likely",
+  "may",
+  "me",
+  "might",
+  "most",
+  "must",
+  "my",
+  "neither",
+  "no",
+  "nor",
+  "not",
+  "of",
+  "off",
+  "often",
+  "on",
+  "only",
+  "or",
+  "other",
+  "our",
+  "own",
+  "rather",
+  "said",
+  "say",
+  "says",
+  "she",
+  "should",
+  "since",
+  "so",
+  "some",
+  "than",
+  "that",
+  "the",
+  "their",
+  "them",
+  "then",
+  "there",
+  "these",
+  "they",
+  "this",
+  "tis",
+  "to",
+  "too",
+  "twas",
+  "us",
+  "wants",
+  "was",
+  "we",
+  "were",
+  "what",
+  "when",
+  "where",
+  "which",
+  "while",
+  "who",
+  "whom",
+  "why",
+  "will",
+  "with",
+  "would",
+  "yet",
+  "you",
+  "your"
+]
 
 lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'stopWordFilter')
 /*!
@@ -1257,6 +1381,13 @@ lunr.TokenStore = function () {
   this.length = 0
 }
 
+/**
+ * Loads a previously serialised token store
+ *
+ * @param {Object} serialisedData The serialised token store to load.
+ * @returns {lunr.TokenStore}
+ * @memberOf TokenStore
+ */
 lunr.TokenStore.load = function (serialisedData) {
   var store = new this
 
@@ -1411,6 +1542,12 @@ lunr.TokenStore.prototype.expand = function (token, memo) {
   return memo
 }
 
+/**
+ * Returns a representation of the token store ready for serialisation.
+ *
+ * @returns {Object}
+ * @memberOf TokenStore
+ */
 lunr.TokenStore.prototype.toJSON = function () {
   return {
     root: this.root,
