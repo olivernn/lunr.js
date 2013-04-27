@@ -1,16 +1,10 @@
-module('utils')
+module('lunr.utils')
 
-test('wrapping in an array', function() {
-  same(lunr.utils.arrayWrap(1), [1])
-  same(lunr.utils.arrayWrap('a'), ['a'])
-  same(lunr.utils.arrayWrap({}), [{}])
-  same(lunr.utils.arrayWrap([]), [])
-  same(lunr.utils.arrayWrap([1]), [1])
-  same(lunr.utils.arrayWrap(undefined), [])
-  same(lunr.utils.arrayWrap(null), [])
+test('zeroFillArray', function() {
+  var arr = lunr.utils.zeroFillArray(10)
+
+  equal(arr.length, 10)
+  ok(arr.every(function (el) { return el === 0 }))
+  ok(arr !== lunr.utils.zeroFillArray(10))
 })
 
-test('flattening an array', function () {
-  same(lunr.utils.flatten([1,2,3]), [1,2,3])
-  same(lunr.utils.flatten([1, [2, [3]]]), [1,2,3])
-})
