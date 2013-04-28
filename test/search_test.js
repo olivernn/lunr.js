@@ -21,11 +21,11 @@ module('search', {
       wordCount: 16
     },{
       id: 'd',
-      title: '',
+      title: 'title',
       body: 'handsome',
     },{
       id: 'e',
-      title: '',
+      title: 'title',
       body: 'hand',
     }]).forEach(function (doc) { idx.add(doc) })
 
