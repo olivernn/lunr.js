@@ -51,6 +51,21 @@ test('removing a document from the index', function () {
   equal(idx.documentStore.length, 0)
 })
 
+test('removing a non-existent document from the index', function () {
+  var idx = new lunr.Index,
+      doc = {id: 1, body: 'this is a test'},
+      doc2 = {id: 2, body: 'i dont exist'}
+
+  idx.field('body')
+  equal(idx.documentStore.length, 0)
+
+  idx.add(doc)
+  equal(idx.documentStore.length, 1)
+
+  idx.remove(doc2)
+  equal(idx.documentStore.length, 1)
+})
+
 test('updating a document', function () {
   var idx = new lunr.Index,
       doc = {id: 1, body: 'foo'}
