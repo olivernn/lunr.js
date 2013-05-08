@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1
+
+* Fix bug [#24](https://github.com/olivernn/lunr.js/pull/24) that caused an error when trying to remove a non-existant document from the index, thanks [Jesús Leganés Combarro](https://github.com/piranna)
+
 ## 0.3.0
 
 * Implement [JSON serialisation](https://github.com/olivernn/lunr.js/pull/14), allows indexes to be loaded and dumped, thanks [ssured](https://github.com/ssured).
