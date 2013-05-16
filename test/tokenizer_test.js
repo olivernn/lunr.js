@@ -43,3 +43,10 @@ test('handling multiple white spaces', function () {
 
   deepEqual(tokens, ['foo', 'bar'])
 })
+
+test('handling null as argument', function () {
+  var tokens = lunr.tokenizer()
+
+  deepEqual(tokens, [])
+})
+
