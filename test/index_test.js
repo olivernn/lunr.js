@@ -48,6 +48,26 @@ test('adding a document with an empty field', function () {
   ok(!isNaN(idx.tokenStore.get('test')[1].tf))
 })
 
+test('triggering add events', function () {
+  var idx = new lunr.Index,
+      doc = {id: 1, body: 'this is a test'},
+      callbackCalled = false,
+      callbackArgs = []
+
+  idx.on('add', function (doc, index) {
+    callbackCalled = true
+    callbackArgs = Array.prototype.slice.call(arguments)
+  })
+
+  idx.field('body')
+  idx.add(doc)
+
+  ok(callbackCalled)
+  equal(callbackArgs.length, 2)
+  deepEqual(callbackArgs[0], doc)
+  deepEqual(callbackArgs[1], idx)
+})
+
 test('removing a document from the index', function () {
   var idx = new lunr.Index,
       doc = {id: 1, body: 'this is a test'}
