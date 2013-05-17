@@ -176,6 +176,65 @@ test('updating a document', function () {
   ok(idx.tokenStore.has('bar'))
 })
 
+test('emitting update events', function () {
+  var idx = new lunr.Index,
+      doc = {id: 1, body: 'foo'}
+      addCallbackCalled = false,
+      removeCallbackCalled = false,
+      updateCallbackCalled = false,
+      callbackArgs = []
+
+  idx.field('body')
+  idx.add(doc)
+  equal(idx.documentStore.length, 1)
+  ok(idx.tokenStore.has('foo'))
+
+  idx.on('update', function (doc, index) {
+    updateCallbackCalled = true
+    callbackArgs = Array.prototype.slice.call(arguments)
+  })
+
+  idx.on('add', function () {
+    addCallbackCalled = true
+  })
+
+  idx.on('remove', function () {
+    removeCallbackCalled = true
+  })
+
+
+  doc.body = 'bar'
+  idx.update(doc)
+
+  ok(updateCallbackCalled)
+  equal(callbackArgs.length, 2)
+  deepEqual(callbackArgs[0], doc)
+  deepEqual(callbackArgs[1], idx)
+
+  ok(!addCallbackCalled)
+  ok(!removeCallbackCalled)
+})
+
+test('silencing update events', function () {
+  var idx = new lunr.Index,
+      doc = {id: 1, body: 'foo'}
+      callbackCalled = false
+
+  idx.field('body')
+  idx.add(doc)
+  equal(idx.documentStore.length, 1)
+  ok(idx.tokenStore.has('foo'))
+
+  idx.on('update', function (doc, index) {
+    callbackCalled = true
+  })
+
+  doc.body = 'bar'
+  idx.update(doc, false)
+
+  ok(!callbackCalled)
+})
+
 test('serialising', function () {
   var idx = new lunr.Index,
       mockDocumentStore = { toJSON: function () { return 'documentStore' }},
