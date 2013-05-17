@@ -99,10 +99,54 @@ test('removing a document from the index', function () {
   equal(idx.documentStore.length, 0)
 })
 
+test('triggering remove events', function () {
+  var idx = new lunr.Index,
+      doc = {id: 1, body: 'this is a test'},
+      callbackCalled = false,
+      callbackArgs = []
+
+  idx.on('remove', function (doc, index) {
+    callbackCalled = true
+    callbackArgs = Array.prototype.slice.call(arguments)
+  })
+
+  idx.field('body')
+  idx.add(doc)
+  idx.remove(doc)
+
+  ok(callbackCalled)
+  equal(callbackArgs.length, 2)
+  deepEqual(callbackArgs[0], doc)
+  deepEqual(callbackArgs[1], idx)
+})
+
+test('triggering remove events', function () {
+  var idx = new lunr.Index,
+      doc = {id: 1, body: 'this is a test'},
+      callbackCalled = false,
+      callbackArgs = []
+
+  idx.on('remove', function (doc, index) {
+    callbackCalled = true
+    callbackArgs = Array.prototype.slice.call(arguments)
+  })
+
+  idx.field('body')
+  idx.add(doc)
+  idx.remove(doc, false)
+
+  ok(!callbackCalled)
+})
+
 test('removing a non-existent document from the index', function () {
   var idx = new lunr.Index,
       doc = {id: 1, body: 'this is a test'},
-      doc2 = {id: 2, body: 'i dont exist'}
+      doc2 = {id: 2, body: 'i dont exist'},
+      callbackCalled = false
+
+  idx.on('remove', function (doc, index) {
+    callbackCalled = true
+  })
 
   idx.field('body')
   equal(idx.documentStore.length, 0)
@@ -112,6 +156,8 @@ test('removing a non-existent document from the index', function () {
 
   idx.remove(doc2)
   equal(idx.documentStore.length, 1)
+
+  ok(!callbackCalled)
 })
 
 test('updating a document', function () {
