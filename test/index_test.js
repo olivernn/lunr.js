@@ -68,6 +68,23 @@ test('triggering add events', function () {
   deepEqual(callbackArgs[1], idx)
 })
 
+test('silencing add events', function () {
+  var idx = new lunr.Index,
+      doc = {id: 1, body: 'this is a test'},
+      callbackCalled = false,
+      callbackArgs = []
+
+  idx.on('add', function (doc, index) {
+    callbackCalled = true
+    callbackArgs = Array.prototype.slice.call(arguments)
+  })
+
+  idx.field('body')
+  idx.add(doc, false)
+
+  ok(!callbackCalled)
+})
+
 test('removing a document from the index', function () {
   var idx = new lunr.Index,
       doc = {id: 1, body: 'this is a test'}
