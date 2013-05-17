@@ -37,6 +37,17 @@ test('adding a document to the index', function () {
   ok(!!idx.documentStore.get(1))
 })
 
+test('adding a document with an empty field', function () {
+  var idx = new lunr.Index,
+      doc = {id: 1, body: 'test', title: ''}
+
+  idx.field('title')
+  idx.field('body')
+
+  idx.add(doc)
+  ok(!isNaN(idx.tokenStore.get('test')[1].tf))
+})
+
 test('removing a document from the index', function () {
   var idx = new lunr.Index,
       doc = {id: 1, body: 'this is a test'}
