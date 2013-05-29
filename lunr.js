@@ -141,8 +141,8 @@ lunr.Pipeline.registeredFunctions = {}
  * @memberOf Pipeline
  */
 lunr.Pipeline.registerFunction = function (fn, label) {
-  if (console && console.warn && (label in this.registeredFunctions)) {
-    console.warn('Overwriting existing registered function: ' + label)
+  if (label in this.registeredFunctions) {
+    lunr.utils.warn('Overwriting existing registered function: ' + label)
   }
 
   fn.label = label
@@ -159,8 +159,8 @@ lunr.Pipeline.registerFunction = function (fn, label) {
 lunr.Pipeline.warnIfFunctionNotRegistered = function (fn) {
   var isRegistered = fn.label && (fn.label in this.registeredFunctions)
 
-  if (!isRegistered && console && console.warn) {
-    console.warn('Function is not registered with pipeline. This may cause problems when serialising the index.\n', fn)
+  if (!isRegistered) {
+    lunr.utils.warn('Function is not registered with pipeline. This may cause problems when serialising the index.\n', fn)
   }
 }
 
@@ -650,8 +650,8 @@ lunr.Index = function () {
  * @memberOf Index
  */
 lunr.Index.load = function (serialisedData) {
-  if (serialisedData.version !== lunr.version && console && console.warn) {
-    console.warn('version mismatch: current ' + lunr.version + ' importing ' + serialisedData.version)
+  if (serialisedData.version !== lunr.version) {
+    lunr.utils.warn('version mismatch: current ' + lunr.version + ' importing ' + serialisedData.version)
   }
 
   var idx = new this
