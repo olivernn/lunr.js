@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.3.2
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.3.3
  * Copyright (C) 2013 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -50,11 +50,34 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.3.2"
+lunr.version = "0.3.3"
 
 if (typeof module !== 'undefined') {
   module.exports = lunr
 }
+/*!
+ * lunr.utils
+ * Copyright (C) 2013 Oliver Nightingale
+ */
+
+/**
+ * A namespace containing utils for the rest of the lunr library
+ */
+lunr.utils = {}
+
+/**
+ * Print a warning message to the console.
+ *
+ * @param {String} message The message to be printed.
+ * @memberOf Utils
+ */
+lunr.utils.warn = (function (global) {
+  return function (message) {
+    if (global.console && console.warn) {
+      console.warn(message)
+    }
+  }
+})(this)
 /*!
  * lunr.tokenizer
  * Copyright (C) 2013 Oliver Nightingale

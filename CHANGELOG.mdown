@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.3
+
+* Fix bug [#32](https://github.com/olivernn/lunr.js/pull/32) which prevented lunr being used where a `console` object is not present, thanks [Tony Marklove](https://github.com/jjbananas) and [wyuenho](https://github.com/wyuenho)
+
+## 0.3.2
+
+* Fix bug [#27](https://github.com/olivernn/lunr.js/pull/27) when trying to calculate tf with empty fields, thanks [Gambhiro](https://github.com/gambhiro)
+
 ## 0.3.1
 
 * Fix bug [#24](https://github.com/olivernn/lunr.js/pull/24) that caused an error when trying to remove a non-existant document from the index, thanks [Jesús Leganés Combarro](https://github.com/piranna)
