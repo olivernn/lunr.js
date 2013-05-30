@@ -53,7 +53,7 @@ test("adding an item to the pipeline after another item", function () {
   var pipeline = new lunr.Pipeline,
       fn1 = $.noop,
       fn2 = function () {},
-      fn3 = console.log
+      fn3 = function () {}
 
   pipeline.add(fn1, fn2)
   pipeline.after(fn1, fn3)

@@ -1,5 +1,6 @@
 
 SRC = lib/lunr.js \
+	lib/utils.js \
 	lib/tokenizer.js \
 	lib/pipeline.js \
 	lib/vector.js \
