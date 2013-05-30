@@ -120,7 +120,7 @@ test('triggering remove events', function () {
   deepEqual(callbackArgs[1], idx)
 })
 
-test('triggering remove events', function () {
+test('silencing remove events', function () {
   var idx = new lunr.Index,
       doc = {id: 1, body: 'this is a test'},
       callbackCalled = false,

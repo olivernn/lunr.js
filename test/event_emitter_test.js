@@ -47,6 +47,14 @@ test('emitting events', function () {
       callbackCalled = false,
       callbackArguments = [],
       callback = function () {
+        callbackArguments = Array.prototype.slice.call(arguments)
         callbackCalled = true
       }
+
+  emitter.emit('test', 1, 'a')
+  emitter.addListener('test', callback)
+  emitter.emit('test', 1, 'a')
+
+  ok(callbackCalled)
+  deepEqual(callbackArguments, [1, 'a'])
 })
