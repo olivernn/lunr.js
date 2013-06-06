@@ -22,8 +22,3 @@ test("calculating the similarity between two vectors", function () {
   equal(roundedSimilarity, 0.111)
 })
 
-test('zero filling vectors created with sparse arrays', function () {
-  var v1 = new lunr.Vector (new Array (10))
-  equal(v1.elements.length, 10)
-  ok(v1.elements.every(function (el) { return el !== undefined }))
-})

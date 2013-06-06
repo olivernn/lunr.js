@@ -54,9 +54,7 @@
 
       search = function (term) {
         console.time('search')
-        for (var i=0; i < 1000; i++) {
-          idx.search(term)
-        };
+        idx.search(term)
         console.timeEnd('search')
       }
 

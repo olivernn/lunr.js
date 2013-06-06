@@ -53,6 +53,8 @@ test('retrieving items from the store', function () {
   deepEqual(store.get(token), {
     '123': doc
   })
+
+  deepEqual(store.get(''), {})
 })
 
 test('retrieving items that do not exist in the store', function () {
