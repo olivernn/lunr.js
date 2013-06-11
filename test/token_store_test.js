@@ -63,6 +63,21 @@ test('retrieving items that do not exist in the store', function () {
   deepEqual(store.get('foo'), {})
 })
 
+test('counting items in the store', function () {
+  var store = new lunr.TokenStore,
+      doc1 = { ref: 123, tf: 1 },
+      doc2 = { ref: 456, tf: 1 },
+      doc3 = { ref: 789, tf: 1 }
+
+  store.add('foo', doc1)
+  store.add('foo', doc2)
+  store.add('bar', doc3)
+
+  equal(store.count('foo'), 2)
+  equal(store.count('bar'), 1)
+  equal(store.count('baz'), 0)
+})
+
 test('removing a document from the token store', function () {
   var store = new lunr.TokenStore,
       doc = { ref: 123, tf: 1 }
