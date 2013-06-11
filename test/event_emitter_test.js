@@ -10,6 +10,21 @@ test('adding an event listener', function () {
   ok(emitter.events.test.indexOf(handler) > -1)
 })
 
+test('adding a listener to multiple events', function () {
+  var emitter = new lunr.EventEmitter,
+      handler = function () {}
+
+  emitter.addListener('foo', 'bar', 'baz', handler)
+
+  ok('foo' in emitter.events)
+  ok('bar' in emitter.events)
+  ok('baz' in emitter.events)
+
+  ok(emitter.events.foo.indexOf(handler) > -1)
+  ok(emitter.events.bar.indexOf(handler) > -1)
+  ok(emitter.events.baz.indexOf(handler) > -1)
+})
+
 test('removing a single event listener', function () {
   var emitter = new lunr.EventEmitter,
       handler = function () {}
