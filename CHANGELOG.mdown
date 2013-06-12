@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+* Add index mutation events ('add', 'update' and 'remove').
+* Performance improvements to searching.
+* Penalise non-exact matches so exact matches are better ranked than expanded matches.
+
 ## 0.3.3
 
 * Fix bug [#32](https://github.com/olivernn/lunr.js/pull/32) which prevented lunr being used where a `console` object is not present, thanks [Tony Marklove](https://github.com/jjbananas) and [wyuenho](https://github.com/wyuenho)

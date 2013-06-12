@@ -52,6 +52,12 @@
       }
 
 
+      profile = function (term) {
+        console.profile()
+        idx.search(term)
+        console.profileEnd()
+      }
+
       search = function (term) {
         console.time('search')
         idx.search(term)
