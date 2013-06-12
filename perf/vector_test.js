@@ -1,30 +1,38 @@
-var suite = new Benchmark.Suite,
-    elements = []
+(function () {
 
-for (var i = 0; i < 1000; i++) {
-  elements[i] = Math.random() * 100
-};
+  var setup = function () {
+    var elements1 = lunr.Vector.oliver(10000),
+        elements2 = lunr.Vector.oliver(10000),
+        index
 
-suite.add('vector#magnitude', function () {
-  var vector = new lunr.Vector (elements)
-  vector.magnitude()
-})
+    for (var i = 0; i < 1000; i++) {
+      index = Math.floor(i + Math.random() * 100)
+      elements1[i] = Math.random() * 100
+    }
 
-suite.add('vector#dot', function () {
-  var v1 = new lunr.Vector(elements),
-      v2 = new lunr.Vector(elements)
+    for (var i = 0; i < 1000; i++) {
+      index = Math.floor(i + Math.random() * 100)
+      elements2[i] = Math.random() * 100
+    }
+  }
 
-  v1.dot(v2)
-})
+  bench('vector#magnitude', function () {
+    var vector = new lunr.Vector (elements1)
+    vector.magnitude
+  }, { setup: setup })
 
-suite.on('cycle', function (e) {
-  console.log(e.target.name)
-})
+  bench('vector#dot', function () {
+    var v1 = new lunr.Vector(elements1),
+        v2 = new lunr.Vector(elements2)
 
-suite.on('complete', function (e) {
-  suite.forEach(function (s) {
-    console.log(s.name, s.count)
-  })
-})
+    v1.dot(v2)
+  }, { setup: setup })
 
-suite.run({async: true})
+  bench('vector#similarity', function () {
+    var v1 = new lunr.Vector(elements1),
+        v2 = new lunr.Vector(elements2)
+
+    v1.similarity(v2)
+  }, { setup: setup })
+})()
+

@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.3.3
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.4.0
  * Copyright (C) 2013 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -50,7 +50,7 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.3.3"
+lunr.version = "0.4.0"
 
 if (typeof module !== 'undefined') {
   module.exports = lunr
@@ -78,6 +78,107 @@ lunr.utils.warn = (function (global) {
     }
   }
 })(this)
+
+/**
+ * Returns a zero filled array of the length specified.
+ *
+ * @param {Number} length The number of zeros required.
+ * @returns {Array}
+ * @memberOf Utils
+ */
+lunr.utils.zeroFillArray = (function () {
+  var zeros = [0]
+
+  return function (length) {
+    while (zeros.length < length) {
+      zeros = zeros.concat(zeros)
+    }
+
+    return zeros.slice(0, length)
+  }
+})()
+/*!
+ * lunr.EventEmitter
+ * Copyright (C) 2013 Oliver Nightingale
+ */
+
+/**
+ * lunr.EventEmitter is an event emitter for lunr. It manages adding and removing event handlers and triggering events and their handlers.
+ *
+ * @constructor
+ */
+lunr.EventEmitter = function () {
+  this.events = {}
+}
+
+/**
+ * Binds a handler function to a specific event(s).
+ *
+ * Can bind a single function to many different events in one call.
+ *
+ * @param {String} [eventName] The name(s) of events to bind this function to.
+ * @param {Function} handler The function to call when an event is fired.
+ * @memberOf EventEmitter
+ */
+lunr.EventEmitter.prototype.addListener = function () {
+  var args = Array.prototype.slice.call(arguments),
+      fn = args.pop(),
+      names = args
+
+  if (typeof fn !== "function") throw new TypeError ("last argument must be a function")
+
+  names.forEach(function (name) {
+    if (!this.hasHandler(name)) this.events[name] = []
+    this.events[name].push(fn)
+  }, this)
+}
+
+/**
+ * Removes a handler function from a specific event.
+ *
+ * @param {String} eventName The name of the event to remove this function from.
+ * @param {Function} handler The function to remove from an event.
+ * @memberOf EventEmitter
+ */
+lunr.EventEmitter.prototype.removeListener = function (name, fn) {
+  if (!this.hasHandler(name)) return
+
+  var fnIndex = this.events[name].indexOf(fn)
+  this.events[name].splice(fnIndex, 1)
+
+  if (!this.events[name].length) delete this.events[name]
+}
+
+/**
+ * Calls all functions bound to the given event.
+ *
+ * Additional data can be passed to the event handler as arguments to `emit`
+ * after the event name.
+ *
+ * @param {String} eventName The name of the event to emit.
+ * @memberOf EventEmitter
+ */
+lunr.EventEmitter.prototype.emit = function (name) {
+  if (!this.hasHandler(name)) return
+
+  var args = Array.prototype.slice.call(arguments, 1)
+
+  this.events[name].forEach(function (fn) {
+    fn.apply(undefined, args)
+  })
+}
+
+/**
+ * Checks whether a handler has ever been stored against an event.
+ *
+ * @param {String} eventName The name of the event to check.
+ * @private
+ * @memberOf EventEmitter
+ */
+lunr.EventEmitter.prototype.hasHandler = function (name) {
+  return name in this.events
+}
+
 /*!
  * lunr.tokenizer
  * Copyright (C) 2013 Oliver Nightingale
@@ -332,10 +433,6 @@ lunr.Pipeline.prototype.toJSON = function () {
  */
 lunr.Vector = function (elements) {
   this.elements = elements
-
-  for (var i = 0; i < elements.length; i++) {
-    if (!(i in this.elements)) this.elements[i] = 0
-  }
 }
 
 /**
@@ -659,8 +756,39 @@ lunr.Index = function () {
   this.documentStore = new lunr.Store
   this.tokenStore = new lunr.TokenStore
   this.corpusTokens = new lunr.SortedSet
+  this.eventEmitter =  new lunr.EventEmitter
+
+  this._idfCache = {}
+
+  this.on('add', 'remove', 'update', (function () {
+    this._idfCache = {}
+  }).bind(this))
 }
 
+/**
+ * Bind a handler to events being emitted by the index.
+ *
+ * The handler can be bound to many events at the same time.
+ *
+ * @param {String} [eventName] The name(s) of events to bind the function to.
+ * @param {Function} handler The serialised set to load.
+ * @memberOf Index
+ */
+lunr.Index.prototype.on = function () {
+  var args = Array.prototype.slice.call(arguments)
+  return this.eventEmitter.addListener.apply(this.eventEmitter, args)
+}
+
+/**
+ * Removes a handler from an event being emitted by the index.
+ *
+ * @param {String} eventName The name of events to remove the function from.
+ * @param {Function} handler The serialised set to load.
+ * @memberOf Index
+ */
+lunr.Index.prototype.off = function (name, fn) {
+  return this.eventEmitter.removeListener(name, fn)
+}
 
 /**
  * Loads a previously serialised index.
@@ -725,6 +853,7 @@ lunr.Index.prototype.field = function (fieldName, opts) {
  *
  * @param {String} refName The property to use to uniquely identify the
  * documents in the index.
+ * @param {Boolean} emitEvent Whether to emit add events, defaults to true
  * @returns {lunr.Index}
  * @memberOf Index
  */
@@ -740,13 +869,19 @@ lunr.Index.prototype.ref = function (refName) {
  * fields from the document through the index's pipeline and then add it to
  * the index, it will then show up in search results.
  *
+ * An 'add' event is emitted with the document that has been added and the index
+ * the document has been added to. This event can be silenced by passing false
+ * as the second argument to add.
+ *
  * @param {Object} doc The document to add to the index.
+ * @param {Boolean} emitEvent Whether or not to emit events, default true.
  * @memberOf Index
  */
-lunr.Index.prototype.add = function (doc) {
+lunr.Index.prototype.add = function (doc, emitEvent) {
   var docTokens = {},
       allDocumentTokens = new lunr.SortedSet,
-      docRef = doc[this._ref]
+      docRef = doc[this._ref],
+      emitEvent = emitEvent === undefined ? true : emitEvent
 
   this._fields.forEach(function (field) {
     var fieldTokens = this.pipeline.run(lunr.tokenizer(doc[field.name]))
@@ -772,6 +907,8 @@ lunr.Index.prototype.add = function (doc) {
 
     this.tokenStore.add(token, { ref: docRef, tf: tf })
   };
+
+  if (emitEvent) this.eventEmitter.emit('add', doc, this)
 }
 
 /**
@@ -784,11 +921,17 @@ lunr.Index.prototype.add = function (doc) {
  * document that was added to the index, they could be completely different
  * objects.
  *
+ * A 'remove' event is emitted with the document that has been removed and the index
+ * the document has been removed from. This event can be silenced by passing false
+ * as the second argument to remove.
+ *
  * @param {Object} doc The document to remove from the index.
+ * @param {Boolean} emitEvent Whether to emit remove events, defaults to true
  * @memberOf Index
  */
-lunr.Index.prototype.remove = function (doc) {
-  var docRef = doc[this._ref]
+lunr.Index.prototype.remove = function (doc, emitEvent) {
+  var docRef = doc[this._ref],
+      emitEvent = emitEvent === undefined ? true : emitEvent
 
   if (!this.documentStore.has(docRef)) return
 
@@ -799,6 +942,8 @@ lunr.Index.prototype.remove = function (doc) {
   docTokens.forEach(function (token) {
     this.tokenStore.remove(token, docRef)
   }, this)
+
+  if (emitEvent) this.eventEmitter.emit('remove', doc, this)
 }
 
 /**
@@ -810,14 +955,24 @@ lunr.Index.prototype.remove = function (doc) {
  *
  * This method is just a wrapper around `remove` and `add`
  *
+ * An 'update' event is emitted with the document that has been updated and the index.
+ * This event can be silenced by passing false as the second argument to update. Only
+ * an update event will be fired, the 'add' and 'remove' events of the underlying calls
+ * are silenced.
+ *
  * @param {Object} doc The document to update in the index.
+ * @param {Boolean} emitEvent Whether to emit update events, defaults to true
  * @see Index.prototype.remove
  * @see Index.prototype.add
  * @memberOf Index
  */
-lunr.Index.prototype.update = function (doc) {
-  this.remove(doc)
-  this.add(doc)
+lunr.Index.prototype.update = function (doc, emitEvent) {
+  var emitEvent = emitEvent === undefined ? true : emitEvent
+
+  this.remove(doc, false)
+  this.add(doc, false)
+
+  if (emitEvent) this.eventEmitter.emit('update', doc, this)
 }
 
 /**
@@ -829,13 +984,16 @@ lunr.Index.prototype.update = function (doc) {
  * @memberOf Index
  */
 lunr.Index.prototype.idf = function (term) {
-  var documentFrequency = Object.keys(this.tokenStore.get(term)).length
+  if (this._idfCache[term]) return this._idfCache[term]
 
-  if (documentFrequency === 0) {
-    return 1
-  } else {
-    return 1 + Math.log(this.tokenStore.length / documentFrequency)
+  var documentFrequency = this.tokenStore.count(term),
+      idf = 1
+
+  if (documentFrequency > 0) {
+    idf = 1 + Math.log(this.tokenStore.length / documentFrequency)
   }
+
+  return this._idfCache[term] = idf
 }
 
 /**
@@ -864,7 +1022,7 @@ lunr.Index.prototype.idf = function (term) {
  */
 lunr.Index.prototype.search = function (query) {
   var queryTokens = this.pipeline.run(lunr.tokenizer(query)),
-      queryArr = new Array (this.corpusTokens.length),
+      queryArr = lunr.utils.zeroFillArray(this.corpusTokens.length),
       documentSets = [],
       fieldBoosts = this._fields.reduce(function (memo, f) { return memo + f.boost }, 0)
 
@@ -882,13 +1040,21 @@ lunr.Index.prototype.search = function (query) {
       var set = this.tokenStore.expand(token).reduce(function (memo, key) {
         var pos = self.corpusTokens.indexOf(key),
             idf = self.idf(key),
-            exactMatchBoost = (key === token ? 10 : 1),
+            similarityBoost = 1,
             set = new lunr.SortedSet
 
+        // if the expanded key is not an exact match to the token then
+        // penalise the score for this key by how different the key is
+        // to the token.
+        if (key !== token) {
+          var diff = Math.max(3, key.length - token.length)
+          similarityBoost = 1 / Math.log(diff)
+        }
+
         // calculate the query tf-idf score for this token
-        // applying an exactMatchBoost to ensure these rank
-        // higher than expanded terms
-        if (pos > -1) queryArr[pos] = tf * idf * exactMatchBoost
+        // applying an similarityBoost to ensure exact matches
+        // these rank higher than expanded terms
+        if (pos > -1) queryArr[pos] = tf * idf * similarityBoost
 
         // add all the documents that have this key into a set
         Object.keys(self.tokenStore.get(key)).forEach(function (ref) { set.add(ref) })
@@ -931,7 +1097,7 @@ lunr.Index.prototype.search = function (query) {
 lunr.Index.prototype.documentVector = function (documentRef) {
   var documentTokens = this.documentStore.get(documentRef),
       documentTokensLength = documentTokens.length,
-      documentArr = new Array (this.corpusTokens.length)
+      documentArr = lunr.utils.zeroFillArray(this.corpusTokens.length)
 
   for (var i = 0; i < documentTokensLength; i++) {
     var token = documentTokens.elements[i],
@@ -1272,6 +1438,7 @@ lunr.stopWordFilter = function (token) {
 lunr.stopWordFilter.stopWords = new lunr.SortedSet
 lunr.stopWordFilter.stopWords.length = 119
 lunr.stopWordFilter.stopWords.elements = [
+  "",
   "a",
   "able",
   "about",
@@ -1466,18 +1633,18 @@ lunr.TokenStore.prototype.add = function (token, doc, root) {
  * @param {Object} root An optional node at which to start
  * @memberOf TokenStore
  */
-lunr.TokenStore.prototype.has = function (token, root) {
-  var root = root || this.root,
-      key = token[0],
-      rest = token.slice(1)
+lunr.TokenStore.prototype.has = function (token) {
+  if (!token) return false
 
-  if (!(key in root)) return false
+  var node = this.root
 
-  if (rest.length === 0) {
-    return true
-  } else {
-    return this.has(rest, root[key])
+  for (var i = 0; i < token.length; i++) {
+    if (!node[token[i]]) return false
+
+    node = node[token[i]]
   }
+
+  return true
 }
 
 /**
@@ -1492,18 +1659,18 @@ lunr.TokenStore.prototype.has = function (token, root) {
  * @see TokenStore.prototype.get
  * @memberOf TokenStore
  */
-lunr.TokenStore.prototype.getNode = function (token, root) {
-  var root = root || this.root,
-      key = token[0],
-      rest = token.slice(1)
+lunr.TokenStore.prototype.getNode = function (token) {
+  if (!token) return {}
 
-  if (!(key in root)) return {}
+  var node = this.root
 
-  if (rest.length === 0) {
-    return root[key]
-  } else {
-    return this.getNode(rest, root[key])
+  for (var i = 0; i < token.length; i++) {
+    if (!node[token[i]]) return {}
+
+    node = node[token[i]]
   }
+
+  return node
 }
 
 /**
@@ -1521,6 +1688,10 @@ lunr.TokenStore.prototype.get = function (token, root) {
   return this.getNode(token, root).docs || {}
 }
 
+lunr.TokenStore.prototype.count = function (token, root) {
+  return Object.keys(this.get(token, root)).length
+}
+
 /**
  * Remove the document identified by ref from the token in the store.
  *
@@ -1533,18 +1704,16 @@ lunr.TokenStore.prototype.get = function (token, root) {
  * @returns {Object}
  * @memberOf TokenStore
  */
-lunr.TokenStore.prototype.remove = function (token, ref, root) {
-  var root = root || this.root,
-      key = token[0],
-      rest = token.slice(1)
+lunr.TokenStore.prototype.remove = function (token, ref) {
+  if (!token) return
+  var node = this.root
 
-  if (!(key in root)) return
-
-  if (rest.length === 0) {
-    delete root[key].docs[ref]
-  } else {
-    return this.remove(rest, ref, root[key])
+  for (var i = 0; i < token.length; i++) {
+    if (!(token[i] in node)) return
+    node = node[token[i]]
   }
+
+  delete node.docs[ref]
 }
 
 /**

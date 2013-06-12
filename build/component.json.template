@@ -4,6 +4,7 @@
   "main": "lunr.js",
   "ignore": [
     "tests/",
+    "perf/",
     "build/",
     "docs/"
   ]
