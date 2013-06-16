@@ -16,7 +16,7 @@ module('search', {
       wordCount: 9
     },{
       id: 'c',
-      title: 'Scarlett helps Professor',
+      title: 'Scarlett helps Professor ',
       body: 'Miss Scarlett watered Professor Plumbs green plant while he was away from his office last week.',
       wordCount: 16
     },{
@@ -75,3 +75,24 @@ test('search boosts exact matches', function () {
 
   ok(results[0].score > results[1].score)
 })
+
+test('Search by OR based query',function() {
+  var results = this.idx.search('green study',lunr.query.OR)
+  equal(results.length,3)
+  equal(results[0].ref, 'a')
+
+  ok(results[0].score >= results[1].score)
+})
+
+test('Search by OR based query -  Atleast one term in index',function() {
+  var results = this.idx.search('fellow yahoooooo',lunr.query.OR)
+  equal(results.length,1)  
+})
+
+test('Search by OR based query - by boost',function() {
+  var results = this.idx.search('green Professor',lunr.query.OR)
+  equal(results.length,3)  
+  equal(results[0].ref, 'c')
+})
+
+
