@@ -9,9 +9,10 @@ test("splitting simple strings into tokens", function () {
 
 test('downcasing tokens', function () {
   var simpleString = 'FOO BAR',
-      tokens = lunr.tokenizer(simpleString)
+      tags = ['Foo', 'BAR']
 
-  deepEqual(tokens, ['foo', 'bar'])
+  deepEqual(lunr.tokenizer(simpleString), ['foo', 'bar'])
+  deepEqual(lunr.tokenizer(tags), ['foo', 'bar'])
 })
 
 test('handling arrays', function () {
