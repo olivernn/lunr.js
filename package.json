@@ -7,6 +7,11 @@
   "homepage": "http://lunrjs.com",
   "bugs": "http://github.com/olivernn/lunr.js/issues",
   "main": "lunr.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/olivernn/lunr.js.git"
+  },
   "devDependencies": {
     "phantomjs": "1.8.1-3"
   },
