@@ -10,6 +10,7 @@ SRC = lib/lunr.js \
 	lib/document_store.js \
 	lib/stemmer.js \
 	lib/stop_word_filter.js \
+	lib/trimmer.js \
 	lib/token_store.js
 
 YEAR = $(shell date +%Y)
