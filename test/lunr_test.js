@@ -10,9 +10,10 @@ test('should set up the pipeline', function () {
   var index = lunr(),
       stack = index.pipeline._stack
 
-  equal(stack.length, 2)
-  equal(stack.indexOf(lunr.stopWordFilter), 0)
-  equal(stack.indexOf(lunr.stemmer), 1)
+  equal(stack.length, 3)
+  equal(stack.indexOf(lunr.trimmer), 0)
+  equal(stack.indexOf(lunr.stopWordFilter), 1)
+  equal(stack.indexOf(lunr.stemmer), 2)
 })
 
 test('passing a config fn which is called with the new index', function () {
