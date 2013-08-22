@@ -171,3 +171,15 @@ test('loading an un-registered pipeline function', function () {
     lunr.Pipeline.load(serialised)
   })
 })
+
+test('resetting the pipeline', function () {
+  var fn1 = function () {},
+      fn2 = function () {},
+      pipeline = new lunr.Pipeline
+
+  pipeline.add(fn1, fn2)
+  deepEqual(pipeline._stack, [fn1, fn2])
+
+  pipeline.reset()
+  deepEqual(pipeline._stack, [])
+})
