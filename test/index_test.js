@@ -178,7 +178,7 @@ test('updating a document', function () {
 
 test('emitting update events', function () {
   var idx = new lunr.Index,
-      doc = {id: 1, body: 'foo'}
+      doc = {id: 1, body: 'foo'},
       addCallbackCalled = false,
       removeCallbackCalled = false,
       updateCallbackCalled = false,
@@ -217,7 +217,7 @@ test('emitting update events', function () {
 
 test('silencing update events', function () {
   var idx = new lunr.Index,
-      doc = {id: 1, body: 'foo'}
+      doc = {id: 1, body: 'foo'},
       callbackCalled = false
 
   idx.field('body')
