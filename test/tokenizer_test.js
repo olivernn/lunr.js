@@ -51,3 +51,18 @@ test('handling null as argument', function () {
   deepEqual(tokens, [])
 })
 
+test('calling to string on passed val', function () {
+  var date = new Date (Date.UTC(2013, 0, 1)),
+      obj = {
+        toString: function () { return 'custom object' }
+      }
+
+  equal(lunr.tokenizer(41), '41')
+  equal(lunr.tokenizer(false), 'false')
+  deepEqual(lunr.tokenizer(obj), ['custom', 'object'])
+
+  // slicing here to avoid asserting on the timezone part of the date
+  // that will be different whereever the test is run.
+  deepEqual(lunr.tokenizer(date).slice(0, 4), ['tue', 'jan', '01', '2013'])
+})
+
