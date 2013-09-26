@@ -1,0 +1,12 @@
+{
+  "name": "lunr",
+  "version": "0.4.2",
+  "repo": "samals/lunr.js",
+  "description": "A browser side text based searching.",
+  "main": "lunr.min.js",
+  "scripts": [
+    "lunr.min.js"
+  ],
+  "dependencies": {},
+  "development": {}
+}
