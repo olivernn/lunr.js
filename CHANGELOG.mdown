@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.3
+
+* Fix bug [#49](https://github.com/olivernn/lunr.js/issues/49) tokenizer should handle null and undefined as arguments, thanks [jona](https://github.com/jona).
+
 ## 0.4.2
 
 * Fix bug [#47](https://github.com/olivernn/lunr.js/issues/47) tokenizer converts its input to a string before trying to split it into tokens, thanks [mikhailkozlov](https://github.com/mikhailkozlov).

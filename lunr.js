@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.4.2
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.4.3
  * Copyright (C) 2013 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -50,7 +50,7 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.4.2"
+lunr.version = "0.4.3"
 
 if (typeof module !== 'undefined') {
   module.exports = lunr
@@ -193,7 +193,7 @@ lunr.EventEmitter.prototype.hasHandler = function (name) {
  * @returns {Array}
  */
 lunr.tokenizer = function (obj) {
-  if (!arguments.length) return []
+  if (!arguments.length || obj == null || obj == undefined) return []
   if (Array.isArray(obj)) return obj.map(function (t) { return t.toLowerCase() })
 
   var str = obj.toString().replace(/^\s+/, '')
