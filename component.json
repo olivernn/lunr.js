@@ -1,0 +1,14 @@
+{
+  "name": "lunr",
+  "repo": "olivernn/lunr.js",
+  "description": "Simple full-text search in your browser.",
+  "version": "0.4.3",
+  "keywords": [
+    "search"
+  ],
+  "main": "lunr.js",
+  "scripts": [
+    "lunr.js"
+  ],
+  "license": "MIT"
+}
