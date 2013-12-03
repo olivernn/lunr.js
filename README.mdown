@@ -87,4 +87,3 @@ The tests can also be run in the browser by starting the test server:
     make test_server
 
 This will start a server on port 3000, the tests are then available at '/test'
-
