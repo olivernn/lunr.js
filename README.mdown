@@ -70,7 +70,15 @@ Contributions are very welcome, to make the process as easy as possible please f
 
 A JavaScript runtime is required for building the library.
 
-Run the tests with, this will use phantomjs to run the tests:
+Install node dependencies with npm:
+
+    npm install
+
+Start the test server:
+
+    make test_serevr
+
+Then, run the tests with `make`. This uses phantomjs to run the tests:
 
     make test
 
