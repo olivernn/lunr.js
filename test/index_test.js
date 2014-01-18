@@ -262,7 +262,9 @@ test('serialising', function () {
     documentStore: 'documentStore',
     tokenStore: 'tokenStore',
     corpusTokens: 'corpusTokens',
-    pipeline: 'pipeline'
+    pipeline: 'pipeline',
+    tokenizer: 'tokenizer',
+    requireAllTerms: true
   })
 })
 
