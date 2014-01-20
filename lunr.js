@@ -1,6 +1,6 @@
 /**
  * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.4.3
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  * MIT Licensed
  * @license
  */
@@ -23,13 +23,18 @@
  *       this.field('title', 10)
  *       this.field('tags', 100)
  *       this.field('body')
- *       
+ *
  *       this.ref('cid')
- *       
+ *
  *       this.pipeline.add(function () {
  *         // some custom pipeline function
  *       })
- *       
+ *
+ *       //do this to set up with ngram matching for autocomplete style
+ *       this.tokenizer = lunr.trigramtokenizer
+ *       this.requireAllTerms = false
+ *       this.pipeline.clear()
+ *
  *     })
  *
  * @param {Function} config A function that will be called with the new instance
@@ -57,7 +62,7 @@ if (typeof module !== 'undefined') {
 }
 /*!
  * lunr.utils
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -99,7 +104,7 @@ lunr.utils.zeroFillArray = (function () {
 })()
 /*!
  * lunr.EventEmitter
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -180,40 +185,8 @@ lunr.EventEmitter.prototype.hasHandler = function (name) {
 }
 
 /*!
- * lunr.tokenizer
- * Copyright (C) 2013 Oliver Nightingale
- */
-
-/**
- * A function for splitting a string into tokens ready to be inserted into
- * the search index.
- *
- * @module
- * @param {String} obj The string to convert into tokens
- * @returns {Array}
- */
-lunr.tokenizer = function (obj) {
-  if (!arguments.length || obj == null || obj == undefined) return []
-  if (Array.isArray(obj)) return obj.map(function (t) { return t.toLowerCase() })
-
-  var str = obj.toString().replace(/^\s+/, '')
-
-  for (var i = str.length - 1; i >= 0; i--) {
-    if (/\S/.test(str.charAt(i))) {
-      str = str.substring(0, i + 1)
-      break
-    }
-  }
-
-  return str
-    .split(/\s+/)
-    .map(function (token) {
-      return token.replace(/^\W+/, '').replace(/\W+$/, '').toLowerCase()
-    })
-}
-/*!
  * lunr.Pipeline
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -277,14 +250,17 @@ lunr.Pipeline.registerFunction = function (fn, label) {
  * Warns if the function is not registered as a Pipeline function.
  *
  * @param {Function} fn The function to check for.
- * @private
+ * @returns {String} The registered string label of the function, or undefined.
  * @memberOf Pipeline
  */
 lunr.Pipeline.warnIfFunctionNotRegistered = function (fn) {
   var isRegistered = fn.label && (fn.label in this.registeredFunctions)
 
   if (!isRegistered) {
-    lunr.utils.warn('Function is not registered with pipeline. This may cause problems when serialising the index.\n', fn)
+    lunr.utils.warn('Function is not registered with pipeline. This may cause problems when serialising the index.\n', fn);
+    return undefined;
+  } else {
+    return fn.label;
   }
 }
 
@@ -419,9 +395,110 @@ lunr.Pipeline.prototype.toJSON = function () {
     return fn.label
   })
 }
+
+/**
+ * Clears out a pipeline, removing all functions.
+ *
+ * @memberOf Pipeline
+ */
+lunr.Pipeline.prototype.clear = function () {
+  this._stack = []
+}
+/*!
+ * lunr.tokenizer
+ * Copyright (C) 2014 Oliver Nightingale
+ */
+
+/**
+ * A function for splitting a string into tokens ready to be inserted into
+ * the search index.
+ *
+ * @module
+ * @param {String} obj The string to convert into tokens
+ * @returns {Array}
+ */
+lunr.tokenizer = function (obj) {
+  if (!arguments.length || obj == null || obj == undefined) return []
+  if (Array.isArray(obj)) return obj.map(function (t) { return t.toLowerCase() })
+
+  var str = obj.toString().replace(/^\s+/, '')
+
+  for (var i = str.length - 1; i >= 0; i--) {
+    if (/\S/.test(str.charAt(i))) {
+      str = str.substring(0, i + 1)
+      break
+    }
+  }
+
+  return str
+    .split(/\s+/)
+    .map(function (token) {
+      return token.replace(/^\W+/, '').replace(/\W+$/, '').toLowerCase()
+    })
+}
+
+lunr.Pipeline.registerFunction(lunr.tokenizer, 'tokenizer')
+/*!
+ * lunr.ngramtokenizer
+ * Copyright (C) 2014 Will Ballard
+ */
+
+/**
+ * A function making function for splitting a string into ngram
+ * tokens suitable for short string autocomplete indexing and fuzzy
+ * name matching.
+ *
+ * In order to effectively boost exact matches, a start character \u0002
+ * and an end character \u0003 are wrapped around the string and used
+ * in the ngrams. This causes a sequence of characters at the start of
+ * both a search query and a sought term to more tightly match than a similar
+ * series of characters elsewhere in sought terms.
+ *
+ * @module
+ * @param {Number} len Make character ngrams of this length
+ * @returns {Function}
+ */
+lunr.ngramtokenizer = function (len) {
+  return function(obj) {
+    if (!arguments.length || obj == null || obj == undefined) return []
+    if (Array.isArray(obj)) return obj.map(function (t) { return t.toLowerCase() })
+
+    var str = "\u0002" + obj.toString() + '\u0003';
+
+    if (str.length <= len) {
+      return [str.toLowerCase()];
+    } else {
+      var buffer = [];
+      for (var i = 0; i <= str.length - len; i++) {
+        buffer.push(str.slice(i, i + len).toLowerCase());
+      }
+      return buffer;
+    }
+  }
+}
+
+/**
+ * A tokenizer that indexes on character bigrams.
+ *
+ * @module
+ * @param {String} obj The string to convert into tokens
+ * @returns {Function}
+ */
+lunr.bigramtokenizer = lunr.ngramtokenizer(2)
+lunr.Pipeline.registerFunction(lunr.bigramtokenizer, 'bigramtokenizer')
+
+/**
+ * A tokenizer that indexes on character trigrams.
+ *
+ * @module
+ * @param {String} obj The string to convert into tokens
+ * @returns {Function}
+ */
+lunr.trigramtokenizer = lunr.ngramtokenizer(3)
+lunr.Pipeline.registerFunction(lunr.trigramtokenizer, 'trigramtokenizer')
 /*!
  * lunr.Vector
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -501,7 +578,7 @@ lunr.Vector.prototype.toArray = function () {
 }
 /*!
  * lunr.SortedSet
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -739,7 +816,7 @@ lunr.SortedSet.prototype.toJSON = function () {
 }
 /*!
  * lunr.Index
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -757,6 +834,8 @@ lunr.Index = function () {
   this.tokenStore = new lunr.TokenStore
   this.corpusTokens = new lunr.SortedSet
   this.eventEmitter =  new lunr.EventEmitter
+  this.tokenizer = lunr.tokenizer
+  this.requireAllTerms = true
 
   this._idfCache = {}
 
@@ -814,6 +893,7 @@ lunr.Index.load = function (serialisedData) {
   idx.tokenStore = lunr.TokenStore.load(serialisedData.tokenStore)
   idx.corpusTokens = lunr.SortedSet.load(serialisedData.corpusTokens)
   idx.pipeline = lunr.Pipeline.load(serialisedData.pipeline)
+  idx.tokenizer = lunr.Pipeline.registeredFunctions[serialisedData.tokenizer] || lunr.tokenizer
 
   return idx
 }
@@ -882,9 +962,10 @@ lunr.Index.prototype.add = function (doc, emitEvent) {
       allDocumentTokens = new lunr.SortedSet,
       docRef = doc[this._ref],
       emitEvent = emitEvent === undefined ? true : emitEvent
+      self = this
 
   this._fields.forEach(function (field) {
-    var fieldTokens = this.pipeline.run(lunr.tokenizer(doc[field.name]))
+    var fieldTokens = this.pipeline.run(self.tokenizer(doc[field.name]))
 
     docTokens[field.name] = fieldTokens
     lunr.SortedSet.prototype.add.apply(allDocumentTokens, fieldTokens)
@@ -1021,10 +1102,11 @@ lunr.Index.prototype.idf = function (term) {
  * @memberOf Index
  */
 lunr.Index.prototype.search = function (query) {
-  var queryTokens = this.pipeline.run(lunr.tokenizer(query)),
+  var queryTokens = this.pipeline.run(this.tokenizer(query)),
       queryArr = lunr.utils.zeroFillArray(this.corpusTokens.length),
       documentSets = [],
-      fieldBoosts = this._fields.reduce(function (memo, f) { return memo + f.boost }, 0)
+      fieldBoosts = this._fields.reduce(function (memo, f) { return memo + f.boost }, 0),
+      self = this
 
   var hasSomeToken = queryTokens.some(function (token) {
     return this.tokenStore.has(token)
@@ -1066,7 +1148,7 @@ lunr.Index.prototype.search = function (query) {
     }, this)
 
   var documentSet = documentSets.reduce(function (memo, set) {
-    return memo.intersect(set)
+    return self.requireAllTerms ? memo.intersect(set) : memo.union(set)
   })
 
   var queryVector = new lunr.Vector (queryArr)
@@ -1124,12 +1206,14 @@ lunr.Index.prototype.toJSON = function () {
     documentStore: this.documentStore.toJSON(),
     tokenStore: this.tokenStore.toJSON(),
     corpusTokens: this.corpusTokens.toJSON(),
-    pipeline: this.pipeline.toJSON()
+    pipeline: this.pipeline.toJSON(),
+    tokenizer: lunr.Pipeline.warnIfFunctionNotRegistered(this.tokenizer),
+    requireAllTerms: this.requireAllTerms
   }
 }
 /*!
  * lunr.Store
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -1225,7 +1309,7 @@ lunr.Store.prototype.toJSON = function () {
 
 /*!
  * lunr.stemmer
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt
  */
 
@@ -1416,7 +1500,7 @@ lunr.stemmer = (function(){
 lunr.Pipeline.registerFunction(lunr.stemmer, 'stemmer')
 /*!
  * lunr.stopWordFilter
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -1563,7 +1647,7 @@ lunr.stopWordFilter.stopWords.elements = [
 lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'stopWordFilter')
 /*!
  * lunr.stemmer
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt
  */
 
