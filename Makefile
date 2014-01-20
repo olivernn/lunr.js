@@ -2,8 +2,9 @@
 SRC = lib/lunr.js \
 	lib/utils.js \
 	lib/event_emitter.js \
-	lib/tokenizer.js \
 	lib/pipeline.js \
+	lib/tokenizer.js \
+	lib/ngramtokenizer.js \
 	lib/vector.js \
 	lib/sorted_set.js \
 	lib/index.js \
@@ -35,7 +36,7 @@ test_server:
 	node server.js 3000
 
 test:
-	phantomjs test/env/runner.js http://localhost:3000/test
+	PATH="./node_modules/.bin:${PATH}" phantomjs test/env/runner.js http://localhost:3000/test
 
 docs:
 	dox < lunr.js | dox-template -n lunr.js -r ${VERSION} > docs/index.html
