@@ -285,3 +285,33 @@ test('loading a serialised index', function () {
   deepEqual(idx._fields, serialisedData.fields)
   equal(idx._ref, 'id')
 })
+
+;(function() {
+
+  function _test(prop) {
+    var idx = new lunr.Index,
+      results
+
+    idx.field('body')
+    idx.add({
+      body: prop
+    })
+
+    results = idx.search(prop)
+    equal(results.length, 1, '[' + prop + '] results.length=1')
+    ok(!isNaN(results[0].score), '[' + prop + '] !isNaN(results[0].score)')
+  }
+
+  test('indexing Object.prototype properties which are all lowercase', function () {
+    ['constructor', '__proto__'].forEach(function(prop) {
+      _test(prop)
+    })
+  })
+
+  test('indexing Object.prototype properties which are not all lowercase', function () {
+    ['hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'].forEach(function(prop) {
+      _test(prop)
+    })
+  })
+
+}())
