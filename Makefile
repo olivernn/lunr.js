@@ -18,7 +18,7 @@ VERSION = $(shell cat VERSION)
 all: lunr.js lunr.min.js docs bower.json package.json component.json
 
 lunr.js: $(SRC)
-	cat $^ | \
+	for src in $^ ; do cat $$src; echo ";" ; done | \
 	sed "s/@YEAR/${YEAR}/" | \
 	sed "s/@VERSION/${VERSION}/" > $@
 
