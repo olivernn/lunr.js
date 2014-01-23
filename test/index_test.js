@@ -252,8 +252,11 @@ test('serialising', function () {
   idx.field('title', { boost: 10 })
   idx.field('body')
 
-  deepEqual(idx.toJSON(), {
-    version: '@VERSION', // this is what the lunr version is set to before being built
+  var actual = idx.toJSON()
+  delete actual.version
+  deepEqual(actual, {
+    // don't check for version equality as it differs between the unbuilt and built version
+    //version: '@VERSION', // this is what the lunr version is set to before being built
     fields: [
       { name: 'title', boost: 10 },
       { name: 'body', boost: 1 }
@@ -268,7 +271,8 @@ test('serialising', function () {
 
 test('loading a serialised index', function () {
   var serialisedData = {
-    version: '@VERSION', // this is what the lunr version is set to before being built
+    // don't check for version equality as it differs between the unbuilt and built version
+    //version: '@VERSION', // this is what the lunr version is set to before being built
     fields: [
       { name: 'title', boost: 10 },
       { name: 'body', boost: 1 }
