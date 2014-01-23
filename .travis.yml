@@ -1,8 +1,10 @@
 language: node_js
 before_script:
+  - chmod +x run_tests.sh
   - node server.js &
   - sleep 5
 node_js:
   - 0.8
 script:
-  - npm test
+  - "./run_tests.sh"
+
