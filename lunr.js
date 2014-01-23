@@ -1,6 +1,22 @@
+// https://github.com/umdjs/umd/blob/master/returnExports.js
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([], factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like enviroments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        // Browser globals
+        root.lunr = factory();
+    }
+}(this, function () {
+
 /**
  * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.4.3
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  * MIT Licensed
  * @license
  */
@@ -57,7 +73,7 @@ if (typeof module !== 'undefined') {
 }
 /*!
  * lunr.utils
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -99,7 +115,7 @@ lunr.utils.zeroFillArray = (function () {
 })()
 /*!
  * lunr.EventEmitter
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -181,7 +197,7 @@ lunr.EventEmitter.prototype.hasHandler = function (name) {
 
 /*!
  * lunr.tokenizer
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -213,7 +229,7 @@ lunr.tokenizer = function (obj) {
 }
 /*!
  * lunr.Pipeline
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -421,7 +437,7 @@ lunr.Pipeline.prototype.toJSON = function () {
 }
 /*!
  * lunr.Vector
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -501,7 +517,7 @@ lunr.Vector.prototype.toArray = function () {
 }
 /*!
  * lunr.SortedSet
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -739,7 +755,7 @@ lunr.SortedSet.prototype.toJSON = function () {
 }
 /*!
  * lunr.Index
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -1129,7 +1145,7 @@ lunr.Index.prototype.toJSON = function () {
 }
 /*!
  * lunr.Store
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -1225,7 +1241,7 @@ lunr.Store.prototype.toJSON = function () {
 
 /*!
  * lunr.stemmer
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt
  */
 
@@ -1416,7 +1432,7 @@ lunr.stemmer = (function(){
 lunr.Pipeline.registerFunction(lunr.stemmer, 'stemmer')
 /*!
  * lunr.stopWordFilter
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -1563,7 +1579,7 @@ lunr.stopWordFilter.stopWords.elements = [
 lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'stopWordFilter')
 /*!
  * lunr.stemmer
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt
  */
 
@@ -1753,4 +1769,8 @@ lunr.TokenStore.prototype.toJSON = function () {
     length: this.length
   }
 }
+
+    // https://github.com/umdjs/umd/blob/master/returnExports.js
+    return lunr;
+}));
 

@@ -1,5 +1,6 @@
 
-SRC = lib/lunr.js \
+SRC = lib/amd_intro.js \
+	lib/lunr.js \
 	lib/utils.js \
 	lib/event_emitter.js \
 	lib/tokenizer.js \
@@ -10,7 +11,8 @@ SRC = lib/lunr.js \
 	lib/document_store.js \
 	lib/stemmer.js \
 	lib/stop_word_filter.js \
-	lib/token_store.js
+	lib/token_store.js \
+	lib/amd_outro.js
 
 YEAR = $(shell date +%Y)
 VERSION = $(shell cat VERSION)
@@ -35,7 +37,10 @@ test_server:
 	node server.js 3000
 
 test:
-	phantomjs test/env/runner.js http://localhost:3000/test
+	phantomjs test/env/runner.js http://localhost:3000/test/index.html
+
+test_built:
+	phantomjs test/env/runner.js http://localhost:3000/test/index_built.html
 
 docs:
 	dox < lunr.js | dox-template -n lunr.js -r ${VERSION} > docs/index.html
