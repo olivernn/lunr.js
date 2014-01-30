@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.4
+
+* Fix bug [#64](https://github.com/olivernn/lunr.js/issues/64) idf cache should handle tokens with the same name as object properties, thanks [gitgrimbo](https://github.com/gitgrimbo).
+* Intersperse source files with a semicolon as part of the build process, fixes [#61](https://github.com/olivernn/lunr.js/issues/61), thanks [shyndman](https://github.com/shyndman).
+
 ## 0.4.3
 
 * Fix bug [#49](https://github.com/olivernn/lunr.js/issues/49) tokenizer should handle null and undefined as arguments, thanks [jona](https://github.com/jona).
