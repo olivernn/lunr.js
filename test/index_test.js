@@ -285,3 +285,22 @@ test('loading a serialised index', function () {
   deepEqual(idx._fields, serialisedData.fields)
   equal(idx._ref, 'id')
 })
+
+test('idf cache with reserved words', function () {
+  var idx = new lunr.Index
+
+  var troublesomeTokens = [
+    'constructor',
+    '__proto__',
+    'hasOwnProperty',
+    'isPrototypeOf',
+    'propertyIsEnumerable',
+    'toLocaleString',
+    'toString',
+    'valueOf'
+  ]
+
+  troublesomeTokens.forEach(function (token) {
+    equal(typeof(idx.idf(token)), 'number', 'Using token: ' + token)
+  })
+})
