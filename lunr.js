@@ -211,7 +211,7 @@ lunr.tokenizer = function (obj) {
   return str
     .split(/\s+/)
     .map(function (token) {
-      return token.replace(/^\W+/, '').replace(/\W+$/, '').toLowerCase()
+      return token.replace(/^[^<>\w]+/, '').replace(/[^<>\w]+$/, '').toLowerCase()
     })
 }
 ;

@@ -66,3 +66,14 @@ test('calling to string on passed val', function () {
   deepEqual(lunr.tokenizer(date).slice(0, 4), ['tue', 'jan', '01', '2013'])
 })
 
+test('ensuring tags are preserved', function() {
+  var testString = '<p>Login using your social account:</p>',
+      tokens = lunr.tokenizer(testString)
+
+  deepEqual(tokens, ['<p>login', 'using', 'your', 'social', 'account:</p>'])
+
+  var tagString = '<audio>',
+      tagToken = lunr.tokenizer(tagString)
+
+  deepEqual(tagToken, ['<audio>'])
+})
