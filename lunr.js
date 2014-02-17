@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.4.4
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.4.5
  * Copyright (C) 2014 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -50,7 +50,7 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.4.4"
+lunr.version = "0.4.5"
 
 if (typeof module !== 'undefined') {
   module.exports = lunr
@@ -992,7 +992,7 @@ lunr.Index.prototype.update = function (doc, emitEvent) {
  */
 lunr.Index.prototype.idf = function (term) {
   var cacheKey = "@" + term
-  if (Object.prototype.hasOwnProperty(this._idfCache, cacheKey)) return this._idfCache[cacheKey]
+  if (Object.prototype.hasOwnProperty.call(this._idfCache, cacheKey)) return this._idfCache[cacheKey]
 
   var documentFrequency = this.tokenStore.count(term),
       idf = 1
