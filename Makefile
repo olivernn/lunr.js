@@ -1,5 +1,6 @@
 
-SRC = lib/lunr.js \
+SRC = build/wrapper_start \
+	lib/lunr.js \
 	lib/utils.js \
 	lib/event_emitter.js \
 	lib/tokenizer.js \
@@ -10,7 +11,8 @@ SRC = lib/lunr.js \
 	lib/document_store.js \
 	lib/stemmer.js \
 	lib/stop_word_filter.js \
-	lib/token_store.js
+	lib/token_store.js \
+	build/wrapper_end
 
 YEAR = $(shell date +%Y)
 VERSION = $(shell cat VERSION)
