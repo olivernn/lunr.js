@@ -7,7 +7,7 @@ test('adding a token to the store', function () {
 
   store.add(token, doc)
 
-  ok(store.root['f']['o']['o']['docs'][123] === doc)
+  ok(store.store['foo'][123] === doc)
   equal(store.length, 1)
 })
 
@@ -20,8 +20,8 @@ test('adding another document to the token', function () {
   store.add(token, doc1)
   store.add(token, doc2)
 
-  ok(store.root['f']['o']['o']['docs'][123] === doc1)
-  ok(store.root['f']['o']['o']['docs'][456] === doc2)
+  ok(store.store['foo'][123] === doc1)
+  ok(store.store['foo'][456] === doc2)
 })
 
 test('checking if a token exists in the store', function () {
@@ -111,45 +111,103 @@ test('removing a document from a key that does not exist', function () {
   ok(!store.has('foo'))
 })
 
-test('expand a token into all descendent tokens', function () {
+test('expanding trailing wildcard', function () {
   var store = new lunr.TokenStore,
       doc = { ref: 123, tf: 1 }
 
+  store.add('tell', doc)
   store.add('hell', doc)
   store.add('hello', doc)
   store.add('help', doc)
+  store.add('heap', doc)
   store.add('held', doc)
   store.add('foo', doc)
   store.add('bar', doc)
 
-  var tokens = store.expand('hel')
-  deepEqual(tokens, ['hell', 'hello', 'help', 'held'])
+  var tokens = store.expand('hel*')
+
+  ok(tokens.indexOf('hell') > -1)
+  ok(tokens.indexOf('hello') > -1)
+  ok(tokens.indexOf('help') > -1)
+  ok(tokens.indexOf('held') > -1)
+
+  equal(tokens.length, 4)
+})
+
+test('expanding leading wildcard', function () {
+  var store = new lunr.TokenStore,
+      doc = { ref: 123, tf: 1 }
+
+  store.add('tell', doc)
+  store.add('hell', doc)
+  store.add('hello', doc)
+  store.add('help', doc)
+  store.add('heap', doc)
+  store.add('held', doc)
+  store.add('foo', doc)
+  store.add('bar', doc)
+
+  var tokens = store.expand("*ell")
+
+  ok(tokens.indexOf('tell') > -1)
+  ok(tokens.indexOf('hell') > -1)
+
+  equal(tokens.length, 2)
+})
+
+test('expanding inside wildcard', function () {
+  var store = new lunr.TokenStore,
+      doc = { ref: 123, tf: 1 }
+
+  store.add('tell', doc)
+  store.add('hell', doc)
+  store.add('hello', doc)
+  store.add('help', doc)
+  store.add('heap', doc)
+  store.add('held', doc)
+  store.add('foo', doc)
+  store.add('bar', doc)
+
+  var tokens = store.expand("he*p")
+
+  ok(tokens.indexOf('help') > -1)
+  ok(tokens.indexOf('heap') > -1)
+
+  equal(tokens.length, 2)
 })
 
 test('serialisation', function () {
   var store = new lunr.TokenStore
 
-  deepEqual(store.toJSON(), { root: { docs: {} }, length: 0 })
+  deepEqual(store.toJSON(), { store: {}, forwards: {}, backwards: {}})
 
   store.add('foo', { ref: 123, tf: 1 })
 
-  deepEqual(store.toJSON(),
-    {
-      root: {
-        docs: {},
-        f: {
-          docs: {},
-          o: {
-            docs: {},
-            o: {
-              docs: { 123: { ref: 123, tf: 1 } }
+  deepEqual(store.toJSON(), {
+    forwards: {
+      'f': {
+        'o': {
+          'o': {
+            '$$':1
             }
           }
         }
       },
-      length: 1
-    }
-  )
+      backwards: {
+        'o': {
+          'o': {
+            'f': {
+              '$$':1
+            }
+          }
+        }
+      },
+      store: {
+        'foo': {
+          123: { ref: 123, tf: 1 }
+        }
+      }
+    })
 })
 
 test('loading a serialised story', function () {
