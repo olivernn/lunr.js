@@ -1,37 +1,33 @@
 (function () {
 
   var setup = function () {
-    var elements1 = lunr.Vector.oliver(10000),
-        elements2 = lunr.Vector.oliver(10000),
-        index
+    var index, val
+
+    var v1 = new lunr.Vector,
+        v2 = new lunr.Vector
 
     for (var i = 0; i < 1000; i++) {
       index = Math.floor(i + Math.random() * 100)
-      elements1[i] = Math.random() * 100
+      val = Math.random() * 100
+      v1.insert(i, val)
     }
 
     for (var i = 0; i < 1000; i++) {
       index = Math.floor(i + Math.random() * 100)
-      elements2[i] = Math.random() * 100
+      val = Math.random() * 100
+      v2.insert(i, val)
     }
   }
 
   bench('vector#magnitude', function () {
-    var vector = new lunr.Vector (elements1)
-    vector.magnitude
+    v1.magnitude()
   }, { setup: setup })
 
   bench('vector#dot', function () {
-    var v1 = new lunr.Vector(elements1),
-        v2 = new lunr.Vector(elements2)
-
     v1.dot(v2)
   }, { setup: setup })
 
   bench('vector#similarity', function () {
-    var v1 = new lunr.Vector(elements1),
-        v2 = new lunr.Vector(elements2)
-
     v1.similarity(v2)
   }, { setup: setup })
 })()
