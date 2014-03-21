@@ -12,6 +12,8 @@ SRC = lib/lunr.js \
 	lib/stop_word_filter.js \
 	lib/trimmer.js \
 	lib/token_store.js \
+	lib/trie.js \
+	lib/token_store.js
 
 YEAR = $(shell date +%Y)
 VERSION = $(shell cat VERSION)

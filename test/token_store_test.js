@@ -179,11 +179,12 @@ test('expanding inside wildcard', function () {
 test('serialisation', function () {
   var store = new lunr.TokenStore
 
-  deepEqual(store.toJSON(), { store: {}, forwards: {}, backwards: {}})
+  deepEqual(store.toJSON(), { length: 0, store: {}, forwards: {}, backwards: {}})
 
   store.add('foo', { ref: 123, tf: 1 })
 
   deepEqual(store.toJSON(), {
+    length: 1,
     forwards: {
       'f': {
         'o': {
@@ -212,16 +213,27 @@ test('serialisation', function () {
 
 test('loading a serialised story', function () {
   var serialisedData = {
-    root: {
-      docs: {},
+    forwards: {
       f: {
-        docs: {},
         o: {
-          docs: {},
           o: {
-            docs: { 123: { ref: 123, tf: 1 } }
+            $$: 1
           }
         }
+      }
+    },
+    backwards: {
+      o: {
+        o: {
+          f: {
+            $$: 1
+          }
+        }
+      }
+    },
+    store: {
+      foo: {
+        123: { tf: 1, ref: 123 }
       }
     },
     length: 1
