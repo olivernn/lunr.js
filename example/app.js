@@ -32,8 +32,9 @@ require([
     console.timeEnd('search')
   }
 
+  var indexDump = JSON.parse(indexDump)
   console.time('load')
-  window.idx = lunr.Index.load(JSON.parse(indexDump))
+  window.idx = lunr.Index.load(indexDump)
   console.timeEnd('load')
 
   var questions = JSON.parse(data).questions.map(function (raw) {
