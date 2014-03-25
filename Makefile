@@ -1,6 +1,5 @@
 
-SRC = build/wrapper_start \
-	lib/lunr.js \
+SRC = lib/lunr.js \
 	lib/utils.js \
 	lib/event_emitter.js \
 	lib/tokenizer.js \
@@ -13,40 +12,56 @@ SRC = build/wrapper_start \
 	lib/stop_word_filter.js \
 	lib/trimmer.js \
 	lib/token_store.js \
-	build/wrapper_end
 
 YEAR = $(shell date +%Y)
 VERSION = $(shell cat VERSION)
 
-all: lunr.js lunr.min.js docs bower.json package.json component.json
+SERVER_PORT ?= 3000
+TEST_PORT ?= 32423
+
+DOX ?= /usr/local/bin/dox
+DOX_TEMPLATE ?= /usr/local/bin/dox-template
+NODE ?= /usr/local/bin/node
+PHANTOMJS ?= /usr/local/bin/phantomjs
+UGLIFYJS ?= /usr/local/share/npm/bin/uglifyjs
+
+all: lunr.js lunr.min.js docs bower.json package.json component.json example
 
 lunr.js: $(SRC)
-	for src in $^ ; do cat $$src; echo ";" ; done | \
+	cat build/wrapper_start $^ build/wrapper_end | \
 	sed "s/@YEAR/${YEAR}/" | \
 	sed "s/@VERSION/${VERSION}/" > $@
 
 lunr.min.js: lunr.js
-	uglifyjs --compress --mangle --comments < $< > $@
+	${UGLIFYJS} --compress --mangle --comments < $< > $@
 
 %.json: build/%.json.template
 	cat $< | sed "s/@VERSION/${VERSION}/" > $@
 
 size: lunr.min.js
-	gzip -c lunr.min.js | wc -c
+	@gzip -c lunr.min.js | wc -c
 
 test_server:
-	node server.js 3000
+	${NODE} server.js ${SERVER_PORT}
 
 test:
-	phantomjs test/env/runner.js http://localhost:3000/test
+	@${NODE} server.js ${TEST_PORT} > /dev/null 2>&1 & echo "$$!" > server.pid
+	@${PHANTOMJS} test/env/runner.js http://localhost:${TEST_PORT}/test 2> /dev/null
+	@cat server.pid | xargs kill
+	@rm server.pid
 
 docs:
-	dox < lunr.js | dox-template -n lunr.js -r ${VERSION} > docs/index.html
+	${DOX} < lunr.js | ${DOX_TEMPLATE} -n lunr.js -r ${VERSION} > docs/index.html
 
 clean:
 	rm -f lunr{.min,}.js
-	rm bower.json
-	rm package.json
-	rm component.json
+	rm *.json
+	rm example/example_index.json
 
-.PHONY: test clean docs
+reset:
+	git checkout lunr.* *.json docs/index.html example/example_index.json
+
+example: lunr.min.js
+	${NODE} example/index_builder.js
+
+.PHONY: test clean docs reset example
