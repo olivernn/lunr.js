@@ -1,9 +1,11 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.4.3
- * Copyright (C) 2013 Oliver Nightingale
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.0
+ * Copyright (C) 2014 Oliver Nightingale
  * MIT Licensed
  * @license
  */
+
+(function(){
 
 /**
  * Convenience function for instantiating a new lunr index and configuring it
@@ -43,21 +45,21 @@
 var lunr = function (config) {
   var idx = new lunr.Index
 
-  idx.pipeline.add(lunr.stopWordFilter, lunr.stemmer)
+  idx.pipeline.add(
+    lunr.trimmer,
+    lunr.stopWordFilter,
+    lunr.stemmer
+  )
 
   if (config) config.call(idx, idx)
 
   return idx
 }
 
-lunr.version = "0.4.3"
-
-if (typeof module !== 'undefined') {
-  module.exports = lunr
-}
+lunr.version = "0.5.0"
 /*!
  * lunr.utils
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -79,27 +81,9 @@ lunr.utils.warn = (function (global) {
   }
 })(this)
 
-/**
- * Returns a zero filled array of the length specified.
- *
- * @param {Number} length The number of zeros required.
- * @returns {Array}
- * @memberOf Utils
- */
-lunr.utils.zeroFillArray = (function () {
-  var zeros = [0]
-
-  return function (length) {
-    while (zeros.length < length) {
-      zeros = zeros.concat(zeros)
-    }
-
-    return zeros.slice(0, length)
-  }
-})()
 /*!
  * lunr.EventEmitter
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -181,7 +165,7 @@ lunr.EventEmitter.prototype.hasHandler = function (name) {
 
 /*!
  * lunr.tokenizer
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -208,12 +192,12 @@ lunr.tokenizer = function (obj) {
   return str
     .split(/\s+/)
     .map(function (token) {
-      return token.replace(/^\W+/, '').replace(/\W+$/, '').toLowerCase()
+      return token.toLowerCase()
     })
 }
 /*!
  * lunr.Pipeline
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -405,6 +389,15 @@ lunr.Pipeline.prototype.run = function (tokens) {
 }
 
 /**
+ * Resets the pipeline by removing any existing processors.
+ *
+ * @memberOf Pipeline
+ */
+lunr.Pipeline.prototype.reset = function () {
+  this._stack = []
+}
+
+/**
  * Returns a representation of the pipeline ready for serialisation.
  *
  * Logs a warning if the function has not been registered.
@@ -421,18 +414,67 @@ lunr.Pipeline.prototype.toJSON = function () {
 }
 /*!
  * lunr.Vector
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
- * lunr.Vectors wrap arrays and add vector related operations for the array
- * elements.
+ * lunr.Vectors implement vector related operations for
+ * a series of elements.
  *
  * @constructor
- * @param {Array} elements Elements that make up the vector.
  */
-lunr.Vector = function (elements) {
-  this.elements = elements
+lunr.Vector = function () {
+  this._magnitude = null
+  this.list = undefined
+  this.length = 0
+}
+
+/**
+ * lunr.Vector.Node is a simple struct for each node
+ * in a lunr.Vector.
+ *
+ * @private
+ * @param {Number} The index of the node in the vector.
+ * @param {Object} The data at this node in the vector.
+ * @param {lunr.Vector.Node} The node directly after this node in the vector.
+ * @constructor
+ * @memberOf Vector
+ */
+lunr.Vector.Node = function (idx, val, next) {
+  this.idx = idx
+  this.val = val
+  this.next = next
+}
+
+/**
+ * Inserts a new value at a position in a vector.
+ *
+ * @param {Number} The index at which to insert a value.
+ * @param {Object} The object to insert in the vector.
+ * @memberOf Vector.
+ */
+lunr.Vector.prototype.insert = function (idx, val) {
+  var list = this.list
+
+  if (!list) {
+    this.list = new lunr.Vector.Node (idx, val, list)
+    return this.length++
+  }
+
+  var prev = list,
+      next = list.next
+
+  while (next != undefined) {
+    if (idx < next.idx) {
+      prev.next = new lunr.Vector.Node (idx, val, next)
+      return this.length++
+    }
+
+    prev = next, next = next.next
+  }
+
+  prev.next = new lunr.Vector.Node (idx, val, next)
+  return this.length++
 }
 
 /**
@@ -442,17 +484,16 @@ lunr.Vector = function (elements) {
  * @memberOf Vector
  */
 lunr.Vector.prototype.magnitude = function () {
-  if (this._magnitude) return this._magnitude
+  if (this._magniture) return this._magnitude
+  var node = this.list,
+      sumOfSquares = 0,
+      val
 
-  var sumOfSquares = 0,
-      elems = this.elements,
-      len = elems.length,
-      el
-
-  for (var i = 0; i < len; i++) {
-    el = elems[i]
-    sumOfSquares += el * el
-  };
+  while (node) {
+    val = node.val
+    sumOfSquares += val * val
+    node = node.next
+  }
 
   return this._magnitude = Math.sqrt(sumOfSquares)
 }
@@ -465,14 +506,21 @@ lunr.Vector.prototype.magnitude = function () {
  * @memberOf Vector
  */
 lunr.Vector.prototype.dot = function (otherVector) {
-  var elem1 = this.elements,
-      elem2 = otherVector.elements,
-      length = elem1.length,
+  var node = this.list,
+      otherNode = otherVector.list,
       dotProduct = 0
 
-  for (var i = 0; i < length; i++) {
-    dotProduct += elem1[i] * elem2[i]
-  };
+  while (node && otherNode) {
+    if (node.idx < otherNode.idx) {
+      node = node.next
+    } else if (node.idx > otherNode.idx) {
+      otherNode = otherNode.next
+    } else {
+      dotProduct += node.val * otherNode.val
+      node = node.next
+      otherNode = otherNode.next
+    }
+  }
 
   return dotProduct
 }
@@ -489,19 +537,9 @@ lunr.Vector.prototype.dot = function (otherVector) {
 lunr.Vector.prototype.similarity = function (otherVector) {
   return this.dot(otherVector) / (this.magnitude() * otherVector.magnitude())
 }
-
-/**
- * Converts this vector back into an array.
- *
- * @returns {Array}
- * @memberOf Vector
- */
-lunr.Vector.prototype.toArray = function () {
-  return this.elements
-}
 /*!
  * lunr.SortedSet
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -739,7 +777,7 @@ lunr.SortedSet.prototype.toJSON = function () {
 }
 /*!
  * lunr.Index
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -984,7 +1022,8 @@ lunr.Index.prototype.update = function (doc, emitEvent) {
  * @memberOf Index
  */
 lunr.Index.prototype.idf = function (term) {
-  if (this._idfCache[term]) return this._idfCache[term]
+  var cacheKey = "@" + term
+  if (Object.prototype.hasOwnProperty.call(this._idfCache, cacheKey)) return this._idfCache[cacheKey]
 
   var documentFrequency = this.tokenStore.count(term),
       idf = 1
@@ -993,7 +1032,7 @@ lunr.Index.prototype.idf = function (term) {
     idf = 1 + Math.log(this.tokenStore.length / documentFrequency)
   }
 
-  return this._idfCache[term] = idf
+  return this._idfCache[cacheKey] = idf
 }
 
 /**
@@ -1022,7 +1061,7 @@ lunr.Index.prototype.idf = function (term) {
  */
 lunr.Index.prototype.search = function (query) {
   var queryTokens = this.pipeline.run(lunr.tokenizer(query)),
-      queryArr = lunr.utils.zeroFillArray(this.corpusTokens.length),
+      queryVector = new lunr.Vector,
       documentSets = [],
       fieldBoosts = this._fields.reduce(function (memo, f) { return memo + f.boost }, 0)
 
@@ -1054,7 +1093,7 @@ lunr.Index.prototype.search = function (query) {
         // calculate the query tf-idf score for this token
         // applying an similarityBoost to ensure exact matches
         // these rank higher than expanded terms
-        if (pos > -1) queryArr[pos] = tf * idf * similarityBoost
+        if (pos > -1) queryVector.insert(pos, tf * idf * similarityBoost)
 
         // add all the documents that have this key into a set
         Object.keys(self.tokenStore.get(key)).forEach(function (ref) { set.add(ref) })
@@ -1068,8 +1107,6 @@ lunr.Index.prototype.search = function (query) {
   var documentSet = documentSets.reduce(function (memo, set) {
     return memo.intersect(set)
   })
-
-  var queryVector = new lunr.Vector (queryArr)
 
   return documentSet
     .map(function (ref) {
@@ -1097,17 +1134,17 @@ lunr.Index.prototype.search = function (query) {
 lunr.Index.prototype.documentVector = function (documentRef) {
   var documentTokens = this.documentStore.get(documentRef),
       documentTokensLength = documentTokens.length,
-      documentArr = lunr.utils.zeroFillArray(this.corpusTokens.length)
+      documentVector = new lunr.Vector
 
   for (var i = 0; i < documentTokensLength; i++) {
     var token = documentTokens.elements[i],
         tf = this.tokenStore.get(token)[documentRef].tf,
         idf = this.idf(token)
 
-    documentArr[this.corpusTokens.indexOf(token)] = tf * idf
+    documentVector.insert(this.corpusTokens.indexOf(token), tf * idf)
   };
 
-  return new lunr.Vector (documentArr)
+  return documentVector
 }
 
 /**
@@ -1127,9 +1164,41 @@ lunr.Index.prototype.toJSON = function () {
     pipeline: this.pipeline.toJSON()
   }
 }
+
+/**
+ * Applies a plugin to the current index.
+ *
+ * A plugin is a function that is called with the index as its context.
+ * Plugins can be used to customise or extend the behaviour the index
+ * in some way. A plugin is just a function, that encapsulated the custom
+ * behaviour that should be applied to the index.
+ *
+ * The plugin function will be called with the index as its argument, additional
+ * arguments can also be passed when calling use. The function will be called
+ * with the index as its context.
+ *
+ * Example:
+ *
+ *     var myPlugin = function (idx, arg1, arg2) {
+ *       // `this` is the index to be extended
+ *       // apply any extensions etc here.
+ *     }
+ *
+ *     var idx = lunr(function () {
+ *       this.use(myPlugin, 'arg1', 'arg2')
+ *     })
+ *
+ * @param {Function} plugin The plugin to apply.
+ * @memberOf Index
+ */
+lunr.Index.prototype.use = function (plugin) {
+  var args = Array.prototype.slice.call(arguments, 1)
+  args.unshift(this)
+  plugin.apply(this, args)
+}
 /*!
  * lunr.Store
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -1225,7 +1294,7 @@ lunr.Store.prototype.toJSON = function () {
 
 /*!
  * lunr.stemmer
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt
  */
 
@@ -1416,7 +1485,7 @@ lunr.stemmer = (function(){
 lunr.Pipeline.registerFunction(lunr.stemmer, 'stemmer')
 /*!
  * lunr.stopWordFilter
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  */
 
 /**
@@ -1562,8 +1631,34 @@ lunr.stopWordFilter.stopWords.elements = [
 
 lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'stopWordFilter')
 /*!
+ * lunr.trimmer
+ * Copyright (C) 2014 Oliver Nightingale
+ */
+
+/**
+ * lunr.trimmer is a pipeline function for trimming non word
+ * characters from the begining and end of tokens before they
+ * enter the index.
+ *
+ * This implementation may not work correctly for non latin
+ * characters and should either be removed or adapted for use
+ * with languages with non-latin characters.
+ *
+ * @module
+ * @param {String} token The token to pass through the filter
+ * @returns {String}
+ * @see lunr.Pipeline
+ */
+lunr.trimmer = function (token) {
+  return token
+    .replace(/^\W+/, '')
+    .replace(/\W+$/, '')
+}
+
+lunr.Pipeline.registerFunction(lunr.trimmer, 'trimmer')
+/*!
  * lunr.stemmer
- * Copyright (C) 2013 Oliver Nightingale
+ * Copyright (C) 2014 Oliver Nightingale
  * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt
  */
 
@@ -1754,3 +1849,32 @@ lunr.TokenStore.prototype.toJSON = function () {
   }
 }
 
+
+  /**
+   * export the module via AMD, CommonnJS or as a browser global
+   * Export code from https://github.com/umdjs/umd/blob/master/returnExports.js
+   */
+  ;(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+      // AMD. Register as an anonymous module.
+      define(factory)
+    } else if (typeof exports === 'object') {
+      /**
+       * Node. Does not work with strict CommonJS, but
+       * only CommonJS-like enviroments that support module.exports,
+       * like Node.
+       */
+      module.exports = factory()
+    } else {
+      // Browser globals (root is window)
+      root.lunr = factory()
+    }
+  }(this, function () {
+    /**
+     * Just return a value to define the module export.
+     * This example returns an object, but the module
+     * can return a function as the exported value.
+     */
+    return lunr
+  }))
+})()
