@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+* Add plugin support to enable i18n and other extensions to lunr.
+* Add AMD support [#72](https://github.com/olivernn/lunr.js/issues/72) thanks [lnwdr](https://github.com/lnwdr).
+* lunr.Vector now implemented using linked lists for better performance especially in indexes with large numbers of unique tokens.
+* Build system clean up.
+
 ## 0.4.5
 
 * Fix performance regression introduced in 0.4.4 by fixing #64.
