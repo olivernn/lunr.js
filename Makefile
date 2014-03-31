@@ -19,11 +19,11 @@ VERSION = $(shell cat VERSION)
 SERVER_PORT ?= 3000
 TEST_PORT ?= 32423
 
-DOX ?= /usr/local/bin/dox
-DOX_TEMPLATE ?= /usr/local/bin/dox-template
+DOX ?= ./node_modules/.bin/dox
+DOX_TEMPLATE ?= ./node_modules/.bin/dox-template
 NODE ?= /usr/local/bin/node
-PHANTOMJS ?= /usr/local/bin/phantomjs
-UGLIFYJS ?= /usr/local/share/npm/bin/uglifyjs
+PHANTOMJS ?= ./node_modules/.bin/phantomjs
+UGLIFYJS ?= ./node_modules/.bin/uglifyjs
 
 all: lunr.js lunr.min.js docs bower.json package.json component.json example
 
