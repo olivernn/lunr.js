@@ -70,7 +70,15 @@ Contributions are very welcome, to make the process as easy as possible please f
 
 A JavaScript runtime is required for building the library.
 
-Run the tests with, this will use phantomjs to run the tests:
+Install node dependencies with npm:
+
+    npm install
+
+Start the test server:
+
+    make test_serevr
+
+Then, run the tests with `make`. This uses phantomjs to run the tests:
 
     make test
 
@@ -79,4 +87,3 @@ The tests can also be run in the browser by starting the test server:
     make test_server
 
 This will start a server on port 3000, the tests are then available at '/test'
-
