@@ -18,7 +18,7 @@ module('serialisation', {
 
 test('dumping and loading an index', function () {
   var idx = new lunr.Index
-
+  idx.useTokenMetadata = false
   idx.field('title', { boost: 10 })
   idx.field('body')
 
@@ -35,6 +35,7 @@ test('dumping and loading an index with a populated pipeline', function () {
     this.field('title', { boost: 10 })
     this.field('body')
   })
+  idx.useTokenMetadata = false
 
   this.corpus.forEach(function (doc) { idx.add(doc) })
 

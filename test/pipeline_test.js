@@ -107,7 +107,7 @@ test("run should return the result of running the entire pipeline on each elemen
   var pipeline = new lunr.Pipeline,
       fn1 = function (t1) { return t1.toUpperCase() }
   pipeline.add(fn1)
-  deepEqual(pipeline.run(['a']), ['A'])
+  deepEqual(pipeline.run(['a']).indexTokens(), ['A'])
 })
 
 test("run should filter out any undefined values at each stage in the pipeline", function () {
