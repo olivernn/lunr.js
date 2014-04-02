@@ -8,6 +8,8 @@ require([
   'text!example_index.json'
 ], function (_, Mustache, lunr, questionView, questionList, data, indexDump) {
 
+window.lunr = lunr
+
   var renderQuestionList = function (qs) {
     $("#question-list-container")
       .empty()
