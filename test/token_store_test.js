@@ -3,7 +3,7 @@ module('lunr.TokenStore')
 test('adding a token to the store', function () {
   var store = new lunr.TokenStore,
       doc = { ref: 123, tf: 1 },
-      token = 'foo'
+      token = new lunr.Token ('foo')
 
   store.add(token, doc)
 
@@ -15,7 +15,7 @@ test('adding another document to the token', function () {
   var store = new lunr.TokenStore,
       doc1 = { ref: 123, tf: 1 },
       doc2 = { ref: 456, tf: 1 },
-      token = 'foo'
+      token = new lunr.Token ('foo')
 
   store.add(token, doc1)
   store.add(token, doc2)
@@ -27,7 +27,7 @@ test('adding another document to the token', function () {
 test('checking if a token exists in the store', function () {
   var store = new lunr.TokenStore,
       doc = { ref: 123, tf: 1 },
-      token = 'foo'
+      token = new lunr.Token ('foo')
 
   store.add(token, doc)
 
@@ -37,7 +37,7 @@ test('checking if a token exists in the store', function () {
 test('checking if a token does not exist in the store', function () {
   var store = new lunr.TokenStore,
       doc = { ref: 123, tf: 1 },
-      token = 'foo'
+      token = new lunr.Token ('foo')
 
   ok(!store.has('bar'))
   store.add(token, doc)
@@ -47,7 +47,7 @@ test('checking if a token does not exist in the store', function () {
 test('retrieving items from the store', function () {
   var store = new lunr.TokenStore,
       doc = { ref: 123, tf: 1 },
-      token = 'foo'
+      token = new lunr.Token ('foo')
 
   store.add(token, doc)
   deepEqual(store.get(token), {
@@ -115,16 +115,16 @@ test('expanding trailing wildcard', function () {
   var store = new lunr.TokenStore,
       doc = { ref: 123, tf: 1 }
 
-  store.add('tell', doc)
-  store.add('hell', doc)
-  store.add('hello', doc)
-  store.add('help', doc)
-  store.add('heap', doc)
-  store.add('held', doc)
-  store.add('foo', doc)
-  store.add('bar', doc)
+  store.add(new lunr.Token ('tell'), doc)
+  store.add(new lunr.Token ('hell'), doc)
+  store.add(new lunr.Token ('hello'), doc)
+  store.add(new lunr.Token ('help'), doc)
+  store.add(new lunr.Token ('heap'), doc)
+  store.add(new lunr.Token ('held'), doc)
+  store.add(new lunr.Token ('foo'), doc)
+  store.add(new lunr.Token ('bar'), doc)
 
-  var tokens = store.expand('hel*')
+  var tokens = store.expand(new lunr.Token ('hel*'))
 
   ok(tokens.indexOf('hell') > -1)
   ok(tokens.indexOf('hello') > -1)
@@ -138,16 +138,16 @@ test('expanding leading wildcard', function () {
   var store = new lunr.TokenStore,
       doc = { ref: 123, tf: 1 }
 
-  store.add('tell', doc)
-  store.add('hell', doc)
-  store.add('hello', doc)
-  store.add('help', doc)
-  store.add('heap', doc)
-  store.add('held', doc)
-  store.add('foo', doc)
-  store.add('bar', doc)
+  store.add(new lunr.Token ('tell'), doc)
+  store.add(new lunr.Token ('hell'), doc)
+  store.add(new lunr.Token ('hello'), doc)
+  store.add(new lunr.Token ('help'), doc)
+  store.add(new lunr.Token ('heap'), doc)
+  store.add(new lunr.Token ('held'), doc)
+  store.add(new lunr.Token ('foo'), doc)
+  store.add(new lunr.Token ('bar'), doc)
 
-  var tokens = store.expand("*ell")
+  var tokens = store.expand(new lunr.Token ('*ell'))
 
   ok(tokens.indexOf('tell') > -1)
   ok(tokens.indexOf('hell') > -1)
@@ -159,16 +159,16 @@ test('expanding inside wildcard', function () {
   var store = new lunr.TokenStore,
       doc = { ref: 123, tf: 1 }
 
-  store.add('tell', doc)
-  store.add('hell', doc)
-  store.add('hello', doc)
-  store.add('help', doc)
-  store.add('heap', doc)
-  store.add('held', doc)
-  store.add('foo', doc)
-  store.add('bar', doc)
+  store.add(new lunr.Token ('tell'), doc)
+  store.add(new lunr.Token ('hell'), doc)
+  store.add(new lunr.Token ('hello'), doc)
+  store.add(new lunr.Token ('help'), doc)
+  store.add(new lunr.Token ('heap'), doc)
+  store.add(new lunr.Token ('held'), doc)
+  store.add(new lunr.Token ('foo'), doc)
+  store.add(new lunr.Token ('bar'), doc)
 
-  var tokens = store.expand("he*p")
+  var tokens = store.expand(new lunr.Token ('he*p'))
 
   ok(tokens.indexOf('help') > -1)
   ok(tokens.indexOf('heap') > -1)

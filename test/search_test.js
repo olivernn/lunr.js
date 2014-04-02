@@ -68,7 +68,7 @@ test('search takes into account boosts', function () {
 })
 
 test('search boosts exact matches', function () {
-  var results = this.idx.search('hand')
+  var results = this.idx.search('hand*')
 
   equal(results.length, 2)
   equal(results[0].ref, 'e')
