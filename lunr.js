@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.0
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.1
  * Copyright (C) 2014 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -56,7 +56,7 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.5.0"
+lunr.version = "0.5.1"
 /*!
  * lunr.utils
  * Copyright (C) 2014 Oliver Nightingale
