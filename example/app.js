@@ -1,6 +1,6 @@
 require([
-  'example/jquery.js',
-  'example/mustache.js',
+  '/example/jquery.js',
+  '/example/mustache.js',
   '../lunr.js',
   'text!templates/question_view.mustache',
   'text!templates/question_list.mustache',
