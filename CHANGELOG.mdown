@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.2
+
+* Use npm they said, it'll be easy they said.
+
+## 0.5.1
+
+* Because [npm issues](https://github.com/olivernn/lunr.js/issues/77) :(
+
 ## 0.5.0
 
 * Add plugin support to enable i18n and other extensions to lunr.
