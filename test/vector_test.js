@@ -37,3 +37,16 @@ test("calculating the similarity between two vectors", function () {
   equal(roundedSimilarity, 0.111)
 })
 
+test("inserting out of order", function () {
+  var v = new lunr.Vector
+
+  v.insert(3, 'a')
+  v.insert(2, 'b')
+  v.insert(1, 'c')
+
+  equal(v.list.idx, 1)
+  equal(v.last.idx, 3)
+
+  equal(v.list.val, 'c')
+  equal(v.last.val, 'a')
+})

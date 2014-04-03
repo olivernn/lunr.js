@@ -19,6 +19,22 @@
     }
   }
 
+  bench('vector#insert in asc order', function () {
+    var v = new lunr.Vector
+
+    for (var i = 0; i < 1000; i++) {
+      v.insert(i, 'test')
+    }
+  })
+
+  bench('vector#insert random order', function () {
+    var v = new lunr.Vector
+
+    for (var i = 0; i < 1000; i++) {
+      v.insert(Math.random() * 100, 'test')
+    }
+  })
+
   bench('vector#magnitude', function () {
     v1.magnitude()
   }, { setup: setup })
