@@ -75,3 +75,25 @@ test('search boosts exact matches', function () {
 
   ok(results[0].score > results[1].score)
 })
+
+test('search uses the searchPipeline instead of indexPipeline', function () {
+  var searchPipelineRun = this.idx.searchPipeline.run,  
+      searchPipelineExecuted = 0,
+      indexPipelineRun = this.idx.indexPipeline.run,
+      indexPipelineExecuted = 0
+
+  this.idx.searchPipeline.run = function () {
+    searchPipelineExecuted++
+    return searchPipelineRun.apply(this, arguments)
+  }
+
+  this.idx.indexPipeline.run = function () {
+    indexPipelineExecuted++
+    return indexPipelineRun.apply(this, arguments)
+  }
+
+  var results = this.idx.search('professor')
+
+  equal(searchPipelineExecuted, 1)
+  equal(indexPipelineExecuted, 0)
+})

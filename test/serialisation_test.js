@@ -41,6 +41,7 @@ test('dumping and loading an index with a populated pipeline', function () {
   var dumpedIdx = JSON.stringify(idx),
       clonedIdx = lunr.Index.load(JSON.parse(dumpedIdx))
 
-  deepEqual(idx.pipeline._stack, clonedIdx.pipeline._stack)
+  deepEqual(idx.indexPipeline._stack, clonedIdx.indexPipeline._stack)
+  deepEqual(idx.searchPipeline._stack, clonedIdx.searchPipeline._stack)
   deepEqual(idx.search('water'), clonedIdx.search('water'))
 })

@@ -85,6 +85,31 @@ test('silencing add events', function () {
   ok(!callbackCalled)
 })
 
+test('adding a document uses the indexPipeline instead of searchPipeline', function () {
+  var idx = new lunr.Index,
+      searchPipelineRun = idx.searchPipeline.run,  
+      searchPipelineExecuted = 0,
+      indexPipelineRun = idx.indexPipeline.run,
+      indexPipelineExecuted = 0,
+      doc = {id: 1, body: 'this is a test'}
+
+  idx.searchPipeline.run = function () {
+    searchPipelineExecuted++
+    return searchPipelineRun.apply(this, arguments)
+  }
+
+  idx.indexPipeline.run = function () {
+    indexPipelineExecuted++
+    return indexPipelineRun.apply(this, arguments)
+  }
+
+  idx.field('body')
+  idx.add(doc)
+
+  equal(searchPipelineExecuted, 0)
+  equal(indexPipelineExecuted, 1)
+})
+
 test('removing a document from the index', function () {
   var idx = new lunr.Index,
       doc = {id: 1, body: 'this is a test'}
@@ -240,12 +265,14 @@ test('serialising', function () {
       mockDocumentStore = { toJSON: function () { return 'documentStore' }},
       mockTokenStore = { toJSON: function () { return 'tokenStore' }},
       mockCorpusTokens = { toJSON: function () { return 'corpusTokens' }},
-      mockPipeline = { toJSON: function () { return 'pipeline' }}
+      mockIndexPipeline = { toJSON: function () { return 'indexPipeline' }}
+      mockSearchPipeline = { toJSON: function () { return 'searchPipeline' }}
 
   idx.documentStore = mockDocumentStore
   idx.tokenStore = mockTokenStore
   idx.corpusTokens = mockCorpusTokens
-  idx.pipeline = mockPipeline
+  idx.indexPipeline = mockIndexPipeline
+  idx.searchPipeline = mockSearchPipeline
 
   idx.ref('id')
 
@@ -262,7 +289,8 @@ test('serialising', function () {
     documentStore: 'documentStore',
     tokenStore: 'tokenStore',
     corpusTokens: 'corpusTokens',
-    pipeline: 'pipeline'
+    indexPipeline: 'indexPipeline',
+    searchPipeline: 'searchPipeline'
   })
 })
 
@@ -277,7 +305,8 @@ test('loading a serialised index', function () {
     documentStore: { store: {}, length: 0 },
     tokenStore: { root: {}, length: 0 },
     corpusTokens: [],
-    pipeline: ['stopWordFilter', 'stemmer']
+    indexPipeline: ['stopWordFilter', 'stemmer'],
+    searchPipeline: ['stopWordFilter', 'stemmer']
   }
 
   var idx = lunr.Index.load(serialisedData)

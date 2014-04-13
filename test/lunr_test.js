@@ -6,9 +6,9 @@ test('returns a new instance of lunr.Index', function () {
   equal(index.constructor, lunr.Index)
 })
 
-test('should set up the pipeline', function () {
+test('should set up the indexPipeline', function () {
   var index = lunr(),
-      stack = index.pipeline._stack
+      stack = index.indexPipeline._stack
 
   equal(stack.length, 3)
   equal(stack.indexOf(lunr.trimmer), 0)
