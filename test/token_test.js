@@ -72,3 +72,19 @@ test('similarity', function () {
   ok(token.similarity(s2) > token.similarity(s3))
   ok(token.similarity(s3) > token.similarity(s4))
 })
+
+test('toJSON', function () {
+  var token = new lunr.Token ('foo')
+  equal(token.toJSON(), 'foo')
+})
+
+test('transform', function () {
+  var t1 = new lunr.Token ('foo')
+
+  var t2 = t1.transform(function (s) {
+    equal(s, 'foo')
+    return 'bar'
+  })
+
+  equal(t2.toString(), 'bar')
+})
