@@ -124,7 +124,7 @@ test('expanding trailing wildcard', function () {
   store.add(new lunr.Token ('foo'), doc)
   store.add(new lunr.Token ('bar'), doc)
 
-  var tokens = store.expand(new lunr.Token ('hel*'))
+  var tokens = store.expand(new lunr.Token ('hel*')).map(function (t) { return t.toString() })
 
   ok(tokens.indexOf('hell') > -1)
   ok(tokens.indexOf('hello') > -1)
@@ -147,7 +147,7 @@ test('expanding leading wildcard', function () {
   store.add(new lunr.Token ('foo'), doc)
   store.add(new lunr.Token ('bar'), doc)
 
-  var tokens = store.expand(new lunr.Token ('*ell'))
+  var tokens = store.expand(new lunr.Token ('*ell')).map(function (t) { return t.toString() })
 
   ok(tokens.indexOf('tell') > -1)
   ok(tokens.indexOf('hell') > -1)
@@ -168,7 +168,7 @@ test('expanding inside wildcard', function () {
   store.add(new lunr.Token ('foo'), doc)
   store.add(new lunr.Token ('bar'), doc)
 
-  var tokens = store.expand(new lunr.Token ('he*p'))
+  var tokens = store.expand(new lunr.Token ('he*p')).map(function (t) { return t.toString() })
 
   ok(tokens.indexOf('help') > -1)
   ok(tokens.indexOf('heap') > -1)

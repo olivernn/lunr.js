@@ -1,24 +1,22 @@
 module('lunr.trimmer')
 
 test('latin characters', function () {
-  var token = 'hello'
-  equal(lunr.trimmer(token), token)
+  equal_with_strings(lunr.trimmer, 'hello')
 })
 
 test('removing leading and trailing punctuation', function () {
-  var fullStop = 'hello.',
-      innerApostrophe = "it's",
-      trailingApostrophe = "james'",
-      exclamationMark = 'stop!',
-      comma = 'first,',
-      brackets = '[tag]'
+  equal_with_strings(lunr.trimmer, "hello.", "hello")
+  equal_with_strings(lunr.trimmer, "it's")
+  equal_with_strings(lunr.trimmer, "james'", "james")
+  equal_with_strings(lunr.trimmer, "stop!", "stop")
+  equal_with_strings(lunr.trimmer, "first,", "first")
+  equal_with_strings(lunr.trimmer, "[tag]", "tag")
+})
 
-  deepEqual(lunr.trimmer(fullStop), 'hello')
-  deepEqual(lunr.trimmer(innerApostrophe), "it's")
-  deepEqual(lunr.trimmer(trailingApostrophe), "james")
-  deepEqual(lunr.trimmer(exclamationMark), 'stop')
-  deepEqual(lunr.trimmer(comma), 'first')
-  deepEqual(lunr.trimmer(brackets), 'tag')
+test('leaving wildcards intact', function () {
+  equal_with_strings(lunr.trimmer, "hello* ", "hello*")
+  equal_with_strings(lunr.trimmer, " *,hello", "*hello")
+  equal_with_strings(lunr.trimmer, "hel*o", "hel*o")
 })
 
 test('should be registered with lunr.Pipeline', function () {
