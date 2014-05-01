@@ -71,7 +71,7 @@ window.lunr = lunr
 
   $('input').bind('keyup', debounce(function () {
     if ($(this).val() < 2) return
-    var query = $(this).val()
+    var query = $(this).val().replace(/^\s+|\s+$/g, '') + "*"
     var results = idx.search(query).map(function (result) {
       return questions.filter(function (q) { return q.id === parseInt(result.ref, 10) })[0]
     })
