@@ -1400,12 +1400,13 @@ lunr.stemmer = (function(){
       }
     }
 
-    // Step 1c - replace suffix y or Y by i if preceded by a non-vowel which is not the first letter of the word (so cry -> cri, by -> by, say -> say)
-    re = /^(.+?[^aeiou])y$/;
+    // Step 1c
+    re = /^(.+?)y$/;
     if (re.test(w)) {
       var fp = re.exec(w);
       stem = fp[1];
-      w = stem + "i";
+      re = new RegExp(s_v);
+      if (re.test(stem)) { w = stem + "i"; }
     }
 
     // Step 2
