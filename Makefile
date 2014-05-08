@@ -42,14 +42,11 @@ lunr.min.js: lunr.js
 size: lunr.min.js
 	@gzip -c lunr.min.js | wc -c
 
-test_server:
+server:
 	${NODE} server.js ${SERVER_PORT}
 
-test:
-	@${NODE} server.js ${TEST_PORT} > /dev/null 2>&1 & echo "$$!" > server.pid
-	@${PHANTOMJS} test/env/runner.js http://localhost:${TEST_PORT}/test 2> /dev/null
-	@cat server.pid | xargs kill
-	@rm server.pid
+test: node_modules
+	@./test/runner.sh ${TEST_PORT}
 
 docs: node_modules
 	${DOX} < lunr.js | ${DOX_TEMPLATE} -n lunr.js -r ${VERSION} > docs/index.html
