@@ -22,10 +22,11 @@ TEST_PORT ?= 32423
 DOX ?= ./node_modules/.bin/dox
 DOX_TEMPLATE ?= ./node_modules/.bin/dox-template
 NODE ?= /usr/local/bin/node
+NPM ?= /usr/local/bin/npm
 PHANTOMJS ?= ./node_modules/.bin/phantomjs
 UGLIFYJS ?= ./node_modules/.bin/uglifyjs
 
-all: lunr.js lunr.min.js docs bower.json package.json component.json example
+all: node_modules lunr.js lunr.min.js docs bower.json package.json component.json example
 
 lunr.js: $(SRC)
 	cat build/wrapper_start $^ build/wrapper_end | \
@@ -50,7 +51,7 @@ test:
 	@cat server.pid | xargs kill
 	@rm server.pid
 
-docs:
+docs: node_modules
 	${DOX} < lunr.js | ${DOX_TEMPLATE} -n lunr.js -r ${VERSION} > docs/index.html
 
 clean:
@@ -63,5 +64,8 @@ reset:
 
 example: lunr.min.js
 	${NODE} example/index_builder.js
+
+node_modules: package.json
+	${NPM} -s install
 
 .PHONY: test clean docs reset example
