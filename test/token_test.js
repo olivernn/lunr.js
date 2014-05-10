@@ -81,10 +81,13 @@ test('toJSON', function () {
 test('transform', function () {
   var t1 = new lunr.Token ('foo')
 
+  t1.metadata.add('foo', 'bar')
+
   var t2 = t1.transform(function (s) {
     equal(s, 'foo')
     return 'bar'
   })
 
   equal(t2.toString(), 'bar')
+  deepEqual(t1.metadata, t2.metadata)
 })

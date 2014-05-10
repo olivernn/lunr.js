@@ -54,3 +54,10 @@ test('calling to string on passed val', function () {
   equalTokens(lunr.tokenizer(date).slice(0, 4), ['tue', 'jan', '01', '2013'])
 })
 
+test('adding position metadata', function () {
+  var testString = 'foo',
+      token = lunr.tokenizer(testString)[0],
+      positionMetadata = token.metadata.get('positions')
+
+  deepEqual(positionMetadata, [{ start: 0, length: 3 }])
+})
