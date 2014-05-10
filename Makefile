@@ -19,13 +19,14 @@ VERSION = $(shell cat VERSION)
 SERVER_PORT ?= 3000
 TEST_PORT ?= 32423
 
-DOX ?= /usr/local/bin/dox
-DOX_TEMPLATE ?= /usr/local/bin/dox-template
+DOX ?= ./node_modules/.bin/dox
+DOX_TEMPLATE ?= ./node_modules/.bin/dox-template
 NODE ?= /usr/local/bin/node
-PHANTOMJS ?= /usr/local/bin/phantomjs
-UGLIFYJS ?= /usr/local/share/npm/bin/uglifyjs
+NPM ?= /usr/local/bin/npm
+PHANTOMJS ?= ./node_modules/.bin/phantomjs
+UGLIFYJS ?= ./node_modules/.bin/uglifyjs
 
-all: lunr.js lunr.min.js docs bower.json package.json component.json example
+all: node_modules lunr.js lunr.min.js docs bower.json package.json component.json example
 
 lunr.js: $(SRC)
 	cat build/wrapper_start $^ build/wrapper_end | \
@@ -41,16 +42,13 @@ lunr.min.js: lunr.js
 size: lunr.min.js
 	@gzip -c lunr.min.js | wc -c
 
-test_server:
+server:
 	${NODE} server.js ${SERVER_PORT}
 
-test:
-	@${NODE} server.js ${TEST_PORT} > /dev/null 2>&1 & echo "$$!" > server.pid
-	@${PHANTOMJS} test/env/runner.js http://localhost:${TEST_PORT}/test 2> /dev/null
-	@cat server.pid | xargs kill
-	@rm server.pid
+test: node_modules
+	@./test/runner.sh ${TEST_PORT}
 
-docs:
+docs: node_modules
 	${DOX} < lunr.js | ${DOX_TEMPLATE} -n lunr.js -r ${VERSION} > docs/index.html
 
 clean:
@@ -63,5 +61,8 @@ reset:
 
 example: lunr.min.js
 	${NODE} example/index_builder.js
+
+node_modules: package.json
+	${NPM} -s install
 
 .PHONY: test clean docs reset example

@@ -13,9 +13,12 @@
     "url": "https://github.com/olivernn/lunr.js.git"
   },
   "devDependencies": {
-    "phantomjs": "1.8.1-3"
+    "dox": "0.4.4",
+    "dox-template": "0.1.1",
+    "phantomjs": "1.8.1-3",
+    "uglify-js": "2.4.13"
   },
   "scripts": {
-    "test": "phantomjs test/env/runner.js http://localhost:3000/test"
+    "test": "make test"
   }
 }
