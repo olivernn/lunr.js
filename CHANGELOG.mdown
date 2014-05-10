@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.3
+
+* Correctly stem words ending with the letter 'y' [#84](https://github.com/olivernn/lunr.js/pull/84) thanks [Mihai Valentin](https://github.com/MihaiValentin)
+* Improve build tools and dev dependency installation [#78](https://github.com/olivernn/lunr.js/pull/78) thanks [Ben Pickles](https://github.com/benpickles)
+
 ## 0.5.2
 
 * Use npm they said, it'll be easy they said.
