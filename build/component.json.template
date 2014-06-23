@@ -1,10 +1,9 @@
 {
-  "name": "lunr.js",
+  "name": "lunr",
+  "repo": "olivernn/lunr.js",
   "version": "@VERSION",
+  "description": "Simple full-text search in your browser.",
+  "license": "MIT",
   "main": "lunr.js",
-  "ignore": [
-    "tests/",
-    "build/",
-    "docs/"
-  ]
+  "scripts": ["lunr.js"]
 }

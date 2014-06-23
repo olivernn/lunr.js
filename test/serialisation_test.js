@@ -38,7 +38,7 @@ test('dumping and loading an index with a populated pipeline', function () {
 
   this.corpus.forEach(function (doc) { idx.add(doc) })
 
-  var dumpedIdx = JSON.stringify(idx)
+  var dumpedIdx = JSON.stringify(idx),
       clonedIdx = lunr.Index.load(JSON.parse(dumpedIdx))
 
   deepEqual(idx.pipeline._stack, clonedIdx.pipeline._stack)
