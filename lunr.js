@@ -1663,7 +1663,7 @@ lunr.trimmer = function (token) {
 }
 
 /**
-*check it contains Chinese (including Japanese and Korean)
+**check it contains Chinese (including Japanese and Korean)
 */
 function isChineseChar(str){     
    var reg = /[\u4E00-\u9FA5\uF900-\uFA2D]/;  
