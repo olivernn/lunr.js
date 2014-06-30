@@ -177,7 +177,8 @@ lunr.EventEmitter.prototype.hasHandler = function (name) {
  * @returns {Array}
  */
 lunr.tokenizer = function (obj) {
-  if (!arguments.length || obj == null || obj == undefined) return []
+  if (!arguments.length || obj == null || obj == undefined) return [];
+
   if (Array.isArray(obj)) return obj.map(function (t) { return t.toLowerCase() })
 
   var str = obj.toString().replace(/^\s+/, '')
@@ -188,12 +189,15 @@ lunr.tokenizer = function (obj) {
       break
     }
   }
+ 
 
-  return str
-    .split(/\s+/)
+  var rs= str
+    .split(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\uFE30-\uFFA0|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]+/)
     .map(function (token) {
-      return token.toLowerCase()
-    })
+      return token.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\uFE30-\uFFA0|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g, '').toLowerCase()
+    });
+	return rs;
+	
 }
 /*!
  * lunr.Pipeline
@@ -1649,11 +1653,22 @@ lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'stopWordFilter')
  * @see lunr.Pipeline
  */
 lunr.trimmer = function (token) {
+//by ming300 check token is chinese then not replace	
+	if(isChineseChar(token)){
+		return token;
+	}
   return token
     .replace(/^\W+/, '')
     .replace(/\W+$/, '')
 }
 
+/**
+**check it contains Chinese (including Japanese and Korean)
+*/
+function isChineseChar(str){     
+   var reg = /[\u4E00-\u9FA5\uF900-\uFA2D]/;  
+   return reg.test(str);  
+}  
 lunr.Pipeline.registerFunction(lunr.trimmer, 'trimmer')
 /*!
  * lunr.stemmer
