@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.4
+
+* Tokenizer also splits on hyphens [#98](https://github.com/olivernn/lunr.js/pull/98/files) thanks [Nolan Lawson](https://github.com/nolanlawson)
+
 ## 0.5.3
 
 * Correctly stem words ending with the letter 'y' [#84](https://github.com/olivernn/lunr.js/pull/84) thanks [Mihai Valentin](https://github.com/MihaiValentin)
