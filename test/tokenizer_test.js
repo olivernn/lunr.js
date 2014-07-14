@@ -50,3 +50,9 @@ test('calling to string on passed val', function () {
   deepEqual(lunr.tokenizer(date).slice(0, 4), ['tue', 'jan', '01', '2013'])
 })
 
+test("splitting strings with hyphens", function () {
+  var simpleString = "take the New York-San Francisco flight",
+      tokens = lunr.tokenizer(simpleString)
+
+  deepEqual(tokens, ['take', 'the', 'new', 'york', 'san', 'francisco', 'flight'])
+})
