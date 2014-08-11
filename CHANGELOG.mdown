@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.5
+
+* Fix bug in tokenizer introduced in 0.5.4 [#101](https://github.com/olivernn/lunr.js/pull/101) thanks [Nolan Lawson](https://github.com/nolanlawson)
+
 ## 0.5.4
 
 * Tokenizer also splits on hyphens [#98](https://github.com/olivernn/lunr.js/pull/98/files) thanks [Nolan Lawson](https://github.com/nolanlawson)

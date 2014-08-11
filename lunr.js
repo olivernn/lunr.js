@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.4
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.5
  * Copyright (C) 2014 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -56,7 +56,7 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.5.4"
+lunr.version = "0.5.5"
 /*!
  * lunr.utils
  * Copyright (C) 2014 Oliver Nightingale
@@ -191,6 +191,9 @@ lunr.tokenizer = function (obj) {
 
   return str
     .split(/(?:\s+|\-)/)
+    .filter(function (token) {
+      return !!token
+    })
     .map(function (token) {
       return token.toLowerCase()
     })
