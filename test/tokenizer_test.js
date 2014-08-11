@@ -56,3 +56,10 @@ test("splitting strings with hyphens", function () {
 
   deepEqual(tokens, ['take', 'the', 'new', 'york', 'san', 'francisco', 'flight'])
 })
+
+test("splitting strings with hyphens and spaces", function () {
+  var simpleString = "Solve for A - B",
+      tokens = lunr.tokenizer(simpleString)
+
+  deepEqual(tokens, ['solve', 'for', 'a', 'b'])
+})
