@@ -39,9 +39,7 @@
           <h3>Get Started</h3>
         </header>
 
-        <p>Open your browser's developer tools on this page to follow along 
-          (<a href="https://developer.mozilla.org/en-US/docs/Tools/Web_Console">Firefox</a> 
-          <a href="https://developer.chrome.com/devtools">Chrome</a>)</p>
+        <p>Open your browser's <a id="developer-tools" target="_blank">developer tools</a> on this page to follow along.</p>
 
         <p>Set up an index for your notes:</p>
         <pre>
@@ -162,6 +160,50 @@
       </ul>
     </footer>
   </div>
+
+  <script>
+    (function (ua) {
+      // some _really_ basic browser sniffing to choose the right dev tools link.
+
+      var consoleSrc,
+          CHROME    = /Chrome/,
+          CHROMIUM  = /Chromium/,
+          FIREFOX   = /Firefox/,
+          MSIE      = /MSIE/
+          OPERA     = /(OPR|Opera)/,
+          SAFARI    = /Safari/,
+          SEAMONKEY = /Seamonkey/
+
+      switch (true) {
+        case FIREFOX.test(ua) && !SEAMONKEY.test(ua):
+          // firefox
+          consoleSrc = "https://developer.mozilla.org/en-US/docs/Tools/Web_Console"
+          break
+
+        case CHROME.test(ua):
+          // chrome
+          consoleSrc = "https://developer.chrome.com/devtools"
+          break
+
+        case SAFARI.test(ua) && !CHROME.test(ua) && !CHROMIUM.test(ua):
+          // safari
+          consoleSrc = "https://developer.apple.com/library/safari/documentation/AppleApplications/Conceptual/Safari_Developer_Guide/GettingStarted/GettingStarted.html#//apple_ref/doc/uid/TP40007874-CH2-SW1"
+          break
+
+        case OPERA.test(ua):
+          // opera
+          consoleSrc = "http://www.opera.com/dragonfly/"
+          break
+
+        case MSIE.test(ua):
+          // IE
+          consoleSrc = "http://msdn.microsoft.com/en-us/library/ie/hh673541(v=vs.85).aspx"
+          break
+      }
+
+      if (consoleSrc) document.getElementById('developer-tools').href = consoleSrc
+    })(navigator.userAgent)
+  </script>
 
   <script>
     (function (hijs) {
