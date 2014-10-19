@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.5
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.6
  * Copyright (C) 2014 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -56,7 +56,7 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.5.5"
+lunr.version = "0.5.6"
 /*!
  * lunr.utils
  * Copyright (C) 2014 Oliver Nightingale
@@ -1243,8 +1243,8 @@ lunr.Store.load = function (serialisedData) {
  * @memberOf Store
  */
 lunr.Store.prototype.set = function (id, tokens) {
+  if (!this.has(id)) this.length++
   this.store[id] = tokens
-  this.length = Object.keys(this.store).length
 }
 
 /**
@@ -1853,7 +1853,7 @@ lunr.TokenStore.prototype.toJSON = function () {
 
 
   /**
-   * export the module via AMD, CommonnJS or as a browser global
+   * export the module via AMD, CommonJS or as a browser global
    * Export code from https://github.com/umdjs/umd/blob/master/returnExports.js
    */
   ;(function (root, factory) {
