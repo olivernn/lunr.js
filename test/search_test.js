@@ -27,6 +27,10 @@ module('search', {
       id: 'e',
       title: 'title',
       body: 'hand',
+    },{
+      id: 10,
+      title: 'ten',
+      body: 'ten 10'
     }]).forEach(function (doc) { idx.add(doc) })
 
     this.idx = idx
@@ -74,4 +78,11 @@ test('search boosts exact matches', function () {
   equal(results[0].ref, 'e')
 
   ok(results[0].score > results[1].score)
+})
+
+test('returning the correct type for reference', function () {
+  var results = this.idx.search('ten');
+  equal(results.length, 1)
+  equal(typeof results[0].ref, 'number')
+  equal(results[0].ref, 10)
 })
