@@ -42,7 +42,7 @@ This returns a list of matching documents with a score of how closely they match
 }]
 ```
 
-[API documentation](http://lunrjs.com/docs) is available, as well as a full working example.
+[API documentation](http://lunrjs.com/docs) is available, as well as a [full working example](http://lunrjs.com/example/).
 
 ## Description
 
