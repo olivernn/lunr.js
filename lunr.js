@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.6
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.7
  * Copyright (C) 2014 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -56,7 +56,7 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.5.6"
+lunr.version = "0.5.7"
 /*!
  * lunr.utils
  * Copyright (C) 2014 Oliver Nightingale
@@ -1355,7 +1355,33 @@ lunr.stemmer = (function(){
     mgr1 = "^(" + C + ")?" + V + C + V + C,       // [C]VCVC... is m>1
     s_v = "^(" + C + ")?" + v;                   // vowel in stem
 
-  return function (w) {
+  var re_mgr0 = new RegExp(mgr0);
+  var re_mgr1 = new RegExp(mgr1);
+  var re_meq1 = new RegExp(meq1);
+  var re_s_v = new RegExp(s_v);
+
+  var re_1a = /^(.+?)(ss|i)es$/;
+  var re2_1a = /^(.+?)([^s])s$/;
+  var re_1b = /^(.+?)eed$/;
+  var re2_1b = /^(.+?)(ed|ing)$/;
+  var re_1b_2 = /.$/;
+  var re2_1b_2 = /(at|bl|iz)$/;
+  var re3_1b_2 = new RegExp("([^aeiouylsz])\\1$");
+  var re4_1b_2 = new RegExp("^" + C + v + "[^aeiouwxy]$");
+
+  var re_1c = /^(.+?[^aeiou])y$/;
+  var re_2 = /^(.+?)(ational|tional|enci|anci|izer|bli|alli|entli|eli|ousli|ization|ation|ator|alism|iveness|fulness|ousness|aliti|iviti|biliti|logi)$/;
+
+  var re_3 = /^(.+?)(icate|ative|alize|iciti|ical|ful|ness)$/;
+
+  var re_4 = /^(.+?)(al|ance|ence|er|ic|able|ible|ant|ement|ment|ent|ou|ism|ate|iti|ous|ive|ize)$/;
+  var re2_4 = /^(.+?)(s|t)(ion)$/;
+
+  var re_5 = /^(.+?)e$/;
+  var re_5_1 = /ll$/;
+  var re3_5 = new RegExp("^" + C + v + "[^aeiouwxy]$");
+
+  var porterStemmer = function porterStemmer(w) {
     var   stem,
       suffix,
       firstch,
@@ -1372,39 +1398,39 @@ lunr.stemmer = (function(){
     }
 
     // Step 1a
-    re = /^(.+?)(ss|i)es$/;
-    re2 = /^(.+?)([^s])s$/;
+    re = re_1a
+    re2 = re2_1a;
 
     if (re.test(w)) { w = w.replace(re,"$1$2"); }
     else if (re2.test(w)) { w = w.replace(re2,"$1$2"); }
 
     // Step 1b
-    re = /^(.+?)eed$/;
-    re2 = /^(.+?)(ed|ing)$/;
+    re = re_1b;
+    re2 = re2_1b;
     if (re.test(w)) {
       var fp = re.exec(w);
-      re = new RegExp(mgr0);
+      re = re_mgr0;
       if (re.test(fp[1])) {
-        re = /.$/;
+        re = re_1b_2;
         w = w.replace(re,"");
       }
     } else if (re2.test(w)) {
       var fp = re2.exec(w);
       stem = fp[1];
-      re2 = new RegExp(s_v);
+      re2 = re_s_v;
       if (re2.test(stem)) {
         w = stem;
-        re2 = /(at|bl|iz)$/;
-        re3 = new RegExp("([^aeiouylsz])\\1$");
-        re4 = new RegExp("^" + C + v + "[^aeiouwxy]$");
+        re2 = re2_1b_2;
+        re3 = re3_1b_2;
+        re4 = re4_1b_2;
         if (re2.test(w)) {  w = w + "e"; }
-        else if (re3.test(w)) { re = /.$/; w = w.replace(re,""); }
+        else if (re3.test(w)) { re = re_1b_2; w = w.replace(re,""); }
         else if (re4.test(w)) { w = w + "e"; }
       }
     }
 
     // Step 1c - replace suffix y or Y by i if preceded by a non-vowel which is not the first letter of the word (so cry -> cri, by -> by, say -> say)
-    re = /^(.+?[^aeiou])y$/;
+    re = re_1c;
     if (re.test(w)) {
       var fp = re.exec(w);
       stem = fp[1];
@@ -1412,65 +1438,65 @@ lunr.stemmer = (function(){
     }
 
     // Step 2
-    re = /^(.+?)(ational|tional|enci|anci|izer|bli|alli|entli|eli|ousli|ization|ation|ator|alism|iveness|fulness|ousness|aliti|iviti|biliti|logi)$/;
+    re = re_2;
     if (re.test(w)) {
       var fp = re.exec(w);
       stem = fp[1];
       suffix = fp[2];
-      re = new RegExp(mgr0);
+      re = re_mgr0;
       if (re.test(stem)) {
         w = stem + step2list[suffix];
       }
     }
 
     // Step 3
-    re = /^(.+?)(icate|ative|alize|iciti|ical|ful|ness)$/;
+    re = re_3;
     if (re.test(w)) {
       var fp = re.exec(w);
       stem = fp[1];
       suffix = fp[2];
-      re = new RegExp(mgr0);
+      re = re_mgr0;
       if (re.test(stem)) {
         w = stem + step3list[suffix];
       }
     }
 
     // Step 4
-    re = /^(.+?)(al|ance|ence|er|ic|able|ible|ant|ement|ment|ent|ou|ism|ate|iti|ous|ive|ize)$/;
-    re2 = /^(.+?)(s|t)(ion)$/;
+    re = re_4;
+    re2 = re2_4;
     if (re.test(w)) {
       var fp = re.exec(w);
       stem = fp[1];
-      re = new RegExp(mgr1);
+      re = re_mgr1;
       if (re.test(stem)) {
         w = stem;
       }
     } else if (re2.test(w)) {
       var fp = re2.exec(w);
       stem = fp[1] + fp[2];
-      re2 = new RegExp(mgr1);
+      re2 = re_mgr1;
       if (re2.test(stem)) {
         w = stem;
       }
     }
 
     // Step 5
-    re = /^(.+?)e$/;
+    re = re_5;
     if (re.test(w)) {
       var fp = re.exec(w);
       stem = fp[1];
-      re = new RegExp(mgr1);
-      re2 = new RegExp(meq1);
-      re3 = new RegExp("^" + C + v + "[^aeiouwxy]$");
+      re = re_mgr1;
+      re2 = re_meq1;
+      re3 = re3_5;
       if (re.test(stem) || (re2.test(stem) && !(re3.test(stem)))) {
         w = stem;
       }
     }
 
-    re = /ll$/;
-    re2 = new RegExp(mgr1);
+    re = re_5_1;
+    re2 = re_mgr1;
     if (re.test(w) && re2.test(w)) {
-      re = /.$/;
+      re = re_1b_2;
       w = w.replace(re,"");
     }
 
@@ -1481,7 +1507,9 @@ lunr.stemmer = (function(){
     }
 
     return w;
-  }
+  };
+
+  return porterStemmer;
 })();
 
 lunr.Pipeline.registerFunction(lunr.stemmer, 'stemmer')

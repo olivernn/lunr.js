@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.7
+
+* Performance improvement for stemmer [#124](https://github.com/olivernn/lunr.js/pull/124) thanks [Tony Jacobs](https://github.com/tony-jacobs)
+
 ## 0.5.6
 
 * Performance improvement when add documents to the index [#114](https://github.com/olivernn/lunr.js/pull/114) thanks [Alex Holmes](https://github.com/alex2)
