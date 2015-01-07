@@ -1,7 +1,7 @@
 var http = require('http'),
     url = require('url'),
     join = require('path').join,
-    exists = require('path').exists,
+    exists = require('fs').exists,
     extname = require('path').extname,
     join = require('path').join,
     fs = require('fs'),
