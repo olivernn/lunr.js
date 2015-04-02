@@ -37,3 +37,15 @@ test("calculating the similarity between two vectors", function () {
   equal(roundedSimilarity, 0.111)
 })
 
+test("inserting an element invalidates the magnitude cache", function () {
+  var vector = new lunr.Vector,
+      elements = [4,5,6]
+
+  elements.forEach(function (el, i) { vector.insert(i, el) })
+
+  equal(vector.magnitude(), Math.sqrt(77))
+
+  vector.insert(3, 7)
+
+  equal(vector.magnitude(), Math.sqrt(126))
+})
