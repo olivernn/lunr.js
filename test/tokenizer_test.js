@@ -36,7 +36,7 @@ test('handling null-like arguments', function () {
 })
 
 test('calling to string on passed val', function () {
-  var date = new Date (Date.UTC(2013, 0, 1)),
+  var date = new Date (Date.UTC(2013, 0, 1, 12)),
       obj = {
         toString: function () { return 'custom object' }
       }
