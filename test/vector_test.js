@@ -49,3 +49,16 @@ test("inserting an element invalidates the magnitude cache", function () {
 
   equal(vector.magnitude(), Math.sqrt(126))
 })
+
+test("inserted elements are kept in index order", function () {
+  var vector = new lunr.Vector,
+      elements = [6,5,4]
+
+  vector.insert(2, 4)
+  vector.insert(1, 5)
+  vector.insert(0, 6)
+
+  equal(vector.list.idx, 0)
+  equal(vector.list.next.idx, 1)
+  equal(vector.list.next.next.idx, 2)
+})
