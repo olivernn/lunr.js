@@ -1,7 +1,6 @@
 var http = require('http'),
     url = require('url'),
     join = require('path').join,
-    exists = require('path').exists,
     extname = require('path').extname,
     join = require('path').join,
     fs = require('fs'),
@@ -29,7 +28,7 @@ http.createServer(function(req, res){
     res.end(err.message + "\n")
   }
 
-  exists(path, function(exists){
+  fs.exists(path, function(exists){
     if (!exists) return notFound()
 
     fs.stat(path, function(err, stat){
