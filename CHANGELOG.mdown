@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.8
+
+* Fix typo when referencing Martin Porter's home page http://tartarus.org/~martin/ [#132](https://github.com/olivernn/lunr.js/pull/132) thanks [James Aylett](https://github.com/jaylett)
+* Performance improvement for tokenizer [#139](https://github.com/olivernn/lunr.js/pull/139) thanks [Arun Srinivasan](https://github.com/satchmorun)
+* Fix vector magnitude caching bug :flushed: [#142](https://github.com/olivernn/lunr.js/pull/142) thanks [Richard Poole](https://github.com/richardpoole)
+* Fix vector insertion bug that prevented lesser ordered nodes to be inserted into a vector [#143](https://github.com/olivernn/lunr.js/pull/143) thanks [Richard Poole](https://github.com/richardpoole)
+* Fix inefficient use of arguments in SortedSet add method, thanks to [Max Nordlund](https://github.com/maxnordlund).
+* Fix deprecated use of path.exists in test server [#141](https://github.com/olivernn/lunr.js/pull/141) thanks [wei song](https://github.com/weixsong)
+
 ## 0.5.7
 
 * Performance improvement for stemmer [#124](https://github.com/olivernn/lunr.js/pull/124) thanks [Tony Jacobs](https://github.com/tony-jacobs)

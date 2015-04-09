@@ -1,6 +1,6 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.7
- * Copyright (C) 2014 Oliver Nightingale
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.8
+ * Copyright (C) 2015 Oliver Nightingale
  * MIT Licensed
  * @license
  */
@@ -56,10 +56,10 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.5.7"
+lunr.version = "0.5.8"
 /*!
  * lunr.utils
- * Copyright (C) 2014 Oliver Nightingale
+ * Copyright (C) 2015 Oliver Nightingale
  */
 
 /**
@@ -83,7 +83,7 @@ lunr.utils.warn = (function (global) {
 
 /*!
  * lunr.EventEmitter
- * Copyright (C) 2014 Oliver Nightingale
+ * Copyright (C) 2015 Oliver Nightingale
  */
 
 /**
@@ -165,7 +165,7 @@ lunr.EventEmitter.prototype.hasHandler = function (name) {
 
 /*!
  * lunr.tokenizer
- * Copyright (C) 2014 Oliver Nightingale
+ * Copyright (C) 2015 Oliver Nightingale
  */
 
 /**
@@ -180,27 +180,12 @@ lunr.tokenizer = function (obj) {
   if (!arguments.length || obj == null || obj == undefined) return []
   if (Array.isArray(obj)) return obj.map(function (t) { return t.toLowerCase() })
 
-  var str = obj.toString().replace(/^\s+/, '')
-
-  for (var i = str.length - 1; i >= 0; i--) {
-    if (/\S/.test(str.charAt(i))) {
-      str = str.substring(0, i + 1)
-      break
-    }
-  }
-
-  return str
-    .split(/(?:\s+|\-)/)
-    .filter(function (token) {
-      return !!token
-    })
-    .map(function (token) {
-      return token.toLowerCase()
-    })
+  return obj.toString().trim().toLowerCase().split(/[\s\-]+/)
 }
+
 /*!
  * lunr.Pipeline
- * Copyright (C) 2014 Oliver Nightingale
+ * Copyright (C) 2015 Oliver Nightingale
  */
 
 /**
@@ -417,7 +402,7 @@ lunr.Pipeline.prototype.toJSON = function () {
 }
 /*!
  * lunr.Vector
- * Copyright (C) 2014 Oliver Nightingale
+ * Copyright (C) 2015 Oliver Nightingale
  */
 
 /**
@@ -457,9 +442,15 @@ lunr.Vector.Node = function (idx, val, next) {
  * @memberOf Vector.
  */
 lunr.Vector.prototype.insert = function (idx, val) {
+  this._magnitude = undefined;
   var list = this.list
 
   if (!list) {
+    this.list = new lunr.Vector.Node (idx, val, list)
+    return this.length++
+  }
+
+  if (idx < list.idx) {
     this.list = new lunr.Vector.Node (idx, val, list)
     return this.length++
   }
@@ -487,7 +478,7 @@ lunr.Vector.prototype.insert = function (idx, val) {
  * @memberOf Vector
  */
 lunr.Vector.prototype.magnitude = function () {
-  if (this._magniture) return this._magnitude
+  if (this._magnitude) return this._magnitude
   var node = this.list,
       sumOfSquares = 0,
       val
@@ -542,7 +533,7 @@ lunr.Vector.prototype.similarity = function (otherVector) {
 }
 /*!
  * lunr.SortedSet
- * Copyright (C) 2014 Oliver Nightingale
+ * Copyright (C) 2015 Oliver Nightingale
  */
 
 /**
@@ -580,10 +571,13 @@ lunr.SortedSet.load = function (serialisedData) {
  * @memberOf SortedSet
  */
 lunr.SortedSet.prototype.add = function () {
-  Array.prototype.slice.call(arguments).forEach(function (element) {
-    if (~this.indexOf(element)) return
+  var i, element
+
+  for (i = 0; i < arguments.length; i++) {
+    element = arguments[i]
+    if (~this.indexOf(element)) continue
     this.elements.splice(this.locationFor(element), 0, element)
-  }, this)
+  }
 
   this.length = this.elements.length
 }
@@ -780,7 +774,7 @@ lunr.SortedSet.prototype.toJSON = function () {
 }
 /*!
  * lunr.Index
- * Copyright (C) 2014 Oliver Nightingale
+ * Copyright (C) 2015 Oliver Nightingale
  */
 
 /**
@@ -1201,7 +1195,7 @@ lunr.Index.prototype.use = function (plugin) {
 }
 /*!
  * lunr.Store
- * Copyright (C) 2014 Oliver Nightingale
+ * Copyright (C) 2015 Oliver Nightingale
  */
 
 /**
@@ -1297,13 +1291,13 @@ lunr.Store.prototype.toJSON = function () {
 
 /*!
  * lunr.stemmer
- * Copyright (C) 2014 Oliver Nightingale
+ * Copyright (C) 2015 Oliver Nightingale
  * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt
  */
 
 /**
  * lunr.stemmer is an english language stemmer, this is a JavaScript
- * implementation of the PorterStemmer taken from http://tartaurs.org/~martin
+ * implementation of the PorterStemmer taken from http://tartarus.org/~martin
  *
  * @module
  * @param {String} str The string to stem
@@ -1515,7 +1509,7 @@ lunr.stemmer = (function(){
 lunr.Pipeline.registerFunction(lunr.stemmer, 'stemmer')
 /*!
  * lunr.stopWordFilter
- * Copyright (C) 2014 Oliver Nightingale
+ * Copyright (C) 2015 Oliver Nightingale
  */
 
 /**
@@ -1662,7 +1656,7 @@ lunr.stopWordFilter.stopWords.elements = [
 lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'stopWordFilter')
 /*!
  * lunr.trimmer
- * Copyright (C) 2014 Oliver Nightingale
+ * Copyright (C) 2015 Oliver Nightingale
  */
 
 /**
@@ -1688,7 +1682,7 @@ lunr.trimmer = function (token) {
 lunr.Pipeline.registerFunction(lunr.trimmer, 'trimmer')
 /*!
  * lunr.stemmer
- * Copyright (C) 2014 Oliver Nightingale
+ * Copyright (C) 2015 Oliver Nightingale
  * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt
  */
 
