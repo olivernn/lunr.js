@@ -7,7 +7,7 @@ test('adding a token to the store', function () {
 
   store.add(token, doc)
 
-  ok(store.root['f']['o']['o']['docs'][123] === doc)
+  ok(store.root['f']['o']['o']['docs'][123] === doc.tf)
   equal(store.length, 1)
 })
 
@@ -20,8 +20,8 @@ test('adding another document to the token', function () {
   store.add(token, doc1)
   store.add(token, doc2)
 
-  ok(store.root['f']['o']['o']['docs'][123] === doc1)
-  ok(store.root['f']['o']['o']['docs'][456] === doc2)
+  ok(store.root['f']['o']['o']['docs'][123] === doc1.tf)
+  ok(store.root['f']['o']['o']['docs'][456] === doc2.tf)
 })
 
 test('checking if a token exists in the store', function () {
@@ -51,7 +51,7 @@ test('retrieving items from the store', function () {
 
   store.add(token, doc)
   deepEqual(store.get(token), {
-    '123': doc
+    '123': doc.tf
   })
 
   deepEqual(store.get(''), {})
@@ -85,7 +85,7 @@ test('removing a document from the token store', function () {
   deepEqual(store.get('foo'), {})
   store.add('foo', doc)
   deepEqual(store.get('foo'), {
-    '123': doc
+    '123': doc.tf
   })
 
   store.remove('foo', 123)
@@ -101,7 +101,7 @@ test('removing a document that is not in the store', function () {
   store.add('bar', doc2)
   store.remove('foo', 456)
 
-  deepEqual(store.get('foo'), { 123: doc1 })
+  deepEqual(store.get('foo'), { 123: doc1.tf })
 })
 
 test('removing a document from a key that does not exist', function () {
@@ -142,7 +142,7 @@ test('serialisation', function () {
           o: {
             docs: {},
             o: {
-              docs: { 123: { ref: 123, tf: 1 } }
+              docs: { 123: 1 }
             }
           }
         }
@@ -161,7 +161,7 @@ test('loading a serialised story', function () {
         o: {
           docs: {},
           o: {
-            docs: { 123: { ref: 123, tf: 1 } }
+            docs: { 123: 1 }
           }
         }
       }
@@ -173,5 +173,5 @@ test('loading a serialised story', function () {
       documents = store.get('foo')
 
   equal(store.length, 1)
-  deepEqual(documents, { 123: { ref: 123, tf: 1 }})
+  deepEqual(documents, { 123: 1 })
 })
