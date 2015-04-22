@@ -41,7 +41,7 @@ test("removing an item from the pipeline", function () {
 test("removing a nonexistent item from the pipeline", function () {
   var pipeline = new lunr.Pipeline,
       fn1 = $.noop,
-	  fn2 = function () {}
+      fn2 = function () {}
 
   pipeline.add(fn1)
   equal(pipeline._stack.length, 1)
