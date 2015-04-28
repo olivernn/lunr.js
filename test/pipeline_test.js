@@ -64,13 +64,16 @@ test("adding an item to the pipeline before another item", function () {
 test("adding an item to the pipeline before nonexistent item", function () {
   var pipeline = new lunr.Pipeline,
       fn1 = $.noop,
-      fn2 = function () {}
+      fn2 = function () {},
+      fn3 = function () {}
 
-  pipeline.add(fn1)
+  pipeline.add(fn1, fn2)
 
   throws(function () {
-    pipeline.before(fn2, fn1)
+    pipeline.before(fn3, fn1)
   })
+
+  deepEqual(pipeline._stack, [fn1, fn2])
 })
 
 test("adding an item to the pipeline after another item", function () {
@@ -96,6 +99,8 @@ test("adding an item to the pipeline after nonexistent item", function () {
   throws(function () {
     pipeline.after(fn3, fn1)
   })
+
+  deepEqual(pipeline._stack, [fn1, fn2])
 })
 
 test("run calls each member of the pipeline for each input", function () {
