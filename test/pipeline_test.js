@@ -38,6 +38,18 @@ test("removing an item from the pipeline", function () {
   equal(pipeline._stack.length, 0)
 })
 
+test("removing a nonexistent item from the pipeline", function () {
+  var pipeline = new lunr.Pipeline,
+      fn1 = $.noop,
+      fn2 = function () {}
+
+  pipeline.add(fn1)
+  equal(pipeline._stack.length, 1)
+
+  pipeline.remove(fn2)
+  equal(pipeline._stack.length, 1)
+})
+
 test("adding an item to the pipeline before another item", function () {
   var pipeline = new lunr.Pipeline,
       fn1 = $.noop,
@@ -47,6 +59,21 @@ test("adding an item to the pipeline before another item", function () {
   pipeline.before(fn1, fn2)
 
   deepEqual(pipeline._stack, [fn2, fn1])
+})
+
+test("adding an item to the pipeline before nonexistent item", function () {
+  var pipeline = new lunr.Pipeline,
+      fn1 = $.noop,
+      fn2 = function () {},
+      fn3 = function () {}
+
+  pipeline.add(fn1, fn2)
+
+  throws(function () {
+    pipeline.before(fn3, fn1)
+  })
+
+  deepEqual(pipeline._stack, [fn1, fn2])
 })
 
 test("adding an item to the pipeline after another item", function () {
@@ -59,6 +86,21 @@ test("adding an item to the pipeline after another item", function () {
   pipeline.after(fn1, fn3)
 
   deepEqual(pipeline._stack, [fn1, fn3, fn2])
+})
+
+test("adding an item to the pipeline after nonexistent item", function () {
+  var pipeline = new lunr.Pipeline,
+      fn1 = $.noop,
+      fn2 = function () {},
+      fn3 = function () {}
+
+  pipeline.add(fn1, fn2)
+
+  throws(function () {
+    pipeline.after(fn3, fn1)
+  })
+
+  deepEqual(pipeline._stack, [fn1, fn2])
 })
 
 test("run calls each member of the pipeline for each input", function () {
