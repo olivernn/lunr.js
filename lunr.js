@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.8
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.9
  * Copyright (C) 2015 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -56,7 +56,7 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.5.8"
+lunr.version = "0.5.9"
 /*!
  * lunr.utils
  * Copyright (C) 2015 Oliver Nightingale
@@ -280,7 +280,7 @@ lunr.Pipeline.load = function (serialised) {
     if (fn) {
       pipeline.add(fn)
     } else {
-      throw new Error ('Cannot load un-registered function: ' + fnName)
+      throw new Error('Cannot load un-registered function: ' + fnName)
     }
   })
 
@@ -317,7 +317,12 @@ lunr.Pipeline.prototype.add = function () {
 lunr.Pipeline.prototype.after = function (existingFn, newFn) {
   lunr.Pipeline.warnIfFunctionNotRegistered(newFn)
 
-  var pos = this._stack.indexOf(existingFn) + 1
+  var pos = this._stack.indexOf(existingFn)
+  if (pos == -1) {
+    throw new Error('Cannot find existingFn')
+  }
+
+  pos = pos + 1
   this._stack.splice(pos, 0, newFn)
 }
 
@@ -335,6 +340,10 @@ lunr.Pipeline.prototype.before = function (existingFn, newFn) {
   lunr.Pipeline.warnIfFunctionNotRegistered(newFn)
 
   var pos = this._stack.indexOf(existingFn)
+  if (pos == -1) {
+    throw new Error('Cannot find existingFn')
+  }
+
   this._stack.splice(pos, 0, newFn)
 }
 
@@ -346,6 +355,10 @@ lunr.Pipeline.prototype.before = function (existingFn, newFn) {
  */
 lunr.Pipeline.prototype.remove = function (fn) {
   var pos = this._stack.indexOf(fn)
+  if (pos == -1) {
+    return
+  }
+
   this._stack.splice(pos, 1)
 }
 
@@ -629,31 +642,30 @@ lunr.SortedSet.prototype.forEach = function (fn, ctx) {
  * sorted set, or -1 if it is not present.
  *
  * @param {Object} elem The object to locate in the sorted set.
- * @param {Number} start An optional index at which to start searching from
- * within the set.
- * @param {Number} end An optional index at which to stop search from within
- * the set.
  * @returns {Number}
  * @memberOf SortedSet
  */
-lunr.SortedSet.prototype.indexOf = function (elem, start, end) {
-  var start = start || 0,
-      end = end || this.elements.length,
+lunr.SortedSet.prototype.indexOf = function (elem) {
+  var start = 0,
+      end = this.elements.length,
       sectionLength = end - start,
       pivot = start + Math.floor(sectionLength / 2),
       pivotElem = this.elements[pivot]
 
-  if (sectionLength <= 1) {
-    if (pivotElem === elem) {
-      return pivot
-    } else {
-      return -1
-    }
+  while (sectionLength > 1) {
+    if (pivotElem === elem) return pivot
+
+    if (pivotElem < elem) start = pivot
+    if (pivotElem > elem) end = pivot
+
+    sectionLength = end - start
+    pivot = start + Math.floor(sectionLength / 2)
+    pivotElem = this.elements[pivot]
   }
 
-  if (pivotElem < elem) return this.indexOf(elem, pivot, end)
-  if (pivotElem > elem) return this.indexOf(elem, start, pivot)
   if (pivotElem === elem) return pivot
+
+  return -1
 }
 
 /**
@@ -664,27 +676,27 @@ lunr.SortedSet.prototype.indexOf = function (elem, start, end) {
  * in the sorted set.
  *
  * @param {Object} elem The elem to find the position for in the set
- * @param {Number} start An optional index at which to start searching from
- * within the set.
- * @param {Number} end An optional index at which to stop search from within
- * the set.
  * @returns {Number}
  * @memberOf SortedSet
  */
-lunr.SortedSet.prototype.locationFor = function (elem, start, end) {
-  var start = start || 0,
-      end = end || this.elements.length,
+lunr.SortedSet.prototype.locationFor = function (elem) {
+  var start = 0,
+      end = this.elements.length,
       sectionLength = end - start,
       pivot = start + Math.floor(sectionLength / 2),
       pivotElem = this.elements[pivot]
 
-  if (sectionLength <= 1) {
-    if (pivotElem > elem) return pivot
-    if (pivotElem < elem) return pivot + 1
+  while (sectionLength > 1) {
+    if (pivotElem < elem) start = pivot
+    if (pivotElem > elem) end = pivot
+
+    sectionLength = end - start
+    pivot = start + Math.floor(sectionLength / 2)
+    pivotElem = this.elements[pivot]
   }
 
-  if (pivotElem < elem) return this.locationFor(elem, pivot, end)
-  if (pivotElem > elem) return this.locationFor(elem, start, pivot)
+  if (pivotElem > elem) return pivot
+  if (pivotElem < elem) return pivot + 1
 }
 
 /**

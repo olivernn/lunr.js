@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.9
+
+* Remove recursion from SortedSet#indexOf and SortedSet#locationFor to gain small performance gains in Index#search and Index#add
+* Fix incorrect handling of non existant functions when adding/removing from a Pipeline [#146](https://github.com/olivernn/lunr.js/issues/146) thanks to [weixsong](https://github.com/weixsong)
+
 ## 0.5.8
 
 * Fix typo when referencing Martin Porter's home page http://tartarus.org/~martin/ [#132](https://github.com/olivernn/lunr.js/pull/132) thanks [James Aylett](https://github.com/jaylett)
