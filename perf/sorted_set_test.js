@@ -18,5 +18,9 @@
     sortedSet.add(2000)
   }, { setup: setup })
 
+  bench("sortedSet#indexOf", function () {
+    filledSet.indexOf(321)
+  }, { setup: setup })
+
 })()
 
