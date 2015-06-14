@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.10
+
+* Fix bug in IDF calculation, thanks to [weixsong](https://github.com/weixsong) for discovering the issue.
+* Documentation fixes [#111](https://github.com/olivernn/lunr.js/pull/111) thanks [Chris Van](https://github.com/cvan).
+* Remove version from bower.json as it is not needed [#160](https://github.com/olivernn/lunr.js/pull/160), thanks [Kevin Kirsche](https://github.com/kkirsche)
+* Fix link to augment.js on the home page [#159](https://github.com/olivernn/lunr.js/issues/159), thanks [Gábor Nádai](https://github.com/mefiblogger)
+
 ## 0.5.9
 
 * Remove recursion from SortedSet#indexOf and SortedSet#locationFor to gain small performance gains in Index#search and Index#add

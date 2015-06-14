@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.9
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.10
  * Copyright (C) 2015 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -56,7 +56,7 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.5.9"
+lunr.version = "0.5.10"
 /*!
  * lunr.utils
  * Copyright (C) 2015 Oliver Nightingale
@@ -101,7 +101,7 @@ lunr.EventEmitter = function () {
  * Can bind a single function to many different events in one call.
  *
  * @param {String} [eventName] The name(s) of events to bind this function to.
- * @param {Function} handler The function to call when an event is fired.
+ * @param {Function} fn The function to call when an event is fired.
  * @memberOf EventEmitter
  */
 lunr.EventEmitter.prototype.addListener = function () {
@@ -121,7 +121,7 @@ lunr.EventEmitter.prototype.addListener = function () {
  * Removes a handler function from a specific event.
  *
  * @param {String} eventName The name of the event to remove this function from.
- * @param {Function} handler The function to remove from an event.
+ * @param {Function} fn The function to remove from an event.
  * @memberOf EventEmitter
  */
 lunr.EventEmitter.prototype.removeListener = function (name, fn) {
@@ -818,7 +818,7 @@ lunr.Index = function () {
  * The handler can be bound to many events at the same time.
  *
  * @param {String} [eventName] The name(s) of events to bind the function to.
- * @param {Function} handler The serialised set to load.
+ * @param {Function} fn The serialised set to load.
  * @memberOf Index
  */
 lunr.Index.prototype.on = function () {
@@ -830,7 +830,7 @@ lunr.Index.prototype.on = function () {
  * Removes a handler from an event being emitted by the index.
  *
  * @param {String} eventName The name of events to remove the function from.
- * @param {Function} handler The serialised set to load.
+ * @param {Function} fn The serialised set to load.
  * @memberOf Index
  */
 lunr.Index.prototype.off = function (name, fn) {
@@ -1038,7 +1038,7 @@ lunr.Index.prototype.idf = function (term) {
       idf = 1
 
   if (documentFrequency > 0) {
-    idf = 1 + Math.log(this.tokenStore.length / documentFrequency)
+    idf = 1 + Math.log(this.documentStore.length / documentFrequency)
   }
 
   return this._idfCache[cacheKey] = idf
