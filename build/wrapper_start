@@ -5,5 +5,5 @@
  * @license
  */
 
-(function(){
+;(function(){
 
