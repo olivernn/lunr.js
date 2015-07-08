@@ -1,6 +1,6 @@
 {
   "name": "lunr.js",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "main": "lunr.js",
   "ignore": [
     "tests/",

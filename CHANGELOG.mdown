@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.11
+
+* Fix [bug](https://github.com/olivernn/lunr.js/issues/162) when using the unminified build of lunr in some project builds, thanks [Alessio Michelini](https://github.com/darkmavis1980)
+
 ## 0.5.10
 
 * Fix bug in IDF calculation, thanks to [weixsong](https://github.com/weixsong) for discovering the issue.

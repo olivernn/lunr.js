@@ -1,7 +1,7 @@
 {
   "name": "lunr",
   "description": "Simple full-text search in your browser.",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "author": "Oliver Nightingale",
   "keywords": ["search"],
   "homepage": "http://lunrjs.com",
