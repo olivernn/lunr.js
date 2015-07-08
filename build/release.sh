@@ -26,7 +26,7 @@ on_master_branch () {
 }
 
 version=$(cat VERSION)
-previous_version=$(git tag -l | tail -n 1)
+previous_version=$(git describe --abbrev=0)
 
 if ! on_master_branch; then
   echo -e "\033[0;31mRefusing to release from non master branch.\033[0m"
