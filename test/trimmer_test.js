@@ -25,3 +25,8 @@ test('should be registered with lunr.Pipeline', function () {
   equal(lunr.trimmer.label, 'trimmer')
   deepEqual(lunr.Pipeline.registeredFunctions['trimmer'], lunr.trimmer)
 })
+
+test('empty tokens should return undefined', function () {
+  var token = '???'
+  equal(lunr.trimmer(token), void 0)
+})
