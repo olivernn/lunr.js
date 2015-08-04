@@ -48,6 +48,20 @@ test('adding a document with an empty field', function () {
   ok(!isNaN(idx.tokenStore.get('test')[1].tf))
 })
 
+test('ignore empty tokens', function () {
+  var idx = new lunr.Index,
+      doc = {id: 1, body: 'test ???'}
+
+  idx.field('body')
+  idx.pipeline.add(lunr.trimmer)
+
+  idx.add(doc)
+       
+  var tokens = idx.documentStore.get(1).toArray()
+  equal(tokens.length, 1)
+  deepEqual(tokens, ['test']) // ??? should be ignored
+})
+
 test('triggering add events', function () {
   var idx = new lunr.Index,
       doc = {id: 1, body: 'this is a test'},
