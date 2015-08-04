@@ -1686,9 +1686,9 @@ lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'stopWordFilter')
  * @see lunr.Pipeline
  */
 lunr.trimmer = function (token) {
-  var result = token.replace(/^\W+/, '')
-                    .replace(/\W+$/, '')
-  return result === '' ? undefined : result
+  return token
+    .replace(/^\W+/, '')
+    .replace(/\W+$/, '')
 }
 
 lunr.Pipeline.registerFunction(lunr.trimmer, 'trimmer')
