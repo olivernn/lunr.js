@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.12
+
+* Implement `lunr.stopWordFilter` with an object instead of using `lunr.SortedSet` [#170](https://github.com/olivernn/lunr.js/pull/170), resulting in a performance boost for the text processing pipeline, thanks to [Brian Vaughn](https://github.com/bvaughn).
+* Ensure that `lunr.trimmer` does not introduce empty tokens into the index, [#166](https://github.com/olivernn/lunr.js/pull/166), thanks to [janeisklar](https://github.com/janeisklar)
+
 ## 0.5.11
 
 * Fix [bug](https://github.com/olivernn/lunr.js/issues/162) when using the unminified build of lunr in some project builds, thanks [Alessio Michelini](https://github.com/darkmavis1980)
