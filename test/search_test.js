@@ -75,3 +75,26 @@ test('search boosts exact matches', function () {
 
   ok(results[0].score > results[1].score)
 })
+
+test('ref type is not changed to a string', function () {
+  var idx = new lunr.Index
+  idx.field('type')
+
+  var objKey = {},
+      arrKey = [],
+      dateKey = new Date,
+      numKey = 1,
+      strKey = "foo"
+
+  idx.add({id: objKey, type: "object"})
+  idx.add({id: arrKey, type: "array"})
+  idx.add({id: dateKey, type: "date"})
+  idx.add({id: numKey, type: "number"})
+  idx.add({id: strKey, type: "string"})
+
+  deepEqual(idx.search("object")[0].ref, objKey)
+  deepEqual(idx.search("array")[0].ref, arrKey)
+  deepEqual(idx.search("date")[0].ref, dateKey)
+  deepEqual(idx.search("number")[0].ref, numKey)
+  deepEqual(idx.search("string")[0].ref, strKey)
+})
