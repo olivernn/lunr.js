@@ -801,7 +801,7 @@ lunr.Index = function () {
   this._ref = 'id'
   this.pipeline = new lunr.Pipeline
   this.documentStore = new lunr.Store
-  this.fieldStore = new lunr.Store
+  this.fieldStore = {}
   this.tokenStore = new lunr.TokenStore
   this.corpusTokens = new lunr.SortedSet
   this.eventEmitter =  new lunr.EventEmitter
@@ -859,7 +859,7 @@ lunr.Index.load = function (serialisedData) {
   idx._ref = serialisedData.ref
 
   idx.documentStore = lunr.Store.load(serialisedData.documentStore)
-  idx.fieldStore = lunr.Store.load(serialisedData.fieldStore)
+  idx.fieldStore = serialisedData.fieldStore
   idx.tokenStore = lunr.TokenStore.load(serialisedData.tokenStore)
   idx.corpusTokens = lunr.SortedSet.load(serialisedData.corpusTokens)
   idx.pipeline = lunr.Pipeline.load(serialisedData.pipeline)
@@ -881,13 +881,16 @@ lunr.Index.load = function (serialisedData) {
  * @param {String} fieldName The name of the field within the document that
  * should be indexed
  * @param {Number} boost An optional boost that can be applied to terms in this
- * @param {Boolean} store Whether to store this field in the index (defaults to false)
+ * field.
+ * @param {Boolean} index Whether to index this field (defaults to true)
+ * @param {Boolean} store Whether to store this field in the index (defaults to
+ * false)
  * @returns {lunr.Index}
  * @memberOf Index
  */
 lunr.Index.prototype.field = function (fieldName, opts) {
   var opts = opts || {},
-      field = { name: fieldName, boost: opts.boost || 1, store: opts.store || false }
+      field = { name: fieldName, boost: opts.boost || 1, index: opts.index !== false, store: opts.store || false }
 
   this._fields.push(field)
   return this
@@ -934,20 +937,22 @@ lunr.Index.prototype.add = function (doc, emitEvent) {
       emitEvent = emitEvent === undefined ? true : emitEvent
 
   this._fields.forEach(function (field) {
-    var fieldTokens = this.pipeline.run(lunr.tokenizer(doc[field.name]))
-
-    docTokens[field.name] = fieldTokens
-    lunr.SortedSet.prototype.add.apply(allDocumentTokens, fieldTokens)
+    if (field.index !== false) {
+      var fieldTokens = this.pipeline.run(lunr.tokenizer(doc[field.name]))
+      docTokens[field.name] = fieldTokens
+      lunr.SortedSet.prototype.add.apply(allDocumentTokens, fieldTokens)      
+    }
     if (field.store) fields[field.name] = doc[field.name]
   }, this)
 
   this.documentStore.set(docRef, allDocumentTokens)
-  this.fieldStore.set(docRef, fields)
+  this.fieldStore[docRef] = fields
   lunr.SortedSet.prototype.add.apply(this.corpusTokens, allDocumentTokens.toArray())
 
   for (var i = 0; i < allDocumentTokens.length; i++) {
     var token = allDocumentTokens.elements[i]
     var tf = this._fields.reduce(function (memo, field) {
+      if (!docTokens[field.name]) return memo;
       var fieldLength = docTokens[field.name].length
 
       if (!fieldLength) return memo
@@ -990,7 +995,7 @@ lunr.Index.prototype.remove = function (doc, emitEvent) {
   var docTokens = this.documentStore.get(docRef)
 
   this.documentStore.remove(docRef)
-  this.fieldStore.remove(docRef)
+  delete this.fieldStore[docRef]
 
   docTokens.forEach(function (token) {
     this.tokenStore.remove(token, docRef)
@@ -1174,7 +1179,7 @@ lunr.Index.prototype.toJSON = function () {
     fields: this._fields,
     ref: this._ref,
     documentStore: this.documentStore.toJSON(),
-    fieldStore: this.fieldStore.toJSON(),
+    fieldStore: this.fieldStore,
     tokenStore: this.tokenStore.toJSON(),
     corpusTokens: this.corpusTokens.toJSON(),
     pipeline: this.pipeline.toJSON()
