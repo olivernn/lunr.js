@@ -4,14 +4,28 @@ test("defining what fields to index", function () {
   var idx = new lunr.Index
   idx.field('foo')
 
-  deepEqual(idx._fields[0], {name: 'foo', boost: 1})
+  deepEqual(idx._fields[0], {name: 'foo', boost: 1, index: true, store: false})
 })
 
 test("giving a particular field a weighting", function () {
   var idx = new lunr.Index
   idx.field('foo', { boost: 10 })
 
-  deepEqual(idx._fields[0], {name: 'foo', boost: 10})
+  deepEqual(idx._fields[0], {name: 'foo', boost: 10, index: true, store: false})
+})
+
+test("defining a particular field not to index", function () {
+  var idx = new lunr.Index
+  idx.field('foo', { index: false })
+
+  deepEqual(idx._fields[0], {name: 'foo', boost: 1, index: false, store: false})
+})
+
+test("defining a particular field to store", function () {
+  var idx = new lunr.Index
+  idx.field('foo', { store: true })
+
+  deepEqual(idx._fields[0], {name: 'foo', boost: 1, index: true, store: true})
 })
 
 test('default reference should be id', function () {
@@ -252,11 +266,13 @@ test('silencing update events', function () {
 test('serialising', function () {
   var idx = new lunr.Index,
       mockDocumentStore = { toJSON: function () { return 'documentStore' }},
+      mockFieldStore = 'fieldStore',
       mockTokenStore = { toJSON: function () { return 'tokenStore' }},
       mockCorpusTokens = { toJSON: function () { return 'corpusTokens' }},
       mockPipeline = { toJSON: function () { return 'pipeline' }}
 
   idx.documentStore = mockDocumentStore
+  idx.fieldStore = mockFieldStore
   idx.tokenStore = mockTokenStore
   idx.corpusTokens = mockCorpusTokens
   idx.pipeline = mockPipeline
@@ -269,11 +285,12 @@ test('serialising', function () {
   deepEqual(idx.toJSON(), {
     version: '@VERSION', // this is what the lunr version is set to before being built
     fields: [
-      { name: 'title', boost: 10 },
-      { name: 'body', boost: 1 }
+      { name: 'title', boost: 10, store: false, index: true },
+      { name: 'body', boost: 1, store: false, index: true }
     ],
     ref: 'id',
     documentStore: 'documentStore',
+    fieldStore: 'fieldStore',
     tokenStore: 'tokenStore',
     corpusTokens: 'corpusTokens',
     pipeline: 'pipeline'
@@ -289,6 +306,7 @@ test('loading a serialised index', function () {
     ],
     ref: 'id',
     documentStore: { store: {}, length: 0 },
+    fieldStore: { store: {}, length: 0 },
     tokenStore: { root: {}, length: 0 },
     corpusTokens: [],
     pipeline: ['stopWordFilter', 'stemmer']
