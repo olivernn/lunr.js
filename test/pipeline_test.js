@@ -165,6 +165,26 @@ test("run should filter out any undefined values at each stage in the pipeline",
   equal(output.length, 5)
 })
 
+test("run should filter out any empty string values at each stage in the pipeline", function () {
+  var pipeline = new lunr.Pipeline,
+      fn2Count = 0,
+      fn1 = function (t) {
+        if (t === "foo") {
+          return ""
+        } else {
+          return t
+        }
+      },
+      fn2 = function (t) { fn2Count++ ; return t }
+
+  pipeline.add(fn1, fn2)
+
+  var output = pipeline.run(["foo", "bar", "baz", ""])
+  equal(fn2Count, 2)
+  equal(output.length, 2)
+  deepEqual(output, ["bar", "baz"])
+})
+
 test('toJSON', function () {
   var pipeline = new lunr.Pipeline,
       fn1 = function () {},
