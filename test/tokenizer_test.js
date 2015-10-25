@@ -15,11 +15,18 @@ test('downcasing tokens', function () {
   deepEqual(lunr.tokenizer(tags), ['foo', 'bar'])
 })
 
-test('handling arrays', function () {
+test('handling arrays of strings', function () {
   var tags = ['foo', 'bar'],
       tokens = lunr.tokenizer(tags)
 
   deepEqual(tokens, tags)
+})
+
+test('handling arrays with undefined or null values', function () {
+  var arr = ['foo', undefined, null, 'bar'],
+      tokens = lunr.tokenizer(arr)
+
+  deepEqual(tokens, ['foo', '', '', 'bar'])
 })
 
 test('handling multiple white spaces', function () {
