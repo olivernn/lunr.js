@@ -965,7 +965,8 @@ lunr.Index.prototype.add = function (doc, emitEvent) {
     var fieldTokens = this.pipeline.run(lunr.tokenizer(doc[field.name]))
 
     docTokens[field.name] = fieldTokens
-    lunr.SortedSet.prototype.add.apply(allDocumentTokens, fieldTokens)
+    if(doc[field.name])
+      lunr.SortedSet.prototype.add.apply(allDocumentTokens, fieldTokens)
   }, this)
 
   this.documentStore.set(docRef, allDocumentTokens)
