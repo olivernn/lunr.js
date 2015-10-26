@@ -2,6 +2,7 @@ module('search', {
   setup: function () {
     var idx = new lunr.Index
     idx.field('body')
+    idx.field('wordCount', { store: true, index: false })
     idx.field('title', { boost: 10 })
 
     ;([{
@@ -12,6 +13,7 @@ module('search', {
     },{
       id: 'b',
       title: 'Plumb waters plant',
+      property: 'Suspect',
       body: 'Professor Plumb has a green plant in his study',
       wordCount: 9
     },{
@@ -38,6 +40,7 @@ test('returning the correct results', function () {
 
   equal(results.length, 2)
   equal(results[0].ref, 'b')
+  equal(results[0].fields.wordCount, 9)
 })
 
 test('search term not in the index', function () {
@@ -63,6 +66,7 @@ test('search takes into account boosts', function () {
 
   equal(results.length, 2)
   equal(results[0].ref, 'c')
+  equal(results[0].fields.wordCount, 16)
 
   ok(results[0].score > 10 * results[1].score)
 })
@@ -72,6 +76,7 @@ test('search boosts exact matches', function () {
 
   equal(results.length, 2)
   equal(results[0].ref, 'e')
+  equal(results[0].fields.wordCount, undefined)
 
   ok(results[0].score > results[1].score)
 })
