@@ -38,12 +38,12 @@ test('passing a config fn which is called with the new index', function () {
 
 test('searching indexed documents', function () {
     var index = lunr(function () {
-        this.field('name');
+        this.field('name')
     })
 
     index.add({'id': 1, 'name': 'usb'})
 
-    equal(index.search('u').length, 1);
-    equal(index.search('usb').length, 1);
-    equal(index.search('us').length, 1);
+    equal(index.search('u').length, 1)
+    equal(index.search('usb').length, 1)
+    equal(index.search('us').length, 1)
 })
