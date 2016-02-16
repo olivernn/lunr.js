@@ -1141,7 +1141,7 @@ lunr.Index.prototype.search = function (query) {
             refsLen = refs.length
 
         for (var i = 0; i < refsLen; i++) {
-          set.add(matchingDocuments[refs[i]].ref)
+          set.add([matchingDocuments[refs[i]].ref])
         }
 
         return memo.union(set)
