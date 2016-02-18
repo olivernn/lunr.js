@@ -608,14 +608,14 @@ lunr.SortedSet.load = function (serialisedData) {
  * Inserts new items into the set in the correct position to maintain the
  * order.
  *
- * @param {Array} inputObjects The objects to add to this set.
+ * @param {Object} The objects to add to this set.
  * @memberOf SortedSet
  */
-lunr.SortedSet.prototype.add = function (inputObjects) {
+lunr.SortedSet.prototype.add = function () {
   var i, element
 
-  for (i = 0; i < inputObjects.length; i++) {
-    element = inputObjects[i]
+  for (i = 0; i < arguments.length; i++) {
+    element = arguments[i]
     if (~this.indexOf(element)) continue
     this.elements.splice(this.locationFor(element), 0, element)
   }
@@ -745,7 +745,7 @@ lunr.SortedSet.prototype.intersect = function (otherSet) {
     if (i > a_len - 1 || j > b_len - 1) break
 
     if (a[i] === b[j]) {
-      intersectSet.add([a[i]])
+      intersectSet.add(a[i])
       i++, j++
       continue
     }
@@ -798,7 +798,7 @@ lunr.SortedSet.prototype.union = function (otherSet) {
 
   unionSet = longSet.clone()
 
-  unionSet.add(shortSet.toArray())
+  unionSet.add.apply(unionSet, shortSet.toArray())
 
   return unionSet
 }
@@ -963,12 +963,13 @@ lunr.Index.prototype.add = function (doc, emitEvent) {
 
   this._fields.forEach(function (field) {
     var fieldTokens = this.pipeline.run(lunr.tokenizer(doc[field.name]))
+
     docTokens[field.name] = fieldTokens
-    allDocumentTokens.add(fieldTokens)
+    lunr.SortedSet.prototype.add.apply(allDocumentTokens, fieldTokens)
   }, this)
 
   this.documentStore.set(docRef, allDocumentTokens)
-  this.corpusTokens.add(allDocumentTokens.toArray())
+  lunr.SortedSet.prototype.add.apply(this.corpusTokens, allDocumentTokens.toArray())
 
   for (var i = 0; i < allDocumentTokens.length; i++) {
     var token = allDocumentTokens.elements[i]
@@ -1141,7 +1142,7 @@ lunr.Index.prototype.search = function (query) {
             refsLen = refs.length
 
         for (var i = 0; i < refsLen; i++) {
-          set.add([matchingDocuments[refs[i]].ref])
+          set.add(matchingDocuments[refs[i]].ref)
         }
 
         return memo.union(set)
