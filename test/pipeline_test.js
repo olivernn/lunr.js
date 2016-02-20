@@ -185,6 +185,40 @@ test("run should filter out any empty string values at each stage in the pipelin
   deepEqual(output, ["bar", "baz"])
 })
 
+test("pipeline functions can expand a token into multiple tokens", function () {
+  var pipeline = new lunr.Pipeline,
+      expander = function (t) { return [t, t.toUpperCase()] }
+
+  pipeline.add(expander)
+  var output = pipeline.run(["foo", "bar"])
+  deepEqual(output, ["foo", "FOO", "bar", "BAR"])
+})
+
+test("pipeline function should not receive tokens that it expanded", function () {
+  var pipeline = new lunr.Pipeline,
+      received = []
+      expander = function (t) {
+        received.push(t)
+        return [t, t.toUpperCase()]
+      }
+
+  pipeline.add(expander)
+  pipeline.run(["foo", "bar"])
+  deepEqual(received, ["foo", "bar"])
+})
+
+test("expanded tokens should be passed to the next processing function", function () {
+  var pipeline = new lunr.Pipeline,
+      received = [],
+      expander = function (t) { return [t, t.toUpperCase()] },
+      nextProcessor = function (t) { received.push(t) }
+
+  pipeline.add(expander)
+  pipeline.add(nextProcessor)
+  pipeline.run(["foo", "bar"])
+  deepEqual(received, ["foo", "FOO", "bar", "BAR"])
+})
+
 test('toJSON', function () {
   var pipeline = new lunr.Pipeline,
       fn1 = function () {},
