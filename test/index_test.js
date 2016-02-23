@@ -26,6 +26,21 @@ test("defining the reference field for the index", function () {
   deepEqual(idx._ref, 'foo')
 })
 
+test("default tokenizer should be the lunr.tokenizer", function () {
+  var idx = new lunr.Index
+  equal(idx.tokenizerFn, lunr.tokenizer)
+})
+
+test("using a custom tokenizer", function () {
+  var idx = new lunr.Index,
+      fn = function () {}
+
+  lunr.tokenizer.registerFunction(fn, 'test')
+
+  idx.tokenizer(fn)
+  equal(idx.tokenizerFn, fn)
+})
+
 test('adding a document to the index', function () {
   var idx = new lunr.Index,
       doc = {id: 1, body: 'this is a test'}
@@ -276,7 +291,8 @@ test('serialising', function () {
     documentStore: 'documentStore',
     tokenStore: 'tokenStore',
     corpusTokens: 'corpusTokens',
-    pipeline: 'pipeline'
+    pipeline: 'pipeline',
+    tokenizer: 'default'
   })
 })
 
@@ -291,7 +307,8 @@ test('loading a serialised index', function () {
     documentStore: { store: {}, length: 0 },
     tokenStore: { root: {}, length: 0 },
     corpusTokens: [],
-    pipeline: ['stopWordFilter', 'stemmer']
+    pipeline: ['stopWordFilter', 'stemmer'],
+    tokenizer: 'default'
   }
 
   var idx = lunr.Index.load(serialisedData)

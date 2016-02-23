@@ -70,3 +70,28 @@ test("splitting strings with hyphens and spaces", function () {
 
   deepEqual(tokens, ['solve', 'for', 'a', 'b'])
 })
+
+test("registering a tokenizer function", function () {
+  var fn = function () {}
+  lunr.tokenizer.registerFunction(fn, 'test')
+
+  equal(fn.label, 'test')
+  equal(lunr.tokenizer.registeredFunctions['test'], fn)
+
+  delete lunr.tokenizer.registerFunction['test'] // resetting the state after the test
+})
+
+test("loading a registered tokenizer", function () {
+  var serialized = 'default', // default tokenizer is already registered
+      tokenizerFn = lunr.tokenizer.load(serialized)
+
+  equal(tokenizerFn, lunr.tokenizer)
+})
+
+test("loading an un-registered tokenizer", function () {
+  var serialized = 'un-registered' // default tokenizer is already registered
+
+  throws(function () {
+    lunr.tokenizer.load(serialized)
+  })
+})
