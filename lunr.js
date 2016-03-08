@@ -1,6 +1,6 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.6.0
- * Copyright (C) 2015 Oliver Nightingale
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.7.0
+ * Copyright (C) 2016 Oliver Nightingale
  * MIT Licensed
  * @license
  */
@@ -56,10 +56,10 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.6.0"
+lunr.version = "0.7.0"
 /*!
  * lunr.utils
- * Copyright (C) 2015 Oliver Nightingale
+ * Copyright (C) 2016 Oliver Nightingale
  */
 
 /**
@@ -101,7 +101,7 @@ lunr.utils.asString = function (obj) {
 }
 /*!
  * lunr.EventEmitter
- * Copyright (C) 2015 Oliver Nightingale
+ * Copyright (C) 2016 Oliver Nightingale
  */
 
 /**
@@ -183,7 +183,7 @@ lunr.EventEmitter.prototype.hasHandler = function (name) {
 
 /*!
  * lunr.tokenizer
- * Copyright (C) 2015 Oliver Nightingale
+ * Copyright (C) 2016 Oliver Nightingale
  */
 
 /**
@@ -211,9 +211,55 @@ lunr.tokenizer = function (obj) {
  * @see lunr.tokenizer
  */
 lunr.tokenizer.seperator = /[\s\-]+/
+
+/**
+ * Loads a previously serialised tokenizer.
+ *
+ * A tokenizer function to be loaded must already be registered with lunr.tokenizer.
+ * If the serialised tokenizer has not been registered then an error will be thrown.
+ *
+ * @param {String} label The label of the serialised tokenizer.
+ * @returns {Function}
+ * @memberOf tokenizer
+ */
+lunr.tokenizer.load = function (label) {
+  var fn = this.registeredFunctions[label]
+
+  if (!fn) {
+    throw new Error('Cannot load un-registered function: ' + label)
+  }
+
+  return fn
+}
+
+lunr.tokenizer.label = 'default'
+
+lunr.tokenizer.registeredFunctions = {
+  'default': lunr.tokenizer
+}
+
+/**
+ * Register a tokenizer function.
+ *
+ * Functions that are used as tokenizers should be registered if they are to be used with a serialised index.
+ *
+ * Registering a function does not add it to an index, functions must still be associated with a specific index for them to be used when indexing and searching documents.
+ *
+ * @param {Function} fn The function to register.
+ * @param {String} label The label to register this function with
+ * @memberOf tokenizer
+ */
+lunr.tokenizer.registerFunction = function (fn, label) {
+  if (label in this.registeredFunctions) {
+    lunr.utils.warn('Overwriting existing tokenizer: ' + label)
+  }
+
+  fn.label = label
+  this.registeredFunctions[label] = fn
+}
 /*!
  * lunr.Pipeline
- * Copyright (C) 2015 Oliver Nightingale
+ * Copyright (C) 2016 Oliver Nightingale
  */
 
 /**
@@ -443,7 +489,7 @@ lunr.Pipeline.prototype.toJSON = function () {
 }
 /*!
  * lunr.Vector
- * Copyright (C) 2015 Oliver Nightingale
+ * Copyright (C) 2016 Oliver Nightingale
  */
 
 /**
@@ -574,7 +620,7 @@ lunr.Vector.prototype.similarity = function (otherVector) {
 }
 /*!
  * lunr.SortedSet
- * Copyright (C) 2015 Oliver Nightingale
+ * Copyright (C) 2016 Oliver Nightingale
  */
 
 /**
@@ -798,7 +844,9 @@ lunr.SortedSet.prototype.union = function (otherSet) {
 
   unionSet = longSet.clone()
 
-  unionSet.add.apply(unionSet, shortSet.toArray())
+  for(var i = 0, shortSetElements = shortSet.toArray(); i < shortSetElements.length; i++){
+    unionSet.add(shortSetElements[i])
+  }
 
   return unionSet
 }
@@ -814,7 +862,7 @@ lunr.SortedSet.prototype.toJSON = function () {
 }
 /*!
  * lunr.Index
- * Copyright (C) 2015 Oliver Nightingale
+ * Copyright (C) 2016 Oliver Nightingale
  */
 
 /**
@@ -832,6 +880,7 @@ lunr.Index = function () {
   this.tokenStore = new lunr.TokenStore
   this.corpusTokens = new lunr.SortedSet
   this.eventEmitter =  new lunr.EventEmitter
+  this.tokenizerFn = lunr.tokenizer
 
   this._idfCache = {}
 
@@ -885,6 +934,7 @@ lunr.Index.load = function (serialisedData) {
   idx._fields = serialisedData.fields
   idx._ref = serialisedData.ref
 
+  idx.tokenizer = lunr.tokenizer.load(serialisedData.tokenizer)
   idx.documentStore = lunr.Store.load(serialisedData.documentStore)
   idx.tokenStore = lunr.TokenStore.load(serialisedData.tokenStore)
   idx.corpusTokens = lunr.SortedSet.load(serialisedData.corpusTokens)
@@ -941,6 +991,28 @@ lunr.Index.prototype.ref = function (refName) {
 }
 
 /**
+ * Sets the tokenizer used for this index.
+ *
+ * By default the index will use the default tokenizer, lunr.tokenizer. The tokenizer
+ * should only be changed before adding documents to the index. Changing the tokenizer
+ * without re-building the index can lead to unexpected results.
+ *
+ * @param {Function} fn The function to use as a tokenizer.
+ * @returns {lunr.Index}
+ * @memberOf Index
+ */
+lunr.Index.prototype.tokenizer = function (fn) {
+  var isRegistered = fn.label && (fn.label in lunr.tokenizer.registeredFunctions)
+
+  if (!isRegistered) {
+    lunr.utils.warn('Function is not a registered tokenizer. This may cause problems when serialising the index')
+  }
+
+  this.tokenizerFn = fn
+  return this
+}
+
+/**
  * Add a document to the index.
  *
  * This is the way new documents enter the index, this function will run the
@@ -962,26 +1034,39 @@ lunr.Index.prototype.add = function (doc, emitEvent) {
       emitEvent = emitEvent === undefined ? true : emitEvent
 
   this._fields.forEach(function (field) {
-    var fieldTokens = this.pipeline.run(lunr.tokenizer(doc[field.name]))
+    var fieldTokens = this.pipeline.run(this.tokenizerFn(doc[field.name]))
 
     docTokens[field.name] = fieldTokens
-    lunr.SortedSet.prototype.add.apply(allDocumentTokens, fieldTokens)
+
+    for (var i = 0; i < fieldTokens.length; i++) {
+      var token = fieldTokens[i]
+      allDocumentTokens.add(token)
+      this.corpusTokens.add(token)
+    }
   }, this)
 
   this.documentStore.set(docRef, allDocumentTokens)
-  lunr.SortedSet.prototype.add.apply(this.corpusTokens, allDocumentTokens.toArray())
 
   for (var i = 0; i < allDocumentTokens.length; i++) {
     var token = allDocumentTokens.elements[i]
-    var tf = this._fields.reduce(function (memo, field) {
-      var fieldLength = docTokens[field.name].length
+    var tf = 0;
 
-      if (!fieldLength) return memo
+    for (var j = 0; j < this._fields.length; j++){
+      var field = this._fields[j]
+      var fieldTokens = docTokens[field.name]
+      var fieldLength = fieldTokens.length
 
-      var tokenCount = docTokens[field.name].filter(function (t) { return t === token }).length
+      if (!fieldLength) continue
 
-      return memo + (tokenCount / fieldLength * field.boost)
-    }, 0)
+      var tokenCount = 0
+      for (var k = 0; k < fieldLength; k++){
+        if (fieldTokens[k] === token){
+          tokenCount++
+        }
+      }
+
+      tf += (tokenCount / fieldLength * field.boost)
+    }
 
     this.tokenStore.add(token, { ref: docRef, tf: tf })
   };
@@ -1100,7 +1185,7 @@ lunr.Index.prototype.idf = function (term) {
  * @memberOf Index
  */
 lunr.Index.prototype.search = function (query) {
-  var queryTokens = this.pipeline.run(lunr.tokenizer(query)),
+  var queryTokens = this.pipeline.run(this.tokenizerFn(query)),
       queryVector = new lunr.Vector,
       documentSets = [],
       fieldBoosts = this._fields.reduce(function (memo, f) { return memo + f.boost }, 0)
@@ -1205,6 +1290,7 @@ lunr.Index.prototype.toJSON = function () {
     version: lunr.version,
     fields: this._fields,
     ref: this._ref,
+    tokenizer: this.tokenizerFn.label,
     documentStore: this.documentStore.toJSON(),
     tokenStore: this.tokenStore.toJSON(),
     corpusTokens: this.corpusTokens.toJSON(),
@@ -1245,7 +1331,7 @@ lunr.Index.prototype.use = function (plugin) {
 }
 /*!
  * lunr.Store
- * Copyright (C) 2015 Oliver Nightingale
+ * Copyright (C) 2016 Oliver Nightingale
  */
 
 /**
@@ -1341,7 +1427,7 @@ lunr.Store.prototype.toJSON = function () {
 
 /*!
  * lunr.stemmer
- * Copyright (C) 2015 Oliver Nightingale
+ * Copyright (C) 2016 Oliver Nightingale
  * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt
  */
 
@@ -1559,7 +1645,7 @@ lunr.stemmer = (function(){
 lunr.Pipeline.registerFunction(lunr.stemmer, 'stemmer')
 /*!
  * lunr.stopWordFilter
- * Copyright (C) 2015 Oliver Nightingale
+ * Copyright (C) 2016 Oliver Nightingale
  */
 
 /**
@@ -1723,7 +1809,7 @@ lunr.stopWordFilter = lunr.generateStopWordFilter([
 lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'stopWordFilter')
 /*!
  * lunr.trimmer
- * Copyright (C) 2015 Oliver Nightingale
+ * Copyright (C) 2016 Oliver Nightingale
  */
 
 /**
@@ -1747,7 +1833,7 @@ lunr.trimmer = function (token) {
 lunr.Pipeline.registerFunction(lunr.trimmer, 'trimmer')
 /*!
  * lunr.stemmer
- * Copyright (C) 2015 Oliver Nightingale
+ * Copyright (C) 2016 Oliver Nightingale
  * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt
  */
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0
+
+* Make tokenizer a property of the index, allowing for different indexes to use different tokenizers [#205](https://github.com/olivernn/lunr.js/pull/205) and [#21](https://github.com/olivernn/lunr.js/issues/21).
+* Fix bug that prevented very large documents from being indexed [#203](https://github.com/olivernn/lunr.js/pull/203), thanks [Daniel Grießhaber](https://github.com/dangrie158).
+* Performance improvements when adding documents to the index [#208](https://github.com/olivernn/lunr.js/pull/208), thanks [Dougal Matthews](https://github.com/d0ugal).
+
 ## 0.6.0
 
 * Ensure document ref property type is preserved when returning results [#117](https://github.com/olivernn/lunr.js/issues/117), thanks [Kyle Kirby](https://github.com/kkirby).
