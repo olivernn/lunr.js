@@ -58,7 +58,5 @@ test("inserted elements are kept in index order", function () {
   vector.insert(1, 5)
   vector.insert(0, 6)
 
-  equal(vector.list.idx, 0)
-  equal(vector.list.next.idx, 1)
-  equal(vector.list.next.next.idx, 2)
+  deepEqual(vector.toArray(), [6,5,4])
 })
