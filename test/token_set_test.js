@@ -165,3 +165,55 @@ test('intersect with contained wildcard no matches', function () {
   deepEqual(z.toArray(), [])
 })
 
+test('intersect with fuzzy string matching no edit', function () {
+  var x = lunr.TokenSet.fromString('bar'),
+      y = lunr.TokenSet.fromFuzzyString('bar', 1)
+      z = x.intersect(y)
+
+  deepEqual(z.toArray(), ["bar"])
+})
+
+test('intersect with fuzzy string substitution', function () {
+  var x1 = lunr.TokenSet.fromString('bar'),
+      x2 = lunr.TokenSet.fromString('cur'),
+      x3 = lunr.TokenSet.fromString('cat'),
+      x4 = lunr.TokenSet.fromString('car'),
+      x5 = lunr.TokenSet.fromString('foo'),
+      y = lunr.TokenSet.fromFuzzyString('car', 1)
+
+  deepEqual(x1.intersect(y).toArray(), ["bar"])
+  deepEqual(x2.intersect(y).toArray(), ["cur"])
+  deepEqual(x3.intersect(y).toArray(), ["cat"])
+  deepEqual(x4.intersect(y).toArray(), ["car"])
+  deepEqual(x5.intersect(y).toArray(), [])
+})
+
+test('intersect with fuzzy string deletion', function () {
+  var x1 = lunr.TokenSet.fromString('ar'),
+      x2 = lunr.TokenSet.fromString('br'),
+      x3 = lunr.TokenSet.fromString('ba'),
+      x4 = lunr.TokenSet.fromString('bar'),
+      x5 = lunr.TokenSet.fromString('foo'),
+      y = lunr.TokenSet.fromFuzzyString('bar', 1)
+
+  deepEqual(x1.intersect(y).toArray(), ["ar"])
+  deepEqual(x2.intersect(y).toArray(), ["br"])
+  deepEqual(x3.intersect(y).toArray(), ["ba"])
+  deepEqual(x4.intersect(y).toArray(), ["bar"])
+  deepEqual(x5.intersect(y).toArray(), [])
+})
+
+test('intersect with fuzzy string insertion', function () {
+  var x1 = lunr.TokenSet.fromString('bbar'),
+      x2 = lunr.TokenSet.fromString('baar'),
+      x3 = lunr.TokenSet.fromString('barr'),
+      x4 = lunr.TokenSet.fromString('bar'),
+      x5 = lunr.TokenSet.fromString('foo'),
+      y = lunr.TokenSet.fromFuzzyString('bar', 1)
+
+  deepEqual(x1.intersect(y).toArray(), ["bbar"])
+  deepEqual(x2.intersect(y).toArray(), ["baar"])
+  deepEqual(x3.intersect(y).toArray(), ["barr"])
+  deepEqual(x4.intersect(y).toArray(), ["bar"])
+  deepEqual(x5.intersect(y).toArray(), [])
+})
