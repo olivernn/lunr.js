@@ -217,3 +217,14 @@ test('intersect with fuzzy string insertion', function () {
   deepEqual(x4.intersect(y).toArray(), ["bar"])
   deepEqual(x5.intersect(y).toArray(), [])
 })
+
+test('intersect with fuzzy string transpose', function () {
+  var x1 = lunr.TokenSet.fromString('abr'),
+      x2 = lunr.TokenSet.fromString('bra'),
+      x3 = lunr.TokenSet.fromString('foo'),
+      y = lunr.TokenSet.fromFuzzyString('bar', 1)
+
+  deepEqual(x1.intersect(y).toArray(), ["abr"])
+  deepEqual(x2.intersect(y).toArray(), ["bra"])
+  deepEqual(x3.intersect(y).toArray(), [])
+})
