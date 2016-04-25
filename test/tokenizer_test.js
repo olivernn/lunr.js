@@ -72,3 +72,19 @@ test("splitting strings with hyphens and spaces", function () {
 
   deepEqual(tokens.map(toString), ['solve', 'for', 'a', 'b'])
 })
+
+test("storing the token index", function () {
+  var str = "foo bar",
+      tokens = lunr.tokenizer(str)
+
+  equal(tokens[0].metadata.index, 0)
+  equal(tokens[1].metadata.index, 1)
+})
+
+test("storing the token position", function () {
+  var str = "foo hurp",
+      tokens = lunr.tokenizer(str)
+
+  deepEqual(tokens[0].metadata.position, [0, 3])
+  deepEqual(tokens[1].metadata.position, [4, 4])
+})
