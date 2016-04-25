@@ -73,41 +73,18 @@ test("splitting strings with hyphens and spaces", function () {
   deepEqual(tokens.map(toString), ['solve', 'for', 'a', 'b'])
 })
 
-test("registering a tokenizer function", function () {
-  var fn = function () {}
-  lunr.tokenizer.registerFunction(fn, 'test')
+test("storing the token index", function () {
+  var str = "foo bar",
+      tokens = lunr.tokenizer(str)
 
-  equal(fn.label, 'test')
-  equal(lunr.tokenizer.registeredFunctions['test'], fn)
-
-  delete lunr.tokenizer.registerFunction['test'] // resetting the state after the test
+  equal(tokens[0].metadata.index, 0)
+  equal(tokens[1].metadata.index, 1)
 })
 
-test("loading a registered tokenizer", function () {
-  var serialized = 'default', // default tokenizer is already registered
-      tokenizerFn = lunr.tokenizer.load(serialized)
+test("storing the token position", function () {
+  var str = "foo hurp",
+      tokens = lunr.tokenizer(str)
 
-  equal(tokenizerFn, lunr.tokenizer)
+  deepEqual(tokens[0].metadata.position, [0, 3])
+  deepEqual(tokens[1].metadata.position, [4, 4])
 })
-
-test("loading an un-registered tokenizer", function () {
-  var serialized = 'un-registered' // default tokenizer is already registered
-
-  throws(function () {
-    lunr.tokenizer.load(serialized)
-  })
-})
-
-test('custom separator', function () {
-  try {
-    var defaultSeparator = lunr.tokenizer.separator,
-        str = 'foo|bar|baz'
-
-    lunr.tokenizer.separator = '|'
-
-    deepEqual(lunr.tokenizer(str), ['foo', 'bar', 'baz'])
-  } finally {
-    lunr.tokenizer.separator = defaultSeparator
-  }
-})
-
