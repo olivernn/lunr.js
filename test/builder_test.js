@@ -67,17 +67,3 @@ test('skips fields not defined as searchable', function () {
   deepEqual(matches, [])
 })
 
-test('adding a document with an empty field', function () {
-  var builder = new lunr.Builder,
-      doc = { id: 'id', title: '' }
-
-  builder.ref('id')
-  builder.field('title')
-
-  builder.add(doc)
-  builder.build()
-
-  ok(!isNaN(builder.invertedIndex['']['title'].idf))
-  ok(!isNaN(builder.documentVectors['id']['title'].elements[1]))
-  ok(!isNaN(builder.documentVectors['id']['ALL'].elements[1]))
-})
