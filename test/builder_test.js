@@ -34,12 +34,10 @@ test('indexing a document', function () {
 
   // builds a vector space of the document
   ok('id' in builder.documentVectors)
-  ok(builder.documentVectors['id']['title'] instanceof lunr.Vector)
-  ok(builder.documentVectors['id']['ALL'] instanceof lunr.Vector)
+  ok(builder.documentVectors['id'] instanceof lunr.Vector)
 
   // for each dimension in the vector there will be two elements, one for the index, the other for the score
-  equal(builder.documentVectors['id']['title'].elements.length, 2)
-  equal(builder.documentVectors['id']['ALL'].elements.length, 2)
+  equal(builder.documentVectors['id'].elements.length, 2)
 
   // builds the token set for this corpus
   var matches = builder.tokenSet.intersect(lunr.TokenSet.fromString("test")).toArray()
@@ -47,7 +45,7 @@ test('indexing a document', function () {
 
   // calculates some statisics about the corpus
   equal(builder.documentCount, 1)
-  equal(builder.averageFieldLengths['title'], 1)
+  equal(builder.averageDocumentLength, 1)
 })
 
 test('skips fields not defined as searchable', function () {
