@@ -1,8 +1,7 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.7.0
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.7.1
  * Copyright (C) 2016 Oliver Nightingale
- * MIT Licensed
- * @license
+ * @license MIT
  */
 
 ;(function(){
@@ -56,7 +55,7 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.7.0"
+lunr.version = "0.7.1"
 /*!
  * lunr.utils
  * Copyright (C) 2016 Oliver Nightingale
