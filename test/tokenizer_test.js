@@ -95,3 +95,18 @@ test("loading an un-registered tokenizer", function () {
     lunr.tokenizer.load(serialized)
   })
 })
+
+test("using the seperator alias", function(){
+
+  // Check they are equal at the start
+  equal(lunr.tokenizer.seperator, lunr.tokenizer.separator)
+
+  // Update via the correct spelling and verify.
+  lunr.tokenizer.separator = /[\s]+/
+  equal(lunr.tokenizer.seperator, lunr.tokenizer.separator)
+
+  // Update via the incorrect spelling and verify.
+  lunr.tokenizer.seperator = /[\s\-]+/
+  equal(lunr.tokenizer.seperator, lunr.tokenizer.separator)
+
+})
