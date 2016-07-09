@@ -7,7 +7,8 @@ test("single term", function () {
   parser.parse()
 
   deepEqual(query.clauses, [{
-    "term": "foo"
+    "term": "foo",
+    "fields": ["title", "body"]
   }])
 })
 
@@ -19,7 +20,8 @@ test("single term with wildcard", function () {
 
   deepEqual(query.clauses, [{
     "term": "fo*",
-    "hasWildcard": true
+    "hasWildcard": true,
+    "fields": ["title", "body"]
   }])
 })
 
@@ -30,9 +32,11 @@ test("multiple terms", function () {
   parser.parse()
 
   deepEqual(query.clauses, [{
-    "term": "foo"
+    "term": "foo",
+    "fields": ["title", "body"]
   },{
-    "term": "bar"
+    "term": "bar",
+    "fields": ["title", "body"]
   }])
 })
 
@@ -93,7 +97,8 @@ test("multiple terms scoped and unscoped", function () {
     "fields": ["body"],
     "term": "bar"
   },{
-    "term": "baz"
+    "term": "baz",
+    "fields": ["title", "body"]
   }])
 })
 
@@ -105,7 +110,8 @@ test("single term with edit distance", function () {
 
   deepEqual(query.clauses, [{
     "term": "foo",
-    "editDistance": 2
+    "editDistance": 2,
+    "fields": ["title", "body"]
   }])
 })
 
@@ -144,10 +150,12 @@ test("multiple terms with edit distance", function () {
 
   deepEqual(query.clauses, [{
     "term": "foo",
-    "editDistance": 2
+    "editDistance": 2,
+    "fields": ["title", "body"]
   },{
     "term": "bar",
-    "editDistance": 3
+    "editDistance": 3,
+    "fields": ["title", "body"]
   }])
 })
 
@@ -159,7 +167,8 @@ test("single term with boost", function () {
 
   deepEqual(query.clauses, [{
     "term": "foo",
-    "boost": 2
+    "boost": 2,
+    "fields": ["title", "body"]
   }])
 })
 
@@ -191,10 +200,12 @@ test("multiple terms with boost", function () {
 
   deepEqual(query.clauses, [{
     "term": "foo",
-    "boost": 2
+    "boost": 2,
+    "fields": ["title", "body"]
   },{
     "term": "bar",
-    "boost": 3
+    "boost": 3,
+    "fields": ["title", "body"]
   }])
 })
 
@@ -207,6 +218,7 @@ test("term with boost and editDistance", function () {
   deepEqual(query.clauses, [{
     "term": "foo",
     "boost": 3,
-    "editDistance": 2
+    "editDistance": 2,
+    "fields": ["title", "body"]
   }])
 })
