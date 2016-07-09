@@ -7,7 +7,9 @@ test("one term", function () {
   equal(lexer.lexemes.length, 1)
   deepEqual(lexer.lexemes[0], {
     type: lunr.QueryLexer.TERM,
-    str: "foo"
+    str: "foo",
+    start: 0,
+    end: 3
   })
 })
 
@@ -19,12 +21,16 @@ test("two terms", function () {
 
   deepEqual(lexer.lexemes[0], {
     type: lunr.QueryLexer.TERM,
-    str: "foo"
+    str: "foo",
+    start: 0,
+    end: 3
   })
 
   deepEqual(lexer.lexemes[1], {
     type: lunr.QueryLexer.TERM,
-    str: "bar"
+    str: "bar",
+    start: 4,
+    end: 7
   })
 })
 
@@ -36,12 +42,16 @@ test("two terms with seperator length > 1", function () {
 
   deepEqual(lexer.lexemes[0], {
     type: lunr.QueryLexer.TERM,
-    str: "foo"
+    str: "foo",
+    start: 0,
+    end: 3
   })
 
   deepEqual(lexer.lexemes[1], {
     type: lunr.QueryLexer.TERM,
-    str: "bar"
+    str: "bar",
+    start: 7,
+    end: 10
   })
 })
 
@@ -53,12 +63,16 @@ test("term with field", function () {
 
   deepEqual(lexer.lexemes[0], {
     type: lunr.QueryLexer.FIELD,
-    str: "title"
+    str: "title",
+    start: 0,
+    end: 5
   })
 
   deepEqual(lexer.lexemes[1], {
     type: lunr.QueryLexer.TERM,
-    str: "foo"
+    str: "foo",
+    start: 6,
+    end: 9
   })
 })
 
@@ -70,12 +84,16 @@ test("term with edit distance", function () {
 
   deepEqual(lexer.lexemes[0], {
     type: lunr.QueryLexer.TERM,
-    str: "foo"
+    str: "foo",
+    start: 0,
+    end: 3
   })
 
   deepEqual(lexer.lexemes[1], {
     type: lunr.QueryLexer.EDIT_DISTANCE,
-    str: "2"
+    str: "2",
+    start: 4,
+    end: 5
   })
 })
 
@@ -87,12 +105,16 @@ test("term with boost", function () {
 
   deepEqual(lexer.lexemes[0], {
     type: lunr.QueryLexer.TERM,
-    str: "foo"
+    str: "foo",
+    start: 0,
+    end: 3
   })
 
   deepEqual(lexer.lexemes[1], {
     type: lunr.QueryLexer.BOOST,
-    str: "10"
+    str: "10",
+    start: 4,
+    end: 6
   })
 })
 
@@ -106,21 +128,29 @@ console.log(lexer.lexemes)
 
   deepEqual(lexer.lexemes[0], {
     type: lunr.QueryLexer.FIELD,
-    str: "title"
+    str: "title",
+    start: 0,
+    end: 5
   })
 
   deepEqual(lexer.lexemes[1], {
     type: lunr.QueryLexer.TERM,
-    str: "foo"
+    str: "foo",
+    start: 6,
+    end: 9
   })
 
   deepEqual(lexer.lexemes[2], {
     type: lunr.QueryLexer.BOOST,
-    str: "10"
+    str: "10",
+    start: 10,
+    end: 12
   })
 
   deepEqual(lexer.lexemes[3], {
     type: lunr.QueryLexer.EDIT_DISTANCE,
-    str: "5"
+    str: "5",
+    start: 13,
+    end: 14
   })
 })
