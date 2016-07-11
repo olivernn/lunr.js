@@ -1,10 +1,6 @@
 module('search', {
   setup: function () {
-    var idx = new lunr.Index
-    idx.field('body')
-    idx.field('title', { boost: 10 })
-
-    ;([{
+    var documents = [{
       id: 'a',
       title: 'Mr. Green kills Colonel Mustard',
       body: 'Mr. Green killed Colonel Mustard in the study with the candlestick. Mr. Green is not a very nice fellow.',
@@ -27,16 +23,24 @@ module('search', {
       id: 'e',
       title: 'title',
       body: 'hand',
-    }]).forEach(function (doc) { idx.add(doc) })
+    }]
 
-    this.idx = idx
+    this.idx = lunr(function () {
+      this.ref('id')
+      this.field('title')
+      this.field('body')
+
+      documents.forEach(function (document) {
+        this.add(document)
+      }, this)
+    })
   }
 })
 
 test('returning the correct results', function () {
   var results = this.idx.search('green plant')
 
-  equal(results.length, 2)
+  equal(results.length, 3)
   equal(results[0].ref, 'b')
 })
 
@@ -49,52 +53,31 @@ test('search term not in the index', function () {
 test('one search term not in the index', function () {
   var results = this.idx.search('foo green')
 
-  equal(results.length, 0)
+  equal(results.length, 3)
 })
 
 test('search contains one term not in the index', function () {
   var results = this.idx.search('green foo')
 
-  equal(results.length, 0)
+  equal(results.length, 3)
 })
 
-test('search takes into account boosts', function () {
-  var results = this.idx.search('professor')
-
-  equal(results.length, 2)
+test('search based on field', function () {
+  var results = this.idx.search("title:professor")
+  equal(results.length, 1)
   equal(results[0].ref, 'c')
-
-  ok(results[0].score > 10 * results[1].score)
 })
 
-test('search boosts exact matches', function () {
-  var results = this.idx.search('hand')
-
+test('search with edit distance', function () {
+  var results = this.idx.search("plnt~1")
   equal(results.length, 2)
-  equal(results[0].ref, 'e')
-
-  ok(results[0].score > results[1].score)
+  equal(results[0].ref, 'b')
+  ok(results[0].matchData.terms.indexOf('plant') >= 0)
 })
 
-test('ref type is not changed to a string', function () {
-  var idx = new lunr.Index
-  idx.field('type')
-
-  var objKey = {},
-      arrKey = [],
-      dateKey = new Date,
-      numKey = 1,
-      strKey = "foo"
-
-  idx.add({id: objKey, type: "object"})
-  idx.add({id: arrKey, type: "array"})
-  idx.add({id: dateKey, type: "date"})
-  idx.add({id: numKey, type: "number"})
-  idx.add({id: strKey, type: "string"})
-
-  deepEqual(idx.search("object")[0].ref, objKey)
-  deepEqual(idx.search("array")[0].ref, arrKey)
-  deepEqual(idx.search("date")[0].ref, dateKey)
-  deepEqual(idx.search("number")[0].ref, numKey)
-  deepEqual(idx.search("string")[0].ref, strKey)
+test('search on field with edit distance', function () {
+  var results = this.idx.search("title:plank~1")
+  equal(results.length, 1)
+  equal(results[0].ref, 'b')
+  ok(results[0].matchData.terms.indexOf('plant') >= 0)
 })

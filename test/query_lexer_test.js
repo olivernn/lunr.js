@@ -122,8 +122,6 @@ test("term with field and boost and edit distance", function () {
   var lexer = new lunr.QueryLexer("title:foo^10~5")
   lexer.run()
 
-console.log(lexer.lexemes)
-
   equal(lexer.lexemes.length, 4)
 
   deepEqual(lexer.lexemes[0], {
