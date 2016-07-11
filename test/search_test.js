@@ -81,3 +81,32 @@ test('search on field with edit distance', function () {
   equal(results[0].ref, 'b')
   ok(results[0].matchData.terms.indexOf('plant') >= 0)
 })
+
+test('search with term boost', function () {
+  var results = this.idx.search("candlestick^5 plant")
+  equal(results.length, 3)
+  deepEqual(results.map(function (r) { return r.ref }), ['a', 'b', 'c'])
+})
+
+test('search with wildcards', function () {
+  var trailingWildcardResults = this.idx.search("candle*"),
+      leadingWildcardResults = this.idx.search("*stick"),
+      containedWildcardResults = this.idx.search("can*ick"),
+      multiWildcardResults = this.idx.search("*an*sti*")
+
+  equal(trailingWildcardResults.length, 1)
+  equal(trailingWildcardResults[0].ref, 'a')
+  ok(trailingWildcardResults[0].matchData.terms.indexOf('candlestick') >= 0)
+
+  equal(leadingWildcardResults.length, 1)
+  equal(leadingWildcardResults[0].ref, 'a')
+  ok(leadingWildcardResults[0].matchData.terms.indexOf('candlestick') >= 0)
+
+  equal(containedWildcardResults.length, 1)
+  equal(containedWildcardResults[0].ref, 'a')
+  ok(containedWildcardResults[0].matchData.terms.indexOf('candlestick') >= 0)
+
+  equal(multiWildcardResults.length, 1)
+  equal(multiWildcardResults[0].ref, 'a')
+  ok(multiWildcardResults[0].matchData.terms.indexOf('candlestick') >= 0)
+})
