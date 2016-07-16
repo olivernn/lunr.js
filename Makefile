@@ -30,6 +30,8 @@ NODE ?= $(shell which node)
 NPM ?= $(shell which npm)
 PHANTOMJS ?= ./node_modules/.bin/phantomjs
 UGLIFYJS ?= ./node_modules/.bin/uglifyjs
+QUNIT ?= ./node_modules/.bin/qunit
+MOCHA ?= ./node_modules/.bin/mocha
 
 all: node_modules lunr.js lunr.min.js docs bower.json package.json component.json example
 
@@ -52,6 +54,9 @@ server:
 
 test: node_modules
 	@./test/runner.sh ${TEST_PORT}
+
+mocha: lunr.js
+	${MOCHA} test/mocha/*.js -u tdd -r test/mocha_helper.js
 
 docs: node_modules
 	${DOX} < lunr.js | ${DOX_TEMPLATE} -n lunr.js -r ${VERSION} > docs/index.html
