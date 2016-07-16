@@ -1,17 +1,22 @@
 
 SRC = lib/lunr.js \
 	lib/utils.js \
-	lib/event_emitter.js \
 	lib/tokenizer.js \
 	lib/pipeline.js \
 	lib/vector.js \
-	lib/sorted_set.js \
-	lib/index.js \
-	lib/document_store.js \
 	lib/stemmer.js \
 	lib/stop_word_filter.js \
 	lib/trimmer.js \
-	lib/token_store.js \
+	lib/token.js \
+	lib/token_set.js \
+	lib/token_set_builder.js \
+	lib/index.js \
+	lib/builder.js \
+	lib/match_data.js \
+	lib/query.js \
+	lib/query_parse_error.js \
+	lib/query_lexer.js \
+	lib/query_parser.js \
 
 YEAR = $(shell date +%Y)
 VERSION = $(shell cat VERSION)
@@ -21,8 +26,8 @@ TEST_PORT ?= 32423
 
 DOX ?= ./node_modules/.bin/dox
 DOX_TEMPLATE ?= ./node_modules/.bin/dox-template
-NODE ?= /usr/local/bin/node
-NPM ?= /usr/local/bin/npm
+NODE ?= $(shell which node)
+NPM ?= $(shell which npm)
 PHANTOMJS ?= ./node_modules/.bin/phantomjs
 UGLIFYJS ?= ./node_modules/.bin/uglifyjs
 
