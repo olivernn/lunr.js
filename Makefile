@@ -56,7 +56,7 @@ test: node_modules
 	@./test/runner.sh ${TEST_PORT}
 
 mocha: lunr.js
-	${MOCHA} test/mocha/*.js -u tdd -r test/mocha_helper.js
+	${MOCHA} test/mocha/*.js -u tdd -r test/mocha_helper.js -R dot -C
 
 docs: node_modules
 	${DOX} < lunr.js | ${DOX_TEMPLATE} -n lunr.js -r ${VERSION} > docs/index.html
