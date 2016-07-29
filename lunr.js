@@ -187,19 +187,19 @@ lunr.EventEmitter.prototype.hasHandler = function (name) {
 
 /**
  * A function for splitting a string into tokens ready to be inserted into
- * the search index. Uses `lunr.tokenizer.seperator` to split strings, change
+ * the search index. Uses `lunr.tokenizer.separator` to split strings, change
  * the value of this property to change how strings are split into tokens.
  *
  * @module
  * @param {String} obj The string to convert into tokens
- * @see lunr.tokenizer.seperator
+ * @see lunr.tokenizer.separator
  * @returns {Array}
  */
 lunr.tokenizer = function (obj) {
   if (!arguments.length || obj == null || obj == undefined) return []
   if (Array.isArray(obj)) return obj.map(function (t) { return lunr.utils.asString(t).toLowerCase() })
 
-  return obj.toString().trim().toLowerCase().split(lunr.tokenizer.seperator)
+  return obj.toString().trim().toLowerCase().split(lunr.tokenizer.separator)
 }
 
 /**
@@ -209,7 +209,7 @@ lunr.tokenizer = function (obj) {
  * @static
  * @see lunr.tokenizer
  */
-lunr.tokenizer.seperator = /[\s\-]+/
+lunr.tokenizer.separator = /[\s\-]+/
 
 /**
  * Loads a previously serialised tokenizer.
