@@ -32,6 +32,7 @@ PHANTOMJS ?= ./node_modules/.bin/phantomjs
 UGLIFYJS ?= ./node_modules/.bin/uglifyjs
 QUNIT ?= ./node_modules/.bin/qunit
 MOCHA ?= ./node_modules/.bin/mocha
+MUSTACHE ?= ./node_modules/.bin/mustache
 
 all: node_modules lunr.js lunr.min.js docs bower.json package.json component.json example
 
@@ -57,6 +58,12 @@ test: node_modules
 
 mocha: lunr.js
 	${MOCHA} test/mocha/*.js -u tdd -r test/mocha_helper.js -R dot -C
+
+test/mocha/env/file_list.json: $(wildcard test/mocha/*.js)
+	${NODE} -p 'JSON.stringify({test_files: process.argv.slice(1)})' $^ > $@
+
+test/mocha.html: test/mocha/env/file_list.json test/mocha/env/index.mustache
+	${MUSTACHE} $^ > $@
 
 docs: node_modules
 	${DOX} < lunr.js | ${DOX_TEMPLATE} -n lunr.js -r ${VERSION} > docs/index.html
