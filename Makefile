@@ -53,16 +53,13 @@ size: lunr.min.js
 server:
 	${NODE} server.js ${SERVER_PORT}
 
-test: node_modules
-	@./test/runner.sh ${TEST_PORT}
+test: node_modules lunr.js
+	${MOCHA} test/*.js -u tdd -r test/test_helper.js -R dot -C
 
-mocha: lunr.js
-	${MOCHA} test/mocha/*.js -u tdd -r test/mocha_helper.js -R dot -C
-
-test/mocha/env/file_list.json: $(wildcard test/mocha/*.js)
+test/env/file_list.json: $(wildcard test/*test.js)
 	${NODE} -p 'JSON.stringify({test_files: process.argv.slice(1)})' $^ > $@
 
-test/mocha.html: test/mocha/env/file_list.json test/mocha/env/index.mustache
+test/index.html: test/env/file_list.json test/env/index.mustache
 	${MUSTACHE} $^ > $@
 
 docs: node_modules

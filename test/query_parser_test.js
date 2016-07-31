@@ -1,224 +1,311 @@
-module("lunr.QueryParser")
+suite('lunr.QueryParser', function () {
+  var parse = function (q) {
+    var query = new lunr.Query (['title', 'body']),
+        parser = new lunr.QueryParser(q, query)
 
-test("single term", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("foo", query)
+    parser.parse()
 
-  parser.parse()
+    return query.clauses
+  }
 
-  deepEqual(query.clauses, [{
-    "term": "foo",
-    "fields": ["title", "body"]
-  }])
-})
+  suite('#parse', function () {
+    suite('single term', function () {
+      setup(function () {
+        this.clauses = parse('foo')
+      })
 
-test("single term with wildcard", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("fo*", query)
+      test('has 1 clause', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
 
-  parser.parse()
+      suite('clauses', function () {
+        setup(function () {
+          this.clause = this.clauses[0]
+        })
 
-  deepEqual(query.clauses, [{
-    "term": "fo*",
-    "hasWildcard": true,
-    "fields": ["title", "body"]
-  }])
-})
+        test('term', function () {
+          assert.equal('foo', this.clause.term)
+        })
 
-test("multiple terms", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("foo bar", query)
+        test('fields', function () {
+          assert.sameMembers(['title', 'body'], this.clause.fields)
+        })
+      })
+    })
 
-  parser.parse()
+    suite('single term with wildcard', function () {
+      setup(function () {
+        this.clauses = parse('fo*')
+      })
 
-  deepEqual(query.clauses, [{
-    "term": "foo",
-    "fields": ["title", "body"]
-  },{
-    "term": "bar",
-    "fields": ["title", "body"]
-  }])
-})
+      test('has 1 clause', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
 
-test("field without a term", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("title:", query)
+      suite('clauses', function () {
+        setup(function () {
+          this.clause = this.clauses[0]
+        })
 
-  throws(function () { parser.parse() }, lunr.QueryParseError)
-})
+        test('#term', function () {
+          assert.equal('fo*', this.clause.term)
+        })
 
-test("single term scoped to field", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("title:foo", query)
+        test('#hasWildcard', function () {
+          assert.ok(this.clause.hasWildcard)
+        })
+      })
+    })
 
-  parser.parse()
+    suite('multiple terms', function () {
+      setup(function () {
+        this.clauses = parse('foo bar')
+      })
 
-  deepEqual(query.clauses, [{
-    "fields": ["title"],
-    "term": "foo"
-  }])
-})
+      test('has 2 clause', function () {
+        assert.lengthOf(this.clauses, 2)
+      })
 
-test("single term scoped to an unknown field", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("blah:foo", query)
+      suite('clauses', function () {
+        test('#term', function () {
+          assert.equal('foo', this.clauses[0].term)
+          assert.equal('bar', this.clauses[1].term)
+        })
+      })
+    })
 
-  throws(function () { parser.parse() }, lunr.QueryParseError)
-})
+    suite('field without a term', function () {
+      test('fails with lunr.QueryParseError', function () {
+        assert.throws(function () { parse('title:') }, lunr.QueryParseError)
+      })
+    })
 
-test("multiple terms scoped to fields", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("title:foo body:bar body:baz", query)
+    suite('unknown field', function () {
+      test('fails with lunr.QueryParseError', function () {
+        assert.throws(function () { parse('unknown:foo') }, lunr.QueryParseError)
+      })
+    })
 
-  parser.parse()
+    suite('term with field', function () {
+      setup(function () {
+        this.clauses = parse('title:foo')
+      })
 
-  deepEqual(query.clauses, [{
-    "fields": ["title"],
-    "term": "foo"
-  },{
-    "fields": ["body"],
-    "term": "bar"
-  },{
-    "fields": ["body"],
-    "term": "baz"
-  }])
-})
+      test('has 1 clause', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
 
-test("multiple terms scoped and unscoped", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("title:foo body:bar baz", query)
+      test('clause contains only scoped field', function () {
+        assert.sameMembers(this.clauses[0].fields, ['title'])
+      })
+    })
 
-  parser.parse()
+    suite('multiple terms scoped to different fields', function () {
+      setup(function () {
+        this.clauses = parse('title:foo body:bar')
+      })
 
-  deepEqual(query.clauses, [{
-    "fields": ["title"],
-    "term": "foo"
-  },{
-    "fields": ["body"],
-    "term": "bar"
-  },{
-    "term": "baz",
-    "fields": ["title", "body"]
-  }])
-})
+      test('has 2 clauses', function () {
+        assert.lengthOf(this.clauses, 2)
+      })
 
-test("single term with edit distance", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("foo~2", query)
+      test('fields', function () {
+        assert.sameMembers(['title'], this.clauses[0].fields)
+        assert.sameMembers(['body'], this.clauses[1].fields)
+      })
 
-  parser.parse()
+      test('terms', function () {
+        assert.equal('foo', this.clauses[0].term)
+        assert.equal('bar', this.clauses[1].term)
+      })
+    })
 
-  deepEqual(query.clauses, [{
-    "term": "foo",
-    "editDistance": 2,
-    "fields": ["title", "body"]
-  }])
-})
+    suite('single term with edit distance', function () {
+      setup(function () {
+        this.clauses = parse('foo~2')
+      })
 
-test("single term with non numeric edit distance", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("foo~a", query)
+      test('has 1 clause', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
 
-  throws(function () { parser.parse() }, lunr.QueryParseError)
-})
+      test('term', function () {
+        assert.equal('foo', this.clauses[0].term)
+      })
 
-test("edit distance without a term", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("~1", query)
+      test('editDistance', function () {
+        assert.equal(2, this.clauses[0].editDistance)
+      })
 
-  throws(function () { parser.parse() }, lunr.QueryParseError)
-})
+      test('fields', function () {
+        assert.sameMembers(['title', 'body'], this.clauses[0].fields)
+      })
+    })
 
-test("single term, scoped to field, with edit distance", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("title:foo~2", query)
+    suite('multiple terms with edit distance', function () {
+      setup(function () {
+        this.clauses = parse('foo~2 bar~3')
+      })
 
-  parser.parse()
+      test('has 2 clauses', function () {
+        assert.lengthOf(this.clauses, 2)
+      })
 
-  deepEqual(query.clauses, [{
-    "fields": ["title"],
-    "term": "foo",
-    "editDistance": 2
-  }])
-})
+      test('term', function () {
+        assert.equal('foo', this.clauses[0].term)
+        assert.equal('bar', this.clauses[1].term)
+      })
 
-test("multiple terms with edit distance", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("foo~2 bar~3", query)
+      test('editDistance', function () {
+        assert.equal(2, this.clauses[0].editDistance)
+        assert.equal(3, this.clauses[1].editDistance)
+      })
 
-  parser.parse()
+      test('fields', function () {
+        assert.sameMembers(['title', 'body'], this.clauses[0].fields)
+        assert.sameMembers(['title', 'body'], this.clauses[1].fields)
+      })
+    })
 
-  deepEqual(query.clauses, [{
-    "term": "foo",
-    "editDistance": 2,
-    "fields": ["title", "body"]
-  },{
-    "term": "bar",
-    "editDistance": 3,
-    "fields": ["title", "body"]
-  }])
-})
+    suite('single term scoped to field with edit distance', function () {
+      setup(function () {
+        this.clauses = parse('title:foo~2')
+      })
 
-test("single term with boost", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("foo^2", query)
+      test('has 1 clause', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
 
-  parser.parse()
+      test('term', function () {
+        assert.equal('foo', this.clauses[0].term)
+      })
 
-  deepEqual(query.clauses, [{
-    "term": "foo",
-    "boost": 2,
-    "fields": ["title", "body"]
-  }])
-})
+      test('editDistance', function () {
+        assert.equal(2, this.clauses[0].editDistance)
+      })
 
-test("single term with non numeric boost", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("foo^a", query)
+      test('fields', function () {
+        assert.sameMembers(['title'], this.clauses[0].fields)
+      })
+    })
 
-  throws(function () { parser.parse() }, lunr.QueryParseError)
-})
+    suite('non-numeric edit distance', function () {
+      test('throws lunr.QueryParseError', function () {
+        assert.throws(function () { parse('foo~a') }, lunr.QueryParseError)
+      })
+    })
 
-test("single term, scoped to field, with boost", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("title:foo^2", query)
+    suite('edit distance without a term', function () {
+      test('throws lunr.QueryParseError', function () {
+        assert.throws(function () { parse('~2') }, lunr.QueryParseError)
+      })
+    })
 
-  parser.parse()
+    suite('single term with boost', function () {
+      setup(function () {
+        this.clauses = parse('foo^2')
+      })
 
-  deepEqual(query.clauses, [{
-    "fields": ["title"],
-    "term": "foo",
-    "boost": 2
-  }])
-})
+      test('has 1 clause', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
 
-test("multiple terms with boost", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("foo^2 bar^3", query)
+      test('term', function () {
+        assert.equal('foo', this.clauses[0].term)
+      })
 
-  parser.parse()
+      test('boost', function () {
+        assert.equal(2, this.clauses[0].boost)
+      })
 
-  deepEqual(query.clauses, [{
-    "term": "foo",
-    "boost": 2,
-    "fields": ["title", "body"]
-  },{
-    "term": "bar",
-    "boost": 3,
-    "fields": ["title", "body"]
-  }])
-})
+      test('fields', function () {
+        assert.sameMembers(['title', 'body'], this.clauses[0].fields)
+      })
+    })
 
-test("term with boost and editDistance", function () {
-  var query = new lunr.Query (["title", "body"]),
-      parser = new lunr.QueryParser("foo~2^3", query)
+    suite('non-numeric boost', function () {
+      test('throws lunr.QueryParseError', function () {
+        assert.throws(function () { parse('foo^a') }, lunr.QueryParseError)
+      })
+    })
 
-  parser.parse()
+    suite('boost without a term', function () {
+      test('throws lunr.QueryParseError', function () {
+        assert.throws(function () { parse('^2') }, lunr.QueryParseError)
+      })
+    })
 
-  deepEqual(query.clauses, [{
-    "term": "foo",
-    "boost": 3,
-    "editDistance": 2,
-    "fields": ["title", "body"]
-  }])
+    suite('multiple terms with boost', function () {
+      setup(function () {
+        this.clauses = parse('foo^2 bar^3')
+      })
+
+      test('has 2 clauses', function () {
+        assert.lengthOf(this.clauses, 2)
+      })
+
+      test('term', function () {
+        assert.equal('foo', this.clauses[0].term)
+        assert.equal('bar', this.clauses[1].term)
+      })
+
+      test('boost', function () {
+        assert.equal(2, this.clauses[0].boost)
+        assert.equal(3, this.clauses[1].boost)
+      })
+
+      test('fields', function () {
+        assert.sameMembers(['title', 'body'], this.clauses[0].fields)
+        assert.sameMembers(['title', 'body'], this.clauses[1].fields)
+      })
+    })
+
+    suite('term scoped by field with boost', function () {
+      setup(function () {
+        this.clauses = parse('title:foo^2')
+      })
+
+      test('has 1 clause', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
+
+      test('term', function () {
+        assert.equal('foo', this.clauses[0].term)
+      })
+
+      test('boost', function () {
+        assert.equal(2, this.clauses[0].boost)
+      })
+
+      test('fields', function () {
+        assert.sameMembers(['title'], this.clauses[0].fields)
+      })
+    })
+  })
+
+  suite('term with boost and edit distance', function () {
+      setup(function () {
+        this.clauses = parse('foo^2~3')
+      })
+
+      test('has 1 clause', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
+
+      test('term', function () {
+        assert.equal('foo', this.clauses[0].term)
+      })
+
+      test('editDistance', function () {
+        assert.equal(3, this.clauses[0].editDistance)
+      })
+
+      test('boost', function () {
+        assert.equal(2, this.clauses[0].boost)
+      })
+
+      test('fields', function () {
+        assert.sameMembers(['title', 'body'], this.clauses[0].fields)
+      })
+  })
 })

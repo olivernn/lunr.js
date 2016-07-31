@@ -1,49 +1,60 @@
-module("lunr.Token")
-
-test("can be converted to a string", function () {
-  var token = new lunr.Token ("foo")
-  equal(token.toString(), "foo")
-})
-
-test("has attached metadata", function () {
-  var token = new lunr.Token ("foo", { length: 3 })
-  equal(token.metadata.length, 3)
-})
-
-test("can be updated", function () {
-  var token = new lunr.Token ("foo")
-
-  token.update(function (s) {
-    return s.toUpperCase()
+suite('lunr.Token', function () {
+  suite('#toString', function () {
+    test('converts the token to a string', function () {
+      var token = new lunr.Token('foo')
+      assert.equal('foo', token.toString())
+    })
   })
 
-  equal(token.toString(), "FOO")
-})
-
-test("metadata available when updating", function () {
-  var token = new lunr.Token ("foo", { bar: true }),
-      yieldedMetadata = null
-
-  token.update(function (_, md) {
-    yieldedMetadata = md
+  suite('#metadata', function () {
+    test('can attach arbitrary metadata', function () {
+      var token = new lunr.Token('foo', { length: 3 })
+      assert.equal(3, token.metadata.length)
+    })
   })
 
-  deepEqual({bar: true}, yieldedMetadata)
-})
+  suite('#update', function () {
+    test('can update the token value', function () {
+      var token = new lunr.Token('foo')
 
-test("can clone a token", function () {
-  var token = new lunr.Token ("foo", { bar: true }),
-      clone = token.clone()
+      token.update(function (s) {
+        return s.toUpperCase()
+      })
 
-  equal(token.toString(), clone.toString())
-  equal(token.metadata.bar, clone.metadata.bar)
-})
+      assert.equal('FOO', token.toString())
+    })
 
-test("can clone a modified token", function () {
-  var token = new lunr.Token ("foo", { bar: true })
-      clone = token.clone(function (s) { return s.toUpperCase() })
+    test('metadata is yielded when updating', function () {
+      var metadata = { bar: true },
+          token = new lunr.Token('foo', metadata),
+          yieldedMetadata
 
-  equal(token.toString(), "foo")
-  equal(clone.toString(), "FOO")
-  equal(token.metadata.bar, clone.metadata.bar)
+      token.update(function (_, md) {
+        yieldedMetadata = md
+      })
+
+      assert.equal(metadata, yieldedMetadata)
+    })
+  })
+
+  suite('#clone', function () {
+    var token = new lunr.Token('foo', { bar: true })
+
+    test('clones value', function () {
+      assert.equal(token.toString(), token.clone().toString())
+    })
+
+    test('clones metadata', function () {
+      assert.equal(token.metadata, token.clone().metadata)
+    })
+
+    test('clone and modify', function () {
+      var clone = token.clone(function (s) {
+        return s.toUpperCase()
+      })
+
+      assert.equal('FOO', clone.toString())
+      assert.equal(token.metadata, clone.metadata)
+    })
+  })
 })

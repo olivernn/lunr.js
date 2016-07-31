@@ -1,62 +1,59 @@
-module("lunr.Vector")
+suite('lunr.Vector', function () {
+  var vectorFromArgs = function () {
+    var vector = new lunr.Vector
 
-test("calculating the magnitude of a vector", function () {
-  var vector = new lunr.Vector,
-      elements = [4,5,6]
+    Array.prototype.slice.call(arguments)
+      .forEach(function (el, i) {
+        vector.insert(i, el)
+      })
 
-  elements.forEach(function (el, i) { vector.insert(i, el) })
+    return vector
+  }
 
-  equal(vector.magnitude(), Math.sqrt(77))
-})
+  suite('#magnitude', function () {
+    test('calculates magnitude of a vector', function () {
+      var vector = vectorFromArgs(4,5,6)
+      assert.equal(Math.sqrt(77), vector.magnitude())
+    })
+  })
 
-test("calculating the dot product with another vector", function () {
-  var v1 = new lunr.Vector,
-      v2 = new lunr.Vector,
-      els1 = [1, 3, -5],
-      els2 = [4, -2, -1]
+  suite('#dot', function () {
+    test('calculates dot product of two vectors', function () {
+      var v1 = vectorFromArgs(1, 3, -5),
+          v2 = vectorFromArgs(4, -2, -1)
 
+      assert.equal(3, v1.dot(v2))
+    })
+  })
 
-  els1.forEach(function (el, i) { v1.insert(i, el) })
-  els2.forEach(function (el, i) { v2.insert(i, el) })
+  suite('#similarity', function () {
+    test('calculates the similarity between two vectors', function () {
+      var v1 = vectorFromArgs(1, 3, -5),
+          v2 = vectorFromArgs(4, -2, -1)
 
-  equal(v1.dot(v2), 3)
-})
+      assert.approximately(v1.similarity(v2), 0.111, 0.001)
+    })
+  })
 
-test("calculating the similarity between two vectors", function () {
-  var v1 = new lunr.Vector,
-      v2 = new lunr.Vector,
-      els1 = [1, 3, -5],
-      els2 = [4, -2, -1]
+  suite('#insert', function () {
+    test('invalidates magnitude cache', function () {
+      var vector = vectorFromArgs(4,5,6)
 
-  els1.forEach(function (el, i) { v1.insert(i, el) })
-  els2.forEach(function (el, i) { v2.insert(i, el) })
+      assert.equal(Math.sqrt(77), vector.magnitude())
 
-  var similarity = v1.similarity(v2),
-      roundedSimilarity = Math.round(similarity * 1000) / 1000
+      vector.insert(3, 7)
 
-  equal(roundedSimilarity, 0.111)
-})
+      assert.equal(Math.sqrt(126), vector.magnitude())
+    })
 
-test("inserting an element invalidates the magnitude cache", function () {
-  var vector = new lunr.Vector,
-      elements = [4,5,6]
+    test('keeps items in index specified order', function () {
+      var vector = new lunr.Vector
 
-  elements.forEach(function (el, i) { vector.insert(i, el) })
+      vector.insert(2, 4)
+      vector.insert(1, 5)
+      vector.insert(0, 6)
 
-  equal(vector.magnitude(), Math.sqrt(77))
-
-  vector.insert(3, 7)
-
-  equal(vector.magnitude(), Math.sqrt(126))
-})
-
-test("inserted elements are kept in index order", function () {
-  var vector = new lunr.Vector,
-      elements = [6,5,4]
-
-  vector.insert(2, 4)
-  vector.insert(1, 5)
-  vector.insert(0, 6)
-
-  deepEqual(vector.toArray(), [6,5,4])
+      assert.deepEqual([6,5,4], vector.toArray())
+    })
+  })
 })

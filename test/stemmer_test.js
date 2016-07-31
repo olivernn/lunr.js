@@ -1,14 +1,26 @@
-module('lunr.stemmer')
+suite('lunr.stemmer', function () {
+  test('reduces words to their stem', function (done) {
+    withFixture('stemming_vocab.json', function (err, fixture) {
+      if (err != null) {
+        throw err
+      }
 
-test('should stem words correctly', function () {
-  Object.keys(stemmingFixture).forEach(function (testWord) {
-    var expected = stemmingFixture[testWord]
+      var testData = JSON.parse(fixture)
 
-    equal(lunr.stemmer(new lunr.Token(testWord)).toString(), expected)
+      Object.keys(testData).forEach(function (word) {
+        var expected = testData[word],
+            token = new lunr.Token(word),
+            result = lunr.stemmer(token).toString()
+
+        assert.equal(expected, result)
+      })
+
+      done()
+    })
   })
-})
 
-test('should be registered with lunr.Pipeline', function () {
-  equal(lunr.stemmer.label, 'stemmer')
-  deepEqual(lunr.Pipeline.registeredFunctions['stemmer'], lunr.stemmer)
+  test('is a registered pipeline function', function () {
+    assert.equal('stemmer', lunr.stemmer.label)
+    assert.equal(lunr.stemmer, lunr.Pipeline.registeredFunctions['stemmer'])
+  })
 })

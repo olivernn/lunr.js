@@ -1,16 +1,21 @@
-module('lunr.MatchData')
+suite('lunr.MatchData', function () {
+  suite('#combine', function () {
+    setup(function () {
+      this.match = new lunr.MatchData('foo', 'title', {
+        position: [1]
+      })
 
-test('combining', function () {
-  var matchA = new lunr.MatchData("foo", "title", {
-    position: [1]
+      this.match.combine(new lunr.MatchData('bar', 'title', {
+        position: [2]
+      }))
+    })
+
+    test('terms', function () {
+      assert.sameMembers(['foo', 'bar'], this.match.terms)
+    })
+
+    test('metadata', function () {
+      assert.deepEqual(this.match.metadata.title.position, [1,2])
+    })
   })
-
-  var matchB = new lunr.MatchData("bar", "title", {
-    position: [2]
-  })
-
-  matchA.combine(matchB)
-
-  deepEqual(matchA.terms, ["foo", "bar"])
-  deepEqual(matchA.metadata.title, { position: [1,2] })
 })

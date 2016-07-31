@@ -1,27 +1,29 @@
-module('lunr.trimmer')
+suite('lunr.trimmer', function () {
+  test('latin characters', function () {
+    var token = new lunr.Token ('hello')
+    assert.equal(lunr.trimmer(token).toString(), token.toString())
+  })
 
-test('latin characters', function () {
-  var token = new lunr.Token ('hello')
-  equal(lunr.trimmer(token).toString(), token)
-})
+  suite('punctuation', function () {
+    var trimmerTest = function (description, str, expected) {
+      test(description, function () {
+        var token = new lunr.Token(str),
+            trimmed = lunr.trimmer(token).toString()
 
-test('removing leading and trailing punctuation', function () {
-  var fullStop = new lunr.Token ('hello.'),
-      innerApostrophe = new lunr.Token ("it's"),
-      trailingApostrophe = new lunr.Token ("james'"),
-      exclamationMark = new lunr.Token ('stop!'),
-      comma = new lunr.Token ('first,'),
-      brackets = new lunr.Token ('[tag]')
+        assert.equal(expected, trimmed)
+      })
+    }
 
-  deepEqual(lunr.trimmer(fullStop).toString(), 'hello')
-  deepEqual(lunr.trimmer(innerApostrophe).toString(), "it's")
-  deepEqual(lunr.trimmer(trailingApostrophe).toString(), "james")
-  deepEqual(lunr.trimmer(exclamationMark).toString(), 'stop')
-  deepEqual(lunr.trimmer(comma).toString(), 'first')
-  deepEqual(lunr.trimmer(brackets).toString(), 'tag')
-})
+    trimmerTest('full stop', 'hello.', 'hello')
+    trimmerTest('inner apostrophe', "it's", "it's")
+    trimmerTest('trailing apostrophe', "james'", 'james')
+    trimmerTest('exclamation mark', 'stop!', 'stop')
+    trimmerTest('comma', 'first,', 'first')
+    trimmerTest('brackets', '[tag]', 'tag')
+  })
 
-test('should be registered with lunr.Pipeline', function () {
-  equal(lunr.trimmer.label, 'trimmer')
-  deepEqual(lunr.Pipeline.registeredFunctions['trimmer'], lunr.trimmer)
+  test('is a registered pipeline function', function () {
+    assert.equal(lunr.trimmer.label, 'trimmer')
+    assert.equal(lunr.Pipeline.registeredFunctions['trimmer'], lunr.trimmer)
+  })
 })

@@ -1,67 +1,62 @@
-module('lunr.Builder')
+suite('lunr.Builder', function () {
+  suite('#field', function () {
+    test('defining fields to index', function () {
+      var builder = new lunr.Builder
+      builder.field('foo')
+      assert.include(builder._fields, 'foo')
+    })
+  })
 
-test('defining what fields to index', function () {
-  var builder = new lunr.Builder
-  builder.field('foo')
-  deepEqual(builder._fields, ['foo'])
+  suite('#ref', function () {
+    test('default reference', function () {
+      var builder = new lunr.Builder
+      assert.equal('id', builder._ref)
+    })
+
+    test('defining a reference field', function () {
+      var builder = new lunr.Builder
+      builder.ref('foo')
+      assert.equal('foo', builder._ref)
+    })
+  })
+
+  suite('#build', function () {
+    setup(function () {
+      var builder = new lunr.Builder,
+          doc = { id: 'id', title: 'test', body: 'missing' }
+
+      builder.ref('id')
+      builder.field('title')
+      builder.add(doc)
+      builder.build()
+
+      this.builder = builder
+    })
+
+    test('adds tokens to invertedIndex', function () {
+      assert.deepProperty(this.builder.invertedIndex, 'test.title.id')
+    })
+
+    test('builds a vector space of the document', function () {
+      assert.property(this.builder.documentVectors, 'id')
+      assert.instanceOf(this.builder.documentVectors.id, lunr.Vector)
+    })
+
+    test('skips fields not defined for indexing', function () {
+      assert.notProperty(this.builder.invertedIndex, 'missing')
+    })
+
+    test('builds a token set for the corpus', function () {
+      var needle = lunr.TokenSet.fromString('test')
+      assert.include(this.builder.tokenSet.intersect(needle).toArray(), 'test')
+    })
+
+    test('calculates document count', function () {
+      assert.equal(1, this.builder.documentCount)
+    })
+
+    test('calculates average document length', function () {
+      assert.equal(1, this.builder.averageDocumentLength)
+    })
+  })
 })
-
-test('default reference should be id', function () {
-  var builder = new lunr.Builder
-  equal(builder._ref, 'id')
-})
-
-test('defining a reference field', function () {
-  var builder = new lunr.Builder
-  builder.ref('foo')
-  equal(builder._ref, 'foo')
-})
-
-test('indexing a document', function () {
-  var builder = new lunr.Builder,
-      doc = { id: 'id', title: 'test' }
-
-  builder.ref('id')
-  builder.field('title')
-
-  builder.add(doc)
-  builder.build()
-
-  // inverted index contains mapping between word and document/field
-  ok('test' in builder.invertedIndex)
-  ok('title' in builder.invertedIndex['test'])
-  ok('id' in builder.invertedIndex['test']['title'])
-
-  // builds a vector space of the document
-  ok('id' in builder.documentVectors)
-  ok(builder.documentVectors['id'] instanceof lunr.Vector)
-
-  // for each dimension in the vector there will be two elements, one for the index, the other for the score
-  equal(builder.documentVectors['id'].elements.length, 2)
-
-  // builds the token set for this corpus
-  var matches = builder.tokenSet.intersect(lunr.TokenSet.fromString("test")).toArray()
-  deepEqual(matches, ["test"])
-
-  // calculates some statisics about the corpus
-  equal(builder.documentCount, 1)
-  equal(builder.averageDocumentLength, 1)
-})
-
-test('skips fields not defined as searchable', function () {
-  var builder = new lunr.Builder,
-      doc = { id: 'id', title: 'test', body: 'missing' }
-
-  builder.ref('id')
-  builder.field('title')
-
-  builder.add(doc)
-  builder.build()
-
-  // does not index unspecified fields
-  ok(!('missing' in builder.invertedIndex))
-
-  var matches = builder.tokenSet.intersect(lunr.TokenSet.fromString("missing")).toArray()
-  deepEqual(matches, [])
-})
-

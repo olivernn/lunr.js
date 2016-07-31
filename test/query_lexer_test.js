@@ -1,154 +1,275 @@
-module("lunr.QueryLexer")
+suite('lunr.QueryLexer', function () {
+  suite('#run', function () {
 
-test("one term", function () {
-  var lexer = new lunr.QueryLexer("foo")
-  lexer.run()
+    var lex = function (str) {
+      var lexer = new lunr.QueryLexer(str)
+      lexer.run()
+      return lexer
+    }
 
-  equal(lexer.lexemes.length, 1)
-  deepEqual(lexer.lexemes[0], {
-    type: lunr.QueryLexer.TERM,
-    str: "foo",
-    start: 0,
-    end: 3
-  })
-})
+    suite('single term', function () {
+      setup(function () {
+        this.lexer = lex('foo')
+      })
 
-test("two terms", function () {
-  var lexer = new lunr.QueryLexer("foo bar")
-  lexer.run()
+      test('produces 1 lexeme', function () {
+        assert.lengthOf(this.lexer.lexemes, 1)
+      })
 
-  equal(lexer.lexemes.length, 2)
+      suite('lexeme', function () {
+        setup(function () {
+          this.lexeme = this.lexer.lexemes[0]
+        })
 
-  deepEqual(lexer.lexemes[0], {
-    type: lunr.QueryLexer.TERM,
-    str: "foo",
-    start: 0,
-    end: 3
-  })
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.TERM, this.lexeme.type)
+        })
 
-  deepEqual(lexer.lexemes[1], {
-    type: lunr.QueryLexer.TERM,
-    str: "bar",
-    start: 4,
-    end: 7
-  })
-})
+        test('#str', function () {
+          assert.equal('foo', this.lexeme.str)
+        })
 
-test("two terms with seperator length > 1", function () {
-  var lexer = new lunr.QueryLexer("foo    bar")
-  lexer.run()
+        test('#start', function () {
+          assert.equal(0, this.lexeme.start)
+        })
 
-  equal(lexer.lexemes.length, 2)
+        test('#end', function () {
+          assert.equal(3, this.lexeme.end)
+        })
+      })
+    })
 
-  deepEqual(lexer.lexemes[0], {
-    type: lunr.QueryLexer.TERM,
-    str: "foo",
-    start: 0,
-    end: 3
-  })
+    suite('multiple terms', function () {
+      setup(function () {
+        this.lexer = lex('foo bar')
+      })
 
-  deepEqual(lexer.lexemes[1], {
-    type: lunr.QueryLexer.TERM,
-    str: "bar",
-    start: 7,
-    end: 10
-  })
-})
+      test('produces 2 lexems', function () {
+        assert.lengthOf(this.lexer.lexemes, 2)
+      })
 
-test("term with field", function () {
-  var lexer = new lunr.QueryLexer("title:foo")
-  lexer.run()
+      suite('lexemes', function () {
+        setup(function () {
+          this.fooLexeme = this.lexer.lexemes[0]
+          this.barLexeme = this.lexer.lexemes[1]
+        })
 
-  equal(lexer.lexemes.length, 2)
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.TERM, this.fooLexeme.type)
+          assert.equal(lunr.QueryLexer.TERM, this.barLexeme.type)
+        })
 
-  deepEqual(lexer.lexemes[0], {
-    type: lunr.QueryLexer.FIELD,
-    str: "title",
-    start: 0,
-    end: 5
-  })
+        test('#str', function () {
+          assert.equal('foo', this.fooLexeme.str)
+          assert.equal('bar', this.barLexeme.str)
+        })
 
-  deepEqual(lexer.lexemes[1], {
-    type: lunr.QueryLexer.TERM,
-    str: "foo",
-    start: 6,
-    end: 9
-  })
-})
+        test('#start', function () {
+          assert.equal(0, this.fooLexeme.start)
+          assert.equal(4, this.barLexeme.start)
+        })
 
-test("term with edit distance", function () {
-  var lexer = new lunr.QueryLexer("foo~2")
-  lexer.run()
+        test('#end', function () {
+          assert.equal(3, this.fooLexeme.end)
+          assert.equal(7, this.barLexeme.end)
+        })
+      })
+    })
 
-  equal(lexer.lexemes.length, 2)
+    suite('separator length > 1', function () {
+      setup(function () {
+        this.lexer = lex('foo    bar')
+      })
 
-  deepEqual(lexer.lexemes[0], {
-    type: lunr.QueryLexer.TERM,
-    str: "foo",
-    start: 0,
-    end: 3
-  })
+      test('produces 2 lexems', function () {
+        assert.lengthOf(this.lexer.lexemes, 2)
+      })
 
-  deepEqual(lexer.lexemes[1], {
-    type: lunr.QueryLexer.EDIT_DISTANCE,
-    str: "2",
-    start: 4,
-    end: 5
-  })
-})
+      suite('lexemes', function () {
+        setup(function () {
+          this.fooLexeme = this.lexer.lexemes[0]
+          this.barLexeme = this.lexer.lexemes[1]
+        })
 
-test("term with boost", function () {
-  var lexer = new lunr.QueryLexer("foo^10")
-  lexer.run()
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.TERM, this.fooLexeme.type)
+          assert.equal(lunr.QueryLexer.TERM, this.barLexeme.type)
+        })
 
-  equal(lexer.lexemes.length, 2)
+        test('#str', function () {
+          assert.equal('foo', this.fooLexeme.str)
+          assert.equal('bar', this.barLexeme.str)
+        })
 
-  deepEqual(lexer.lexemes[0], {
-    type: lunr.QueryLexer.TERM,
-    str: "foo",
-    start: 0,
-    end: 3
-  })
+        test('#start', function () {
+          assert.equal(0, this.fooLexeme.start)
+          assert.equal(7, this.barLexeme.start)
+        })
 
-  deepEqual(lexer.lexemes[1], {
-    type: lunr.QueryLexer.BOOST,
-    str: "10",
-    start: 4,
-    end: 6
-  })
-})
+        test('#end', function () {
+          assert.equal(3, this.fooLexeme.end)
+          assert.equal(10, this.barLexeme.end)
+        })
+      })
+    })
 
-test("term with field and boost and edit distance", function () {
-  var lexer = new lunr.QueryLexer("title:foo^10~5")
-  lexer.run()
+    suite('term with field', function () {
+      setup(function () {
+        this.lexer = lex('title:foo')
+      })
 
-  equal(lexer.lexemes.length, 4)
+      test('produces 2 lexems', function () {
+        assert.lengthOf(this.lexer.lexemes, 2)
+      })
 
-  deepEqual(lexer.lexemes[0], {
-    type: lunr.QueryLexer.FIELD,
-    str: "title",
-    start: 0,
-    end: 5
-  })
+      suite('lexemes', function () {
+        setup(function () {
+          this.fieldLexeme = this.lexer.lexemes[0]
+          this.termLexeme = this.lexer.lexemes[1]
+        })
 
-  deepEqual(lexer.lexemes[1], {
-    type: lunr.QueryLexer.TERM,
-    str: "foo",
-    start: 6,
-    end: 9
-  })
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.FIELD, this.fieldLexeme.type)
+          assert.equal(lunr.QueryLexer.TERM, this.termLexeme.type)
+        })
 
-  deepEqual(lexer.lexemes[2], {
-    type: lunr.QueryLexer.BOOST,
-    str: "10",
-    start: 10,
-    end: 12
-  })
+        test('#str', function () {
+          assert.equal('title', this.fieldLexeme.str)
+          assert.equal('foo', this.termLexeme.str)
+        })
 
-  deepEqual(lexer.lexemes[3], {
-    type: lunr.QueryLexer.EDIT_DISTANCE,
-    str: "5",
-    start: 13,
-    end: 14
+        test('#start', function () {
+          assert.equal(0, this.fieldLexeme.start)
+          assert.equal(6, this.termLexeme.start)
+        })
+
+        test('#end', function () {
+          assert.equal(5, this.fieldLexeme.end)
+          assert.equal(9, this.termLexeme.end)
+        })
+      })
+    })
+
+    suite('term with edit distance', function () {
+      setup(function () {
+        this.lexer = lex('foo~2')
+      })
+
+      test('produces 2 lexems', function () {
+        assert.lengthOf(this.lexer.lexemes, 2)
+      })
+
+      suite('lexemes', function () {
+        setup(function () {
+          this.termLexeme = this.lexer.lexemes[0]
+          this.editDistanceLexeme = this.lexer.lexemes[1]
+        })
+
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.TERM, this.termLexeme.type)
+          assert.equal(lunr.QueryLexer.EDIT_DISTANCE, this.editDistanceLexeme.type)
+        })
+
+        test('#str', function () {
+          assert.equal('foo', this.termLexeme.str)
+          assert.equal('2', this.editDistanceLexeme.str)
+        })
+
+        test('#start', function () {
+          assert.equal(0, this.termLexeme.start)
+          assert.equal(4, this.editDistanceLexeme.start)
+        })
+
+        test('#end', function () {
+          assert.equal(3, this.termLexeme.end)
+          assert.equal(5, this.editDistanceLexeme.end)
+        })
+      })
+    })
+
+    suite('term with boost', function () {
+      setup(function () {
+        this.lexer = lex('foo^10')
+      })
+
+      test('produces 2 lexems', function () {
+        assert.lengthOf(this.lexer.lexemes, 2)
+      })
+
+      suite('lexemes', function () {
+        setup(function () {
+          this.termLexeme = this.lexer.lexemes[0]
+          this.boostLexeme = this.lexer.lexemes[1]
+        })
+
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.TERM, this.termLexeme.type)
+          assert.equal(lunr.QueryLexer.BOOST, this.boostLexeme.type)
+        })
+
+        test('#str', function () {
+          assert.equal('foo', this.termLexeme.str)
+          assert.equal('10', this.boostLexeme.str)
+        })
+
+        test('#start', function () {
+          assert.equal(0, this.termLexeme.start)
+          assert.equal(4, this.boostLexeme.start)
+        })
+
+        test('#end', function () {
+          assert.equal(3, this.termLexeme.end)
+          assert.equal(6, this.boostLexeme.end)
+        })
+      })
+    })
+
+    suite('term with field, boost and edit distance', function () {
+      setup(function () {
+        this.lexer = lex('title:foo^10~5')
+      })
+
+      test('produces 4 lexems', function () {
+        assert.lengthOf(this.lexer.lexemes, 4)
+      })
+
+      suite('lexemes', function () {
+        setup(function () {
+          this.fieldLexeme = this.lexer.lexemes[0]
+          this.termLexeme = this.lexer.lexemes[1]
+          this.boostLexeme = this.lexer.lexemes[2]
+          this.editDistanceLexeme = this.lexer.lexemes[3]
+        })
+
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.FIELD, this.fieldLexeme.type)
+          assert.equal(lunr.QueryLexer.TERM, this.termLexeme.type)
+          assert.equal(lunr.QueryLexer.BOOST, this.boostLexeme.type)
+          assert.equal(lunr.QueryLexer.EDIT_DISTANCE, this.editDistanceLexeme.type)
+        })
+
+        test('#str', function () {
+          assert.equal('title', this.fieldLexeme.str)
+          assert.equal('foo', this.termLexeme.str)
+          assert.equal('10', this.boostLexeme.str)
+          assert.equal('5', this.editDistanceLexeme.str)
+        })
+
+        test('#start', function () {
+          assert.equal(0, this.fieldLexeme.start)
+          assert.equal(6, this.termLexeme.start)
+          assert.equal(10, this.boostLexeme.start)
+          assert.equal(13, this.editDistanceLexeme.start)
+        })
+
+        test('#end', function () {
+          assert.equal(5, this.fieldLexeme.end)
+          assert.equal(9, this.termLexeme.end)
+          assert.equal(12, this.boostLexeme.end)
+          assert.equal(14, this.editDistanceLexeme.end)
+        })
+      })
+    })
+
   })
 })

@@ -1,232 +1,225 @@
-// TODO: fix the naming for this object
-module('lunr.TokenSet')
+suite('lunr.TokenSet', function () {
+  suite('#toString', function () {
+    test('includes node finality', function () {
+      var nonFinal = new lunr.TokenSet,
+          final = new lunr.TokenSet,
+          otherFinal = new lunr.TokenSet
 
-test('toString includes whether node is final', function () {
-  var nonFinal = new lunr.TokenSet,
-      final = new lunr.TokenSet,
-      otherFinal = new lunr.TokenSet
+      final.final = true
+      otherFinal.final = true
 
-  final.final = true
-  otherFinal.final = true
+      assert.notEqual(nonFinal.toString(), final.toString())
+      assert.equal(otherFinal.toString(), final.toString())
+    })
 
-  notEqual(nonFinal.toString(), final.toString())
-  equal(otherFinal.toString(), final.toString())
-})
+    test('includes all edges', function () {
+      var zeroEdges = new lunr.TokenSet,
+          oneEdge = new lunr.TokenSet,
+          twoEdges = new lunr.TokenSet
 
-test('toString includes all edges', function () {
-  var noEdges = new lunr.TokenSet,
-      oneEdge = new lunr.TokenSet,
-      twoEdges = new lunr.TokenSet
+      oneEdge.edges['a'] = 1
+      twoEdges.edges['a'] = 1
+      twoEdges.edges['b'] = 1
 
-  oneEdge.edges['a'] = 1
-  twoEdges.edges['a'] = 1
-  twoEdges.edges['b'] = 1
+      assert.notEqual(zeroEdges.toString(), oneEdge.toString())
+      assert.notEqual(twoEdges.toString(), oneEdge.toString())
+      assert.notEqual(twoEdges.toString(), zeroEdges.toString())
+    })
 
-  notEqual(noEdges.toString(), oneEdge.toString())
-  notEqual(twoEdges.toString(), oneEdge.toString())
-  notEqual(twoEdges.toString(), noEdges.toString())
-})
+    test('includes child node', function () {
+      var a = new lunr.TokenSet,
+          b = new lunr.TokenSet,
+          c = new lunr.TokenSet
 
-test('toString includes child toString', function () {
-  var a = new lunr.TokenSet,
-      b = new lunr.TokenSet,
-      c = new lunr.TokenSet
+      a.edges['x'] = 1
+      b.edges['x'] = 2
+      c.edges['x'] = 1
 
-  a.edges['x'] = 1
-  b.edges['x'] = 2
-  c.edges['x'] = 1
-
-  notEqual(a.toString(), b.toString())
-  equal(a.toString(), c.toString())
-})
-
-test('fromString without special characters', function () {
-  var x = lunr.TokenSet.fromString('a')
-
-  equal(x.toString(), '0a1')
-  ok(x.edges['a'].final)
-})
-
-test('fromString with a trailing wildcard', function () {
-  var x = lunr.TokenSet.fromString('a*'),
-      wild = x.edges['a'].edges['*']
-
-  // a state reached by a wildcard has an
-  // edge with wildcard to itself, making
-  // the resultant automota non-determenistic
-  deepEqual(wild, wild.edges['*'])
-})
-
-test('fromArray unsorted', function () {
-  throws(function () {
-    lunr.TokenSet.fromArray(['z', 'a'])
-  })
-})
-
-test('fromArray sorted', function () {
-  var words = ['bar', 'baz'],
-      set = lunr.TokenSet.fromArray(words)
-
-  deepEqual(words.sort(), set.toArray().sort())
-})
-
-test('fromArray creates a minimal number of nodes', function () {
-  var words = ['tuesday', 'thursday'].sort(),
-      set = lunr.TokenSet.fromArray(words),
-      counters = {}
-
-  words.forEach(function (word) {
-    Array.prototype.reduce.call(word, function (node, char) {
-      node = node.edges[char]
-
-      if (!(node in counters)) {
-        counters[node] = 0
-      }
-
-      counters[node] += 1
-
-      return node
-    }, set)
+      assert.equal(a.toString(), c.toString())
+      assert.notEqual(a.toString(), b.toString())
+    })
   })
 
-  var counts = Object
-    .keys(counters)
-    .map(function (k) { return counters[k] })
+  suite('.fromString', function () {
+    test('without wildcard', function () {
+      var x = lunr.TokenSet.fromString('a')
 
-  ok(Math.max.apply(null, counts) > 1)
-})
+      assert.equal(x.toString(), '0a1')
+      assert.isOk(x.edges['a'].final)
+    })
 
-test('toArray with a single word', function () {
-  var x = lunr.TokenSet.fromString('foo')
-  deepEqual(x.toArray() ['foo'])
-})
+    test('with trailing wildcard', function () {
+      var x = lunr.TokenSet.fromString('a*'),
+          wild = x.edges['a'].edges['*']
 
-test('intersect no intersection', function () {
-  var x = lunr.TokenSet.fromString('foo'),
-      y = lunr.TokenSet.fromString('bar')
-      z = x.intersect(y)
+      // a state reached by a wildcard has
+      // an edge with a wildcard to itself.
+      // the resulting automota is
+      // non-determenistic
+      assert.equal(wild, wild.edges['*'])
+      assert.isOk(wild.final)
+    })
+  })
 
-  deepEqual(z.toArray(), [])
-})
+  suite('.fromArray', function () {
+    test('with unsorted array', function () {
+      assert.throws(function () {
+        lunr.TokenSet.fromArray(['z', 'a'])
+      })
+    })
 
-test('intersect with simple intersection', function () {
-  var x = lunr.TokenSet.fromString('foo'),
-      y = lunr.TokenSet.fromString('foo'),
-      z = x.intersect(y)
+    test('with sorted array', function () {
+      var tokenSet = lunr.TokenSet.fromArray(['a', 'z'])
 
-  deepEqual(z.toArray() ['foo'])
-})
+      assert.deepEqual(['a', 'z'], tokenSet.toArray().sort())
+    })
 
-test('intersect with trailing wildcard matching', function () {
-  var x = lunr.TokenSet.fromString('foo'),
-      y = lunr.TokenSet.fromString('f*'),
-      z = x.intersect(y)
+    test('is minimal', function () {
+      var tokenSet = lunr.TokenSet.fromArray(['ac', 'dc']),
+          acNode = tokenSet.edges['a'].edges['c'],
+          dcNode = tokenSet.edges['d'].edges['c']
 
-  deepEqual(z.toArray(), ['foo'])
-})
+      assert.deepEqual(acNode, dcNode)
+    })
+  })
 
-test('intersect with trailing wildcard no matches', function () {
-  var x = lunr.TokenSet.fromString('foo'),
-      y = lunr.TokenSet.fromString('b*'),
-      z = x.intersect(y)
+  suite('#toArray', function () {
+    test('includes all words', function () {
+      var words = ['bat', 'cat'],
+          tokenSet = lunr.TokenSet.fromArray(words)
 
-  deepEqual(z.toArray(), [])
-})
+      assert.sameMembers(words, tokenSet.toArray())
+    })
 
-test('intersect with leading wildcard matching', function () {
-  var x = lunr.TokenSet.fromString('foo'),
-      y = lunr.TokenSet.fromString('*oo'),
-      z = x.intersect(y)
+    test('includes single words', function () {
+      var word = 'bat',
+          tokenSet = lunr.TokenSet.fromString(word)
 
-  deepEqual(z.toArray(), ['foo'])
-})
+      assert.sameMembers([word], tokenSet.toArray())
+    })
+  })
 
-test('intersect with leading wildcard no matches', function () {
-  var x = lunr.TokenSet.fromString('foo'),
-      y = lunr.TokenSet.fromString('*ar'),
-      z = x.intersect(y)
+  suite('#intersect', function () {
+    test('no intersection', function () {
+      var x = lunr.TokenSet.fromString('cat'),
+          y = lunr.TokenSet.fromString('bar'),
+          z = x.intersect(y)
 
-  deepEqual(z.toArray(), [])
-})
+      assert.equal(0, z.toArray().length)
+    })
 
-test('intersect with contained wildcard matching', function () {
-  var x = lunr.TokenSet.fromString('foo'),
-      y = lunr.TokenSet.fromString('f*o'),
-      z = x.intersect(y)
+    test('simple intersection', function () {
+      var x = lunr.TokenSet.fromString('cat'),
+          y = lunr.TokenSet.fromString('cat'),
+          z = x.intersect(y)
 
-  deepEqual(z.toArray(), ['foo'])
-})
+      assert.sameMembers(['cat'], z.toArray())
+    })
 
-test('intersect with contained wildcard no matches', function () {
-  var x = lunr.TokenSet.fromString('foo'),
-      y = lunr.TokenSet.fromString('b*r'),
-      z = x.intersect(y)
+    test('trailing wildcard intersection', function () {
+      var x = lunr.TokenSet.fromString('cat'),
+          y = lunr.TokenSet.fromString('c*'),
+          z = x.intersect(y)
 
-  deepEqual(z.toArray(), [])
-})
+      assert.sameMembers(['cat'], z.toArray())
+    })
 
-test('intersect with fuzzy string matching no edit', function () {
-  var x = lunr.TokenSet.fromString('bar'),
-      y = lunr.TokenSet.fromFuzzyString('bar', 1)
-      z = x.intersect(y)
+    test('trailing wildcard no intersection', function () {
+      var x = lunr.TokenSet.fromString('cat'),
+          y = lunr.TokenSet.fromString('b*'),
+          z = x.intersect(y)
 
-  deepEqual(z.toArray(), ["bar"])
-})
+      assert.equal(0, z.toArray().length)
+    })
 
-test('intersect with fuzzy string substitution', function () {
-  var x1 = lunr.TokenSet.fromString('bar'),
-      x2 = lunr.TokenSet.fromString('cur'),
-      x3 = lunr.TokenSet.fromString('cat'),
-      x4 = lunr.TokenSet.fromString('car'),
-      x5 = lunr.TokenSet.fromString('foo'),
-      y = lunr.TokenSet.fromFuzzyString('car', 1)
+    test('leading wildcard intersection', function () {
+      var x = lunr.TokenSet.fromString('cat'),
+          y = lunr.TokenSet.fromString('*t'),
+          z = x.intersect(y)
 
-  deepEqual(x1.intersect(y).toArray(), ["bar"])
-  deepEqual(x2.intersect(y).toArray(), ["cur"])
-  deepEqual(x3.intersect(y).toArray(), ["cat"])
-  deepEqual(x4.intersect(y).toArray(), ["car"])
-  deepEqual(x5.intersect(y).toArray(), [])
-})
+      assert.sameMembers(['cat'], z.toArray())
+    })
 
-test('intersect with fuzzy string deletion', function () {
-  var x1 = lunr.TokenSet.fromString('ar'),
-      x2 = lunr.TokenSet.fromString('br'),
-      x3 = lunr.TokenSet.fromString('ba'),
-      x4 = lunr.TokenSet.fromString('bar'),
-      x5 = lunr.TokenSet.fromString('foo'),
-      y = lunr.TokenSet.fromFuzzyString('bar', 1)
+    test('leading wildcard no intersection', function () {
+      var x = lunr.TokenSet.fromString('cat'),
+          y = lunr.TokenSet.fromString('*r'),
+          z = x.intersect(y)
 
-  deepEqual(x1.intersect(y).toArray(), ["ar"])
-  deepEqual(x2.intersect(y).toArray(), ["br"])
-  deepEqual(x3.intersect(y).toArray(), ["ba"])
-  deepEqual(x4.intersect(y).toArray(), ["bar"])
-  deepEqual(x5.intersect(y).toArray(), [])
-})
+      assert.equal(0, z.toArray().length)
+    })
 
-test('intersect with fuzzy string insertion', function () {
-  var x1 = lunr.TokenSet.fromString('bbar'),
-      x2 = lunr.TokenSet.fromString('baar'),
-      x3 = lunr.TokenSet.fromString('barr'),
-      x4 = lunr.TokenSet.fromString('bar'),
-      x5 = lunr.TokenSet.fromString('ba'),
-      x6 = lunr.TokenSet.fromString('foo'),
-      y = lunr.TokenSet.fromFuzzyString('bar', 1)
+    test('contained wildcard intersection', function () {
+      var x = lunr.TokenSet.fromString('foo'),
+          y = lunr.TokenSet.fromString('f*o'),
+          z = x.intersect(y)
 
-  deepEqual(x1.intersect(y).toArray(), ["bbar"])
-  deepEqual(x2.intersect(y).toArray(), ["baar"])
-  deepEqual(x3.intersect(y).toArray(), ["barr"])
-  deepEqual(x4.intersect(y).toArray(), ["bar"])
-  deepEqual(x5.intersect(y).toArray(), ["ba"])
-  deepEqual(x6.intersect(y).toArray(), [])
-})
+      assert.sameMembers(['foo'], z.toArray())
+    })
 
-test('intersect with fuzzy string transpose', function () {
-  var x1 = lunr.TokenSet.fromString('abr'),
-      x2 = lunr.TokenSet.fromString('bra'),
-      x3 = lunr.TokenSet.fromString('foo'),
-      y = lunr.TokenSet.fromFuzzyString('bar', 1)
+    test('contained wildcard no intersection', function () {
+      var x = lunr.TokenSet.fromString('foo'),
+          y = lunr.TokenSet.fromString('b*r'),
+          z = x.intersect(y)
 
-  deepEqual(x1.intersect(y).toArray(), ["abr"])
-  deepEqual(x2.intersect(y).toArray(), ["bra"])
-  deepEqual(x3.intersect(y).toArray(), [])
+      assert.equal(0, z.toArray().length)
+    })
+
+    test('intersect with fuzzy string substitution', function () {
+      var x1 = lunr.TokenSet.fromString('bar'),
+          x2 = lunr.TokenSet.fromString('cur'),
+          x3 = lunr.TokenSet.fromString('cat'),
+          x4 = lunr.TokenSet.fromString('car'),
+          x5 = lunr.TokenSet.fromString('foo'),
+          y = lunr.TokenSet.fromFuzzyString('car', 1)
+
+      assert.sameMembers(x1.intersect(y).toArray(), ["bar"])
+      assert.sameMembers(x2.intersect(y).toArray(), ["cur"])
+      assert.sameMembers(x3.intersect(y).toArray(), ["cat"])
+      assert.sameMembers(x4.intersect(y).toArray(), ["car"])
+      assert.equal(x5.intersect(y).toArray().length, 0)
+    })
+
+    test('intersect with fuzzy string deletion', function () {
+      var x1 = lunr.TokenSet.fromString('ar'),
+          x2 = lunr.TokenSet.fromString('br'),
+          x3 = lunr.TokenSet.fromString('ba'),
+          x4 = lunr.TokenSet.fromString('bar'),
+          x5 = lunr.TokenSet.fromString('foo'),
+          y = lunr.TokenSet.fromFuzzyString('bar', 1)
+
+      assert.sameMembers(x1.intersect(y).toArray(), ["ar"])
+      assert.sameMembers(x2.intersect(y).toArray(), ["br"])
+      assert.sameMembers(x3.intersect(y).toArray(), ["ba"])
+      assert.sameMembers(x4.intersect(y).toArray(), ["bar"])
+      assert.equal(x5.intersect(y).toArray().length, 0)
+    })
+
+    test('intersect with fuzzy string insertion', function () {
+      var x1 = lunr.TokenSet.fromString('bbar'),
+          x2 = lunr.TokenSet.fromString('baar'),
+          x3 = lunr.TokenSet.fromString('barr'),
+          x4 = lunr.TokenSet.fromString('bar'),
+          x5 = lunr.TokenSet.fromString('ba'),
+          x6 = lunr.TokenSet.fromString('foo'),
+          y = lunr.TokenSet.fromFuzzyString('bar', 1)
+
+      assert.sameMembers(x1.intersect(y).toArray(), ["bbar"])
+      assert.sameMembers(x2.intersect(y).toArray(), ["baar"])
+      assert.sameMembers(x3.intersect(y).toArray(), ["barr"])
+      assert.sameMembers(x4.intersect(y).toArray(), ["bar"])
+      assert.sameMembers(x5.intersect(y).toArray(), ["ba"])
+      assert.equal(x6.intersect(y).toArray().length, 0)
+    })
+
+    test('intersect with fuzzy string transpose', function () {
+      var x1 = lunr.TokenSet.fromString('abr'),
+          x2 = lunr.TokenSet.fromString('bra'),
+          x3 = lunr.TokenSet.fromString('foo'),
+          y = lunr.TokenSet.fromFuzzyString('bar', 1)
+
+      assert.sameMembers(x1.intersect(y).toArray(), ["abr"])
+      assert.sameMembers(x2.intersect(y).toArray(), ["bra"])
+      assert.equal(x3.intersect(y).toArray().length, 0)
+    })
+  })
 })
