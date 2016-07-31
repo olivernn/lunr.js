@@ -18,7 +18,8 @@
     "uglify-js": "2.4.13",
     "mocha": "*",
     "chai": "*",
-    "mustache": "*"
+    "mustache": "*",
+    "eslint": "*"
   },
   "scripts": {
     "test": "make test"

@@ -33,6 +33,7 @@ UGLIFYJS ?= ./node_modules/.bin/uglifyjs
 QUNIT ?= ./node_modules/.bin/qunit
 MOCHA ?= ./node_modules/.bin/mocha
 MUSTACHE ?= ./node_modules/.bin/mustache
+ESLINT ?= ./node_modules/.bin/eslint
 
 all: node_modules lunr.js lunr.min.js docs bower.json package.json component.json example
 
@@ -52,6 +53,9 @@ size: lunr.min.js
 
 server:
 	${NODE} server.js ${SERVER_PORT}
+
+lint:
+	${ESLINT} lib/*.js
 
 test: node_modules lunr.js
 	${MOCHA} test/*.js -u tdd -r test/test_helper.js -R dot -C
