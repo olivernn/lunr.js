@@ -1,5 +1,5 @@
-module('search', {
-  setup: function () {
+suite('search', function () {
+  setup(function () {
     var documents = [{
       id: 'a',
       title: 'Mr. Green kills Colonel Mustard',
@@ -15,14 +15,6 @@ module('search', {
       title: 'Scarlett helps Professor',
       body: 'Miss Scarlett watered Professor Plumbs green plant while he was away from his office last week.',
       wordCount: 16
-    },{
-      id: 'd',
-      title: 'title',
-      body: 'handsome',
-    },{
-      id: 'e',
-      title: 'title',
-      body: 'hand',
     }]
 
     this.idx = lunr(function () {
@@ -34,79 +26,426 @@ module('search', {
         this.add(document)
       }, this)
     })
-  }
-})
+  })
 
-test('returning the correct results', function () {
-  var results = this.idx.search('green plant')
+  suite('single term search', function () {
+    suite('one match', function () {
+      setup(function () {
+        this.results = this.idx.search('scarlett')
+      })
 
-  equal(results.length, 3)
-  equal(results[0].ref, 'b')
-})
+      test('one result returned', function () {
+        assert.lengthOf(this.results, 1)
+      })
 
-test('search term not in the index', function () {
-  var results = this.idx.search('foo')
+      test('document c matches', function () {
+        assert.equal('c', this.results[0].ref)
+      })
 
-  equal(results.length, 0)
-})
+      test('matching term', function () {
+        assert.sameMembers(['scarlett'], this.results[0].matchData.terms)
+      })
+    })
 
-test('one search term not in the index', function () {
-  var results = this.idx.search('foo green')
+    suite('no match', function () {
+      setup(function () {
+        this.results = this.idx.search('foo')
+      })
 
-  equal(results.length, 3)
-})
+      test('no matches', function () {
+        assert.lengthOf(this.results, 0)
+      })
+    })
 
-test('search contains one term not in the index', function () {
-  var results = this.idx.search('green foo')
+    suite('multiple matches', function () {
+      setup(function () {
+        this.results = this.idx.search('plant')
+      })
 
-  equal(results.length, 3)
-})
+      test('has two matches', function () {
+        assert.lengthOf(this.results, 2)
+      })
 
-test('search based on field', function () {
-  var results = this.idx.search("title:professor")
-  equal(results.length, 1)
-  equal(results[0].ref, 'c')
-})
+      test('sorted by relevance', function () {
+        assert.equal('b', this.results[0].ref)
+        assert.equal('c', this.results[1].ref)
+      })
+    })
+  })
 
-test('search with edit distance', function () {
-  var results = this.idx.search("plnt~1")
-  equal(results.length, 2)
-  equal(results[0].ref, 'b')
-  ok(results[0].matchData.terms.indexOf('plant') >= 0)
-})
+  suite('multiple terms', function () {
+    suite('all terms match', function () {
+      setup(function () {
+        this.results = this.idx.search('fellow candlestick')
+      })
 
-test('search on field with edit distance', function () {
-  var results = this.idx.search("title:plank~1")
-  equal(results.length, 1)
-  equal(results[0].ref, 'b')
-  ok(results[0].matchData.terms.indexOf('plant') >= 0)
-})
+      test('has one match', function () {
+        assert.lengthOf(this.results, 1)
+      })
 
-test('search with term boost', function () {
-  var results = this.idx.search("candlestick^5 plant")
-  equal(results.length, 3)
-  deepEqual(results.map(function (r) { return r.ref }), ['a', 'b', 'c'])
-})
+      test('correct document returned', function () {
+        assert.equal('a', this.results[0].ref)
+      })
 
-test('search with wildcards', function () {
-  var trailingWildcardResults = this.idx.search("candle*"),
-      leadingWildcardResults = this.idx.search("*stick"),
-      containedWildcardResults = this.idx.search("can*ick"),
-      multiWildcardResults = this.idx.search("*an*sti*")
+      test('matched terms returned', function () {
+        assert.sameMembers(['fellow', 'candlestick'], this.results[0].matchData.terms)
+      })
+    })
 
-  equal(trailingWildcardResults.length, 1)
-  equal(trailingWildcardResults[0].ref, 'a')
-  ok(trailingWildcardResults[0].matchData.terms.indexOf('candlestick') >= 0)
+    suite('one term matches', function () {
+      setup(function () {
+        this.results = this.idx.search('week foo')
+      })
 
-  equal(leadingWildcardResults.length, 1)
-  equal(leadingWildcardResults[0].ref, 'a')
-  ok(leadingWildcardResults[0].matchData.terms.indexOf('candlestick') >= 0)
+      test('has one match', function () {
+        assert.lengthOf(this.results, 1)
+      })
 
-  equal(containedWildcardResults.length, 1)
-  equal(containedWildcardResults[0].ref, 'a')
-  ok(containedWildcardResults[0].matchData.terms.indexOf('candlestick') >= 0)
+      test('correct document returned', function () {
+        assert.equal('c', this.results[0].ref)
+      })
 
-  equal(multiWildcardResults.length, 1)
-  equal(multiWildcardResults[0].ref, 'a')
-  ok(multiWildcardResults[0].matchData.terms.indexOf('candlestick') >= 0)
+      test('only matching terms returned', function () {
+        assert.sameMembers(['week'], this.results[0].matchData.terms)
+      })
+    })
+
+    suite('documents with all terms score higher', function () {
+      setup(function () {
+        this.results = this.idx.search('candlestick green')
+      })
+
+      test('has three matches', function () {
+        assert.lengthOf(this.results, 3)
+      })
+
+      test('correct documents returned', function () {
+        var matchingDocuments = this.results.map(function (r) {
+          return r.ref
+        })
+        assert.sameMembers(['a', 'b', 'c'], matchingDocuments)
+      })
+
+      test('documents with all terms score highest', function () {
+        assert.equal('a', this.results[0].ref)
+      })
+
+      test('matching terms are returned', function () {
+        assert.sameMembers(['candlestick', 'green'], this.results[0].matchData.terms)
+        assert.sameMembers(['green'], this.results[1].matchData.terms)
+        assert.sameMembers(['green'], this.results[2].matchData.terms)
+      })
+    })
+
+    suite('no terms match', function () {
+      setup(function () {
+        this.results = this.idx.search('foo bar')
+      })
+
+      test('no matches', function () {
+        assert.lengthOf(this.results, 0)
+      })
+    })
+
+    suite('corpus terms are stemmed', function () {
+      setup(function () {
+        this.results = this.idx.search('water')
+      })
+
+      test('matches two documents', function () {
+        assert.lengthOf(this.results, 2)
+      })
+
+      test('matches correct documents', function () {
+        var matchingDocuments = this.results.map(function (r) {
+          return r.ref
+        })
+        assert.sameMembers(['b', 'c'], matchingDocuments)
+      })
+    })
+
+    suite('field scoped terms', function () {
+      suite('only matches on scoped field', function () {
+        setup(function () {
+          this.results = this.idx.search('title:plant')
+        })
+
+        test('one result returned', function () {
+          assert.lengthOf(this.results, 1)
+        })
+
+        test('returns the correct document', function () {
+          assert.equal('b', this.results[0].ref)
+        })
+
+        test('match data', function () {
+          assert.sameMembers(['plant'], this.results[0].matchData.terms)
+        })
+      })
+
+      suite('no matching terms', function () {
+        setup(function () {
+          this.results = this.idx.search('title:candlestick')
+        })
+
+        test('no results returned', function () {
+          assert.lengthOf(this.results, 0)
+        })
+      })
+    })
+
+    suite('wildcard matching', function () {
+      suite('trailing wildcard', function () {
+        suite('no matches', function () {
+          setup(function () {
+            this.results = this.idx.search('fo*')
+          })
+
+          test('no results returned', function () {
+            assert.lengthOf(this.results, 0)
+          })
+        })
+
+        suite('one match', function () {
+          setup(function () {
+            this.results = this.idx.search('candle*')
+          })
+
+          test('one result returned', function () {
+            assert.lengthOf(this.results, 1)
+          })
+
+          test('correct document matched', function () {
+            assert.equal('a', this.results[0].ref)
+          })
+
+          test('matching terms returned', function () {
+            assert.sameMembers(['candlestick'], this.results[0].matchData.terms)
+          })
+        })
+
+        suite('multiple terms match', function () {
+          setup(function () {
+            this.results = this.idx.search('pl*')
+          })
+
+          test('two results returned', function () {
+            assert.lengthOf(this.results, 2)
+          })
+
+          test('correct documents matched', function () {
+            var matchingDocuments = this.results.map(function (r) {
+              return r.ref
+            })
+            assert.sameMembers(['b', 'c'], matchingDocuments)
+          })
+
+          test('matching terms returned', function () {
+            assert.sameMembers(['plumb', 'plant'], this.results[0].matchData.terms)
+            assert.sameMembers(['plumb', 'plant'], this.results[1].matchData.terms)
+          })
+        })
+      })
+    })
+  })
+
+  suite('wildcard matching', function () {
+    suite('trailing wildcard', function () {
+      suite('no matches found', function () {
+        setup(function () {
+          this.results = this.idx.search('fo*')
+        })
+
+        test('no results returned', function () {
+          assert.lengthOf(this.results, 0)
+        })
+      })
+
+      suite('results found', function () {
+        setup(function () {
+          this.results = this.idx.search('pl*')
+        })
+
+        test('two results returned', function () {
+          assert.lengthOf(this.results, 2)
+        })
+
+        test('matching documents returned', function () {
+          assert.equal('b', this.results[0].ref)
+          assert.equal('c', this.results[1].ref)
+        })
+
+        test('matching terms returned', function () {
+          assert.sameMembers(['plant', 'plumb'], this.results[0].matchData.terms)
+          assert.sameMembers(['plant', 'plumb'], this.results[1].matchData.terms)
+        })
+      })
+    })
+
+    suite('leading wildcard', function () {
+      suite('no results found', function () {
+        setup(function () {
+          this.results = this.idx.search('*oo')
+        })
+
+        test('no results found', function () {
+          assert.lengthOf(this.results, 0)
+        })
+      })
+
+      suite('results found', function () {
+        setup(function () {
+          this.results = this.idx.search('*ant')
+        })
+
+        test('two results found', function () {
+          assert.lengthOf(this.results, 2)
+        })
+
+        test('matching documents returned', function () {
+          assert.equal('b', this.results[0].ref)
+          assert.equal('c', this.results[1].ref)
+        })
+
+        test('matching terms returned', function () {
+          assert.sameMembers(['plant'], this.results[0].matchData.terms)
+          assert.sameMembers(['plant'], this.results[1].matchData.terms)
+        })
+      })
+    })
+
+    suite('contained wildcard', function () {
+      suite('no results found', function () {
+        setup(function () {
+          this.results = this.idx.search('f*o')
+        })
+
+        test('no results found', function () {
+          assert.lengthOf(this.results, 0)
+        })
+      })
+
+      suite('results found', function () {
+        setup(function () {
+          this.results = this.idx.search('pl*nt')
+        })
+
+        test('two results found', function () {
+          assert.lengthOf(this.results, 2)
+        })
+
+        test('matching documents returned', function () {
+          assert.equal('b', this.results[0].ref)
+          assert.equal('c', this.results[1].ref)
+        })
+
+        test('matching terms returned', function () {
+          assert.sameMembers(['plant'], this.results[0].matchData.terms)
+          assert.sameMembers(['plant'], this.results[1].matchData.terms)
+        })
+      })
+    })
+  })
+
+  suite('edit distance', function () {
+    suite('no results found', function () {
+      setup(function () {
+        this.results = this.idx.search('foo~1')
+      })
+
+      test('no results returned', function () {
+        assert.lengthOf(this.results, 0)
+      })
+    })
+
+    suite('results found', function () {
+      setup(function () {
+        this.results = this.idx.search('plont~1')
+      })
+
+      test('two results found', function () {
+        assert.lengthOf(this.results, 2)
+      })
+
+      test('matching documents returned', function () {
+        assert.equal('b', this.results[0].ref)
+        assert.equal('c', this.results[1].ref)
+      })
+
+      test('matching terms returned', function () {
+        assert.sameMembers(['plant'], this.results[0].matchData.terms)
+        assert.sameMembers(['plant'], this.results[1].matchData.terms)
+      })
+    })
+  })
+
+  suite('searching by field', function () {
+    suite('unknown field', function () {
+      test('throws lunr.QueryParseError', function () {
+        assert.throws(function () {
+          this.idx.search('unknown-field:plant')
+        }.bind(this), lunr.QueryParseError)
+      })
+    })
+
+    suite('no results found', function () {
+      setup(function () {
+        this.results = this.idx.search('title:candlestick')
+      })
+
+      test('no results found', function () {
+        assert.lengthOf(this.results, 0)
+      })
+    })
+
+    suite('results found', function () {
+      setup(function () {
+        this.results = this.idx.search('title:plant')
+      })
+
+      test('one results found', function () {
+        assert.lengthOf(this.results, 1)
+      })
+
+      test('matching documents returned', function () {
+        assert.equal('b', this.results[0].ref)
+      })
+
+      test('matching terms returned', function () {
+        assert.sameMembers(['plant'], this.results[0].matchData.terms)
+      })
+    })
+  })
+
+  suite('term boosts', function () {
+    suite('no results found', function () {
+      setup(function () {
+        this.results = this.idx.search('foo^10')
+      })
+
+      test('no results found', function () {
+        assert.lengthOf(this.results, 0)
+      })
+    })
+
+    suite('results found', function () {
+      setup(function () {
+        this.results = this.idx.search('scarlett candlestick^5')
+      })
+
+      test('two results found', function () {
+        assert.lengthOf(this.results, 2)
+      })
+
+      test('matching documents returned', function () {
+        assert.equal('a', this.results[0].ref)
+        assert.equal('c', this.results[1].ref)
+      })
+
+      test('matching terms returned', function () {
+        assert.sameMembers(['candlestick'], this.results[0].matchData.terms)
+        assert.sameMembers(['scarlett'], this.results[1].matchData.terms)
+      })
+    })
+  })
 })

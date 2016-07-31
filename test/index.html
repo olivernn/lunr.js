@@ -1,58 +1,53 @@
-<!DOCTYPE HTML>
 <html>
-  <head>
-    <title>Lunr tests</title>
+<head>
+  <meta charset="utf-8">
+  <title>Mocha Tests</title>
+  <link href="/test/env/mocha.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="mocha"></div>
 
-    <!-- dependencies -->
-    <script src="/test/env/jquery.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/test/env/augment.min.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/test/env/mocha.js"></script>
+  <script src="/test/env/chai.js"></script>
+  <script src="/lunr.js"></script>
 
-    <!-- QUnit -->
-    <script src="/test/env/qunit.js"></script>
-    <link rel="stylesheet" href="/test/env/qunit.css" type="text/css" media="screen" />
+  <script>
+    mocha.setup('tdd')
+    window.assert = chai.assert
 
-    <!-- Lunr -->
-    <script src="/lib/lunr.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/lib/utils.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/lib/tokenizer.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/lib/pipeline.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/lib/vector.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/lib/sorted_set.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/lib/stemmer.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/lib/stop_word_filter.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/lib/trimmer.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/lib/token.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/lib/token_set.js"></script>
-    <script src="/lib/token_set_builder.js"></script>
-    <script src="/lib/index.js" type="text/javascript" charset="utf-8"></script>
-    <script src="/lib/builder.js"></script>
-    <script src="/lib/match_data.js"></script>
-    <script src="/lib/query.js"></script>
-    <script src="/lib/query_parse_error.js"></script>
-    <script src="/lib/query_lexer.js"></script>
-    <script src="/lib/query_parser.js"></script>
+    window.withFixture = function (name, fn) {
+      var fixturePath = '/test/fixtures/' + name,
+          xhr = new XMLHttpRequest
 
-    <!-- Fixtures -->
-    <script src="/test/fixtures/stemming_vocab.json"></script>
+      xhr.addEventListener('load', function () {
+        if (this.status != 200) {
+          fn('non 200 response')
+        } else {
+          fn(null, this.responseText)
+        }
+      })
 
-    <!-- Tests -->
-    <script src="/test/tokenizer_test.js"></script>
-    <script src="/test/pipeline_test.js"></script>
-    <script src="/test/vector_test.js"></script>
-    <script src="/test/sorted_set_test.js"></script>
-    <script src="/test/stemmer_test.js"></script>
-    <script src="/test/stop_word_filter_test.js"></script>
-    <script src="/test/token_test.js"></script>
-    <script src="/test/trimmer_test.js"></script>
-    <script src="/test/token_set_test.js"></script>
-    <script src="/test/builder_test.js"></script>
-    <script src="/test/match_data_test.js"></script>
-    <script src="/test/query_lexer_test.js"></script>
-    <script src="/test/query_parser_test.js"></script>
-    <script src="/test/search_test.js"></script>
-
-  </head>
-  <body>
-    <div id="qunit"></div>
-  </body>
+      xhr.open('GET', fixturePath)
+      xhr.send()
+    }
+  </script>
+  <script src="/test/query_lexer_test.js"></script>
+  <script src="/test/stemmer_test.js"></script>
+  <script src="/test/token_test.js"></script>
+  <script src="/test/vector_test.js"></script>
+  <script src="/test/search_test.js"></script>
+  <script src="/test/match_data_test.js"></script>
+  <script src="/test/tokenizer_test.js"></script>
+  <script src="/test/pipeline_test.js"></script>
+  <script src="/test/query_parser_test.js"></script>
+  <script src="/test/builder_test.js"></script>
+  <script src="/test/stop_word_filter_test.js"></script>
+  <script src="/test/token_set_test.js"></script>
+  <script src="/test/trimmer_test.js"></script>
+  <script>
+    mocha.checkLeaks();
+    mocha.globals(['lunr']);
+    mocha.run();
+  </script>
+</body>
 </html>

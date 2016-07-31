@@ -1,23 +1,13 @@
-var helpers = require('./../lib/helpers')
+var lunr = require('../lunr.js'),
+    assert = require('chai').assert,
+    fs = require('fs'),
+    path = require('path')
 
-var extensions = function () {
-  this.equalNumber = function (lambdaNum, num, desc) {
-    return this.equal.call(this, helpers.toNumber(lambdaNum), num, desc)
-  },
-
-  this.isTrue = function (lambdaBool, desc) {
-    return this.ok.call(this, helpers.toBoolean(lambdaBool), desc)
-  },
-
-  this.isFalse = function (lambdaBool, desc) {
-    return this.ok.call(this, !helpers.toBoolean(lambdaBool), desc)
-  }
+var withFixture = function (name, fn) {
+  var fixturePath = path.join('test', 'fixtures', name)
+  fs.readFile(fixturePath, fn)
 }
 
-module.exports = function (testName, testFn) {
-  module.exports[testName] = function (test) {
-    extensions.call(test)
-    testFn.call(test, test)
-    test.done()
-  }
-}
+global.lunr = lunr
+global.assert = assert
+global.withFixture = withFixture

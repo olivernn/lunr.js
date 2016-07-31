@@ -1,30 +1,30 @@
-module('lunr.stopWordFilter')
+suite('lunr.stopWordFilter', function () {
+  test('filters stop words', function () {
+    var stopWords = ['the', 'and', 'but', 'than', 'when']
 
-test('stops stop words', function () {
-  var stopWords = ['the', 'and', 'but', 'than', 'when']
-
-  stopWords.forEach(function (word) {
-    equal(lunr.stopWordFilter(word), undefined)
+    stopWords.forEach(function (word) {
+      assert.isUndefined(lunr.stopWordFilter(word))
+    })
   })
-})
 
-test('non stop words pass through', function () {
-  var nonStopWords = ['interesting', 'words', 'pass', 'through']
+  test('ignores non stop words', function () {
+    var nonStopWords = ['interesting', 'words', 'pass', 'through']
 
-  nonStopWords.forEach(function (word) {
-    equal(lunr.stopWordFilter(word), word)
+    nonStopWords.forEach(function (word) {
+      assert.equal(word, lunr.stopWordFilter(word))
+    })
   })
-})
 
-test('should not filter Object.prototype terms', function () {
-  var nonStopWords = ['constructor', 'hasOwnProperty', 'toString', 'valueOf']
+  test('ignores properties of Object.prototype', function () {
+    var nonStopWords = ['constructor', 'hasOwnProperty', 'toString', 'valueOf']
 
-  nonStopWords.forEach(function (word) {
-    equal(lunr.stopWordFilter(word), word)
+    nonStopWords.forEach(function (word) {
+      assert.equal(word, lunr.stopWordFilter(word))
+    })
   })
-})
 
-test('should be registered with lunr.Pipeline', function () {
-  equal(lunr.stopWordFilter.label, 'stopWordFilter')
-  deepEqual(lunr.Pipeline.registeredFunctions['stopWordFilter'], lunr.stopWordFilter)
+  test('is a registered pipeline function', function () {
+    assert.equal('stopWordFilter', lunr.stopWordFilter.label)
+    assert.equal(lunr.stopWordFilter, lunr.Pipeline.registeredFunctions['stopWordFilter'])
+  })
 })

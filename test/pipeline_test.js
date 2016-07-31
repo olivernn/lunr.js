@@ -1,281 +1,271 @@
-module('lunr.Pipeline', {
-  setup: function () {
-    this.existingRegisteredFunctions = lunr.Pipeline.registeredFunctions
-    lunr.Pipeline.registeredFunctions = {}
+suite('lunr.Pipeline', function () {
+  var noop = function () {}
 
+  setup(function () {
+    this.existingRegisteredFunctions = lunr.Pipeline.registeredFunctions
     this.existingWarnIfFunctionNotRegistered = lunr.Pipeline.warnIfFunctionNotRegistered
-    lunr.Pipeline.warnIfFunctionNotRegistered = $.noop
-  },
-  teardown: function () {
+
+    lunr.Pipeline.registeredFunctions = {}
+    lunr.Pipeline.warnIfFunctionNotRegistered = noop
+
+    this.pipeline = new lunr.Pipeline
+  })
+
+  teardown(function () {
     lunr.Pipeline.registeredFunctions = this.existingRegisteredFunctions
     lunr.Pipeline.warnIfFunctionNotRegistered = this.existingWarnIfFunctionNotRegistered
-  }
-})
-
-test("adding a new item to the pipeline", function () {
-  var pipeline = new lunr.Pipeline
-  equal(pipeline._stack.length, 0)
-
-  pipeline.add($.noop)
-  equal(pipeline._stack.length, 1)
-})
-
-test("adding multiple items to the pipeline in one go", function () {
-  var pipeline = new lunr.Pipeline
-
-  pipeline.add($.noop, $.noop)
-  equal(pipeline._stack.length, 2)
-})
-
-test("removing an item from the pipeline", function () {
-  var pipeline = new lunr.Pipeline,
-      fn = $.noop
-
-  pipeline.add(fn)
-  equal(pipeline._stack.length, 1)
-
-  pipeline.remove(fn)
-  equal(pipeline._stack.length, 0)
-})
-
-test("removing a nonexistent item from the pipeline", function () {
-  var pipeline = new lunr.Pipeline,
-      fn1 = $.noop,
-      fn2 = function () {}
-
-  pipeline.add(fn1)
-  equal(pipeline._stack.length, 1)
-
-  pipeline.remove(fn2)
-  equal(pipeline._stack.length, 1)
-})
-
-test("adding an item to the pipeline before another item", function () {
-  var pipeline = new lunr.Pipeline,
-      fn1 = $.noop,
-      fn2 = function () {}
-
-  pipeline.add(fn1)
-  pipeline.before(fn1, fn2)
-
-  deepEqual(pipeline._stack, [fn2, fn1])
-})
-
-test("adding an item to the pipeline before nonexistent item", function () {
-  var pipeline = new lunr.Pipeline,
-      fn1 = $.noop,
-      fn2 = function () {},
-      fn3 = function () {}
-
-  pipeline.add(fn1, fn2)
-
-  throws(function () {
-    pipeline.before(fn3, fn1)
   })
 
-  deepEqual(pipeline._stack, [fn1, fn2])
-})
+  suite('#add', function () {
+    test('add function to pipeline', function () {
+      this.pipeline.add(noop)
+      assert.equal(1, this.pipeline._stack.length)
+    })
 
-test("adding an item to the pipeline after another item", function () {
-  var pipeline = new lunr.Pipeline,
-      fn1 = $.noop,
-      fn2 = function () {},
-      fn3 = function () {}
-
-  pipeline.add(fn1, fn2)
-  pipeline.after(fn1, fn3)
-
-  deepEqual(pipeline._stack, [fn1, fn3, fn2])
-})
-
-test("adding an item to the pipeline after nonexistent item", function () {
-  var pipeline = new lunr.Pipeline,
-      fn1 = $.noop,
-      fn2 = function () {},
-      fn3 = function () {}
-
-  pipeline.add(fn1, fn2)
-
-  throws(function () {
-    pipeline.after(fn3, fn1)
+    test('add multiple functions to the pipeline', function () {
+      this.pipeline.add(noop, noop)
+      assert.equal(2, this.pipeline._stack.length)
+    })
   })
 
-  deepEqual(pipeline._stack, [fn1, fn2])
-})
+  suite('#remove', function () {
+    test('function exists in pipeline', function () {
+      this.pipeline.add(noop)
+      assert.equal(1, this.pipeline._stack.length)
+      this.pipeline.remove(noop)
+      assert.equal(0, this.pipeline._stack.length)
+    })
 
-test("run calls each member of the pipeline for each input", function () {
-  var pipeline = new lunr.Pipeline,
-      count1 = 0, count2 = 0,
-      fn1 = function (token) { count1++ ; return token },
-      fn2 = function (token) { count2++ ; return token }
+    test('function does not exist in pipeline', function () {
+      var fn = function () {}
+      this.pipeline.add(noop)
+      assert.equal(1, this.pipeline._stack.length)
+      this.pipeline.remove(fn)
+      assert.equal(1, this.pipeline._stack.length)
+    })
+  })
 
-  pipeline.add(fn1, fn2)
+  suite('#before', function () {
+    var fn = function () {}
 
-  pipeline.run([1,2,3])
+    test('other function exists', function () {
+      this.pipeline.add(noop)
+      this.pipeline.before(noop, fn)
 
-  equal(count1, 3)
-  equal(count2, 3)
-})
+      assert.deepEqual([fn, noop], this.pipeline._stack)
+    })
 
-test("run should pass three inputs to the pipeline fn", function () {
-  var pipeline = new lunr.Pipeline,
-      input, index, arr,
-      fn1 = function () { input = arguments[0], index = arguments[1], arr = arguments[2] }
-
-  pipeline.add(fn1)
-
-  pipeline.run(['a'])
-
-  equal(input, 'a')
-  equal(index, 0)
-  deepEqual(arr, ['a'])
-})
-
-test("run should pass the output of one into the input of the next", function () {
-  var pipeline = new lunr.Pipeline,
-      output,
-      fn1 = function (t1) { return t1.toUpperCase() },
-      fn2 = function (t2) { output = t2 }
-
-  pipeline.add(fn1)
-  pipeline.add(fn2)
-
-  pipeline.run(['a'])
-
-  equal(output, 'A')
-})
-
-test("run should return the result of running the entire pipeline on each element", function () {
-  var pipeline = new lunr.Pipeline,
-      fn1 = function (t1) { return t1.toUpperCase() }
-  pipeline.add(fn1)
-  deepEqual(pipeline.run(['a']), ['A'])
-})
-
-test("run should filter out any undefined values at each stage in the pipeline", function () {
-  var pipeline = new lunr.Pipeline,
-      fn2Count = 0,
-      fn1 = function (t) { if (t < 5) return t },
-      fn2 = function (t) { fn2Count++ ; return t }
-
-  pipeline.add(fn1, fn2)
-
-  var output = pipeline.run([0,1,2,3,4,5,6,7,8,9])
-  equal(fn2Count, 5)
-  equal(output.length, 5)
-})
-
-test("run should filter out any empty string values at each stage in the pipeline", function () {
-  var pipeline = new lunr.Pipeline,
-      fn2Count = 0,
-      fn1 = function (t) {
-        if (t === "foo") {
-          return ""
-        } else {
-          return t
-        }
-      },
-      fn2 = function (t) { fn2Count++ ; return t }
-
-  pipeline.add(fn1, fn2)
-
-  var output = pipeline.run(["foo", "bar", "baz", ""])
-  equal(fn2Count, 2)
-  equal(output.length, 2)
-  deepEqual(output, ["bar", "baz"])
-})
-
-test("pipeline functions can expand a token into multiple tokens", function () {
-  var pipeline = new lunr.Pipeline,
-      expander = function (t) { return [t, t.toUpperCase()] }
-
-  pipeline.add(expander)
-  var output = pipeline.run(["foo", "bar"])
-  deepEqual(output, ["foo", "FOO", "bar", "BAR"])
-})
-
-test("pipeline function should not receive tokens that it expanded", function () {
-  var pipeline = new lunr.Pipeline,
-      received = []
-      expander = function (t) {
-        received.push(t)
-        return [t, t.toUpperCase()]
+    test('other function does not exist', function () {
+      var action = function () {
+        this.pipeline.before(noop, fn)
       }
 
-  pipeline.add(expander)
-  pipeline.run(["foo", "bar"])
-  deepEqual(received, ["foo", "bar"])
-})
-
-test("expanded tokens should be passed to the next processing function", function () {
-  var pipeline = new lunr.Pipeline,
-      received = [],
-      expander = function (t) { return [t, t.toUpperCase()] },
-      nextProcessor = function (t) { received.push(t) }
-
-  pipeline.add(expander)
-  pipeline.add(nextProcessor)
-  pipeline.run(["foo", "bar"])
-  deepEqual(received, ["foo", "FOO", "bar", "BAR"])
-})
-
-test('toJSON', function () {
-  var pipeline = new lunr.Pipeline,
-      fn1 = function () {},
-      fn2 = function () {}
-
-  lunr.Pipeline.registerFunction(fn1, 'fn1')
-  lunr.Pipeline.registerFunction(fn2, 'fn2')
-
-  pipeline.add(fn1, fn2)
-
-  deepEqual(pipeline.toJSON(), ['fn1', 'fn2'])
-})
-
-test('registering a pipeline function', function () {
-  var fn1 = function () {}
-
-  equal(Object.keys(lunr.Pipeline.registeredFunctions).length, 0)
-
-  lunr.Pipeline.registerFunction(fn1, 'fn1')
-
-  equal(fn1.label, 'fn1')
-  equal(Object.keys(lunr.Pipeline.registeredFunctions).length, 1)
-  deepEqual(lunr.Pipeline.registeredFunctions['fn1'], fn1)
-})
-
-test('load', function () {
-  var fn1 = function () {},
-      fn2 = function () {}
-
-  lunr.Pipeline.registerFunction(fn1, 'fn1')
-  lunr.Pipeline.registerFunction(fn2, 'fn2')
-
-  var serialised = ['fn1', 'fn2']
-
-  var pipeline = lunr.Pipeline.load(serialised)
-
-  equal(pipeline._stack.length, 2)
-  deepEqual(pipeline._stack[0], fn1)
-  deepEqual(pipeline._stack[1], fn2)
-})
-
-test('loading an un-registered pipeline function', function () {
-  var serialised = ['fn1']
-
-  throws(function () {
-    lunr.Pipeline.load(serialised)
+      assert.throws(action.bind(this))
+      assert.equal(0, this.pipeline._stack.length)
+    })
   })
-})
 
-test('resetting the pipeline', function () {
-  var fn1 = function () {},
-      fn2 = function () {},
-      pipeline = new lunr.Pipeline
+  suite('#after', function () {
+    var fn = function () {}
 
-  pipeline.add(fn1, fn2)
-  deepEqual(pipeline._stack, [fn1, fn2])
+    test('other function exists', function () {
+      this.pipeline.add(noop)
+      this.pipeline.after(noop, fn)
 
-  pipeline.reset()
-  deepEqual(pipeline._stack, [])
+      assert.deepEqual([noop, fn], this.pipeline._stack)
+    })
+
+    test('other function does not exist', function () {
+      var action = function () {
+        this.pipeline.after(noop, fn)
+      }
+
+      assert.throws(action.bind(this))
+      assert.equal(0, this.pipeline._stack.length)
+    })
+  })
+
+  suite('#run', function () {
+    test('calling each function for each token', function () {
+      var count1 = 0, count2 = 0,
+          fn1 = function (t) { count1++; return t },
+          fn2 = function (t) { count2++; return t }
+
+      this.pipeline.add(fn1, fn2)
+      this.pipeline.run([1,2,3])
+
+      assert.equal(3, count1)
+      assert.equal(3, count2)
+    })
+
+    test('passes token to pipeline function', function () {
+      this.pipeline.add(function (token) {
+        assert.equal('foo', token)
+      })
+
+      this.pipeline.run(['foo'])
+    })
+
+    test('passes index to pipeline function', function () {
+      this.pipeline.add(function (_, index) {
+        assert.equal(0, index)
+      })
+
+      this.pipeline.run(['foo'])
+    })
+
+    test('passes entire token array to pipeline function', function () {
+      this.pipeline.add(function (_, _, tokens) {
+        assert.deepEqual(['foo'], tokens)
+      })
+
+      this.pipeline.run(['foo'])
+    })
+
+    test('passes output of one function as input to the next', function () {
+      this.pipeline.add(function (t) {
+        return t.toUpperCase()
+      })
+
+      this.pipeline.add(function (t) {
+        assert.equal('FOO', t)
+      })
+
+      this.pipeline.run(['foo'])
+    })
+
+    test('returns the results of the last function', function () {
+      this.pipeline.add(function (t) {
+        return t.toUpperCase()
+      })
+
+      assert.deepEqual(['FOO'], this.pipeline.run(['foo']))
+    })
+
+    test('filters out undefined values', function () {
+      var tokens = [],
+          output
+
+      // only pass on tokens for even token indexes
+      this.pipeline.add(function (t, i) {
+        if (i % 2) {
+          return t
+        }
+      })
+
+      this.pipeline.add(function (t) {
+        tokens.push(t)
+        return t
+      })
+
+      output = this.pipeline.run(['a', 'b', 'c', 'd'])
+
+      assert.sameMembers(['b', 'd'], tokens)
+      assert.sameMembers(['b', 'd'], output)
+    })
+
+    suite('expanding tokens', function () {
+      test('passed to output', function () {
+        this.pipeline.add(function (t) {
+          return [t, t.toUpperCase()]
+        })
+
+        assert.sameMembers(["foo", "FOO"], this.pipeline.run(['foo']))
+      })
+
+      test('not passed to same function', function () {
+        var received = []
+
+        this.pipeline.add(function (t) {
+          received.push(t)
+          return [t, t.toUpperCase()]
+        })
+
+        this.pipeline.run(['foo'])
+
+        assert.sameMembers(['foo'], received)
+      })
+
+      test('passed to the next pipeline function', function () {
+        var received = []
+
+        this.pipeline.add(function (t) {
+          return [t, t.toUpperCase()]
+        })
+
+        this.pipeline.add(function (t) {
+          received.push(t)
+        })
+
+        this.pipeline.run(['foo'])
+
+        assert.sameMembers(['foo', 'FOO'], received)
+      })
+    })
+  })
+
+  suite('#toJSON', function () {
+    test('returns an array of registered function labels', function () {
+      var fn = function () {}
+
+      lunr.Pipeline.registerFunction(fn, 'fn')
+
+      this.pipeline.add(fn)
+
+      assert.sameMembers(['fn'], this.pipeline.toJSON())
+    })
+  })
+
+  suite('.registerFunction', function () {
+    setup(function () {
+      this.fn = function () {}
+    })
+
+    test('adds a label property to the function', function () {
+      lunr.Pipeline.registerFunction(this.fn, 'fn')
+
+      assert.equal('fn', this.fn.label)
+    })
+
+    test('adds function to the list of registered functions', function () {
+      lunr.Pipeline.registerFunction(this.fn, 'fn')
+
+      assert.equal(this.fn, lunr.Pipeline.registeredFunctions['fn'])
+    })
+  })
+
+  suite('.load', function () {
+    test('with registered functions', function () {
+      var fn = function () {},
+          serializedPipeline = ['fn'],
+          pipeline
+
+      lunr.Pipeline.registerFunction(fn, 'fn')
+
+      pipeline = lunr.Pipeline.load(serializedPipeline)
+
+      assert.equal(1, pipeline._stack.length)
+      assert.equal(fn, pipeline._stack[0])
+    })
+
+    test('with unregisterd functions', function () {
+      var serializedPipeline = ['fn']
+
+      assert.throws(function () {
+        lunr.Pipeline.load(serializedPipeline)
+      })
+    })
+  })
+
+  suite('#reset', function () {
+    test('empties the stack', function () {
+      this.pipeline.add(function () {})
+
+      assert.equal(1, this.pipeline._stack.length)
+
+      this.pipeline.reset()
+
+      assert.equal(0, this.pipeline._stack.length)
+    })
+  })
 })
