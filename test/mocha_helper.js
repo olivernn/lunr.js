@@ -3,11 +3,11 @@ var lunr = require('../lunr.js'),
     fs = require('fs'),
     path = require('path')
 
-var fixture = function (name) {
+var withFixture = function (name, fn) {
   var fixturePath = path.join('test', 'fixtures', name)
-  return fs.readFileSync(fixturePath)
+  fs.readFile(fixturePath, fn)
 }
 
 global.lunr = lunr
 global.assert = assert
-global.fixture = fixture
+global.withFixture = withFixture
