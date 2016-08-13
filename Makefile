@@ -1,13 +1,13 @@
 
 SRC = lib/lunr.js \
 	lib/utils.js \
+	lib/token.js \
 	lib/tokenizer.js \
 	lib/pipeline.js \
 	lib/vector.js \
 	lib/stemmer.js \
 	lib/stop_word_filter.js \
 	lib/trimmer.js \
-	lib/token.js \
 	lib/token_set.js \
 	lib/token_set_builder.js \
 	lib/index.js \
@@ -57,6 +57,11 @@ server:
 lint:
 	${ESLINT} lib/*.js
 
+perf/*_perf.js:
+	${NODE} -r ./perf/perf_helper.js $@
+
+benchmark: perf/*_perf.js
+
 test: node_modules lunr.js
 	${MOCHA} test/*.js -u tdd -r test/test_helper.js -R dot -C
 
@@ -83,4 +88,4 @@ example: lunr.min.js
 node_modules: package.json
 	${NPM} -s install
 
-.PHONY: test clean docs reset example
+.PHONY: test clean docs reset example perf/*_perf.js
