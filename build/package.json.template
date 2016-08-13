@@ -19,7 +19,9 @@
     "mocha": "*",
     "chai": "*",
     "mustache": "*",
-    "eslint": "*"
+    "eslint": "*",
+    "benchmark": "*",
+    "word-list": "*"
   },
   "scripts": {
     "test": "make test"
