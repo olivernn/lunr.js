@@ -34,6 +34,7 @@ QUNIT ?= ./node_modules/.bin/qunit
 MOCHA ?= ./node_modules/.bin/mocha
 MUSTACHE ?= ./node_modules/.bin/mustache
 ESLINT ?= ./node_modules/.bin/eslint
+JSDOC ?= ./node_modules/.bin/jsdoc
 
 all: node_modules lunr.js lunr.min.js docs bower.json package.json component.json example
 
@@ -72,7 +73,7 @@ test/index.html: test/env/file_list.json test/env/index.mustache
 	${MUSTACHE} $^ > $@
 
 docs: node_modules
-	${DOX} < lunr.js | ${DOX_TEMPLATE} -n lunr.js -r ${VERSION} > docs/index.html
+	${JSDOC} -R README.mdown -d docs -c build/jsdoc.conf.json lib/*.js
 
 clean:
 	rm -f lunr{.min,}.js

@@ -13,15 +13,14 @@
     "url": "https://github.com/olivernn/lunr.js.git"
   },
   "devDependencies": {
-    "dox": "0.4.4",
-    "dox-template": "0.1.1",
     "uglify-js": "2.4.13",
     "mocha": "*",
     "chai": "*",
     "mustache": "*",
     "eslint": "*",
     "benchmark": "*",
-    "word-list": "*"
+    "word-list": "*",
+    "jsdoc": "*"
   },
   "scripts": {
     "test": "make test"

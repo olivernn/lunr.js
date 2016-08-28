@@ -1,4 +1,32 @@
-/*!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: token_set.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: token_set.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*!
  * lunr.TokenSet
  * Copyright (C) @YEAR Oliver Nightingale
  */
@@ -39,7 +67,7 @@ lunr.TokenSet = function () {
 lunr.TokenSet.fromArray = function (arr) {
   var builder = new lunr.TokenSet.Builder
 
-  for (var i = 0, len = arr.length; i < len; i++) {
+  for (var i = 0, len = arr.length; i &lt; len; i++) {
     builder.insert(arr[i])
   }
 
@@ -117,7 +145,7 @@ lunr.TokenSet.fromFuzzyString = function (str, editDistance) {
     // deletion
     // can only do a deletion if we have enough edits remaning
     // and if there are characters left to delete in the string
-    if (frame.editsRemaining > 0 && frame.str.length > 1) {
+    if (frame.editsRemaining > 0 &amp;&amp; frame.str.length > 1) {
       var char = frame.str.charAt(1),
           deletionNode
 
@@ -128,7 +156,7 @@ lunr.TokenSet.fromFuzzyString = function (str, editDistance) {
         frame.node.edges[char] = deletionNode
       }
 
-      if (frame.str.length <= 2) {
+      if (frame.str.length &lt;= 2) {
         deletionNode.final = true
       } else {
         stack.push({
@@ -141,14 +169,14 @@ lunr.TokenSet.fromFuzzyString = function (str, editDistance) {
 
     // deletion
     // just removing the last character from the str
-    if (frame.editsRemaining > 0 && frame.str.length == 1) {
+    if (frame.editsRemaining > 0 &amp;&amp; frame.str.length == 1) {
       frame.node.final = true
     }
 
     // substitution
     // can only do a substition if we have enough edits remaining
     // and if there are characters left to substitute
-    if (frame.editsRemaining > 0 && frame.str.length >= 1) {
+    if (frame.editsRemaining > 0 &amp;&amp; frame.str.length >= 1) {
       if ("*" in frame.node.edges) {
         var substitutionNode = frame.node.edges["*"]
       } else {
@@ -191,7 +219,7 @@ lunr.TokenSet.fromFuzzyString = function (str, editDistance) {
     // transposition
     // can only do a transposition if there are edits remaining
     // and there are enough characters to transpose
-    if (frame.editsRemaining > 0 && frame.str.length > 1) {
+    if (frame.editsRemaining > 0 &amp;&amp; frame.str.length > 1) {
       var charA = frame.str.charAt(0),
           charB = frame.str.charAt(1),
           transposeNode
@@ -241,7 +269,7 @@ lunr.TokenSet.fromString = function (str) {
    * referencing edge is introduced to continually match
    * any number of any characters.
    */
-  for (var i = 0, len = str.length; i < len; i++) {
+  for (var i = 0, len = str.length; i &lt; len; i++) {
     var char = str[i],
         final = (i == len - 1)
 
@@ -290,7 +318,7 @@ lunr.TokenSet.prototype.toArray = function () {
       words.push(frame.prefix)
     }
 
-    for (var i = 0; i < len; i++) {
+    for (var i = 0; i &lt; len; i++) {
       var edge = edges[i]
 
       stack.push({
@@ -330,7 +358,7 @@ lunr.TokenSet.prototype.toString = function () {
       labels = Object.keys(this.edges),
       len = labels.length
 
-  for (var i = 0; i < len; i++) {
+  for (var i = 0; i &lt; len; i++) {
     var label = labels[i],
         node = this.edges[label]
 
@@ -372,16 +400,16 @@ lunr.TokenSet.prototype.intersect = function (b) {
         nEdges = Object.keys(frame.node.edges),
         nLen = nEdges.length
 
-    for (var q = 0; q < qLen; q++) {
+    for (var q = 0; q &lt; qLen; q++) {
       var qEdge = qEdges[q]
 
-      for (var n = 0; n < nLen; n++) {
+      for (var n = 0; n &lt; nLen; n++) {
         var nEdge = nEdges[n]
 
         if (nEdge == qEdge || qEdge == '*') {
           var node = frame.node.edges[nEdge],
               qNode = frame.qNode.edges[qEdge],
-              final = node.final && qNode.final,
+              final = node.final &amp;&amp; qNode.final,
               next = undefined
 
           if (nEdge in frame.output.edges) {
@@ -412,3 +440,26 @@ lunr.TokenSet.prototype.intersect = function (b) {
 
   return output
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="lunr.Builder.html">lunr.Builder</a></li><li><a href="lunr.Index.html">lunr.Index</a></li><li><a href="lunr.MatchData.html">lunr.MatchData</a></li><li><a href="lunr.Pipeline.html">lunr.Pipeline</a></li><li><a href="lunr.Query.html">lunr.Query</a></li><li><a href="lunr.Token.html">lunr.Token</a></li><li><a href="lunr.TokenSet.html">lunr.TokenSet</a></li><li><a href="lunr.Vector.html">lunr.Vector</a></li></ul><h3>Namespaces</h3><ul><li><a href="lunr.html">lunr</a></li></ul><h3>Interfaces</h3><ul><li><a href="lunr.PipelineFunction.html">lunr.PipelineFunction</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sun Aug 28 2016 17:17:49 GMT+0000 (UTC)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
