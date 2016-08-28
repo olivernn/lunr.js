@@ -351,3 +351,26 @@ test('using a plugin', function () {
   deepEqual(args, [idx, 'foo', 'bar'])
   ok(idx.pluginLoaded)
 })
+
+test('searching from a loaded index', function () {
+
+  var i = lunr(function() {
+    this.field('summary')
+    this.ref('id')
+  });
+
+  i.add({ summary: "hello", id: 1});
+
+  var reference = i.search("hello");
+  deepEqual(reference, [
+    {
+      "ref": 1,
+      "score": 1
+    }
+  ]);
+
+  var j = lunr.Index.load(i.toJSON());
+
+  var res = j.search("hello"); // should not throw
+  deepEqual(res, reference);
+});
