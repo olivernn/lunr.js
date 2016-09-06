@@ -30,6 +30,10 @@ suite('lunr.QueryParser', function () {
         test('fields', function () {
           assert.sameMembers(['title', 'body'], this.clause.fields)
         })
+
+        test('usePipeline', function () {
+          assert.ok(this.clause.usePipeline)
+        })
       })
     })
 
@@ -51,8 +55,8 @@ suite('lunr.QueryParser', function () {
           assert.equal('fo*', this.clause.term)
         })
 
-        test('#hasWildcard', function () {
-          assert.ok(this.clause.hasWildcard)
+        test('#usePipeline', function () {
+          assert.ok(!this.clause.usePipeline)
         })
       })
     })

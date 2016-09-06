@@ -71,6 +71,40 @@ suite('search', function () {
         assert.equal('c', this.results[1].ref)
       })
     })
+
+    suite('pipeline processing', function () {
+      // study would be stemmed to studi, tokens
+      // are stemmed by default on index and must
+      // also be stemmed on search to match
+      suite('enabled (default)', function () {
+        setup(function () {
+          this.results = this.idx.query(function (q) {
+            q.clause({term: 'study', usePipeline: true})
+          })
+        })
+
+        test('has two matches', function () {
+          assert.lengthOf(this.results, 2)
+        })
+
+        test('sorted by relevance', function () {
+          assert.equal('b', this.results[0].ref)
+          assert.equal('a', this.results[1].ref)
+        })
+      })
+
+      suite('disabled', function () {
+        setup(function () {
+          this.results = this.idx.query(function (q) {
+            q.clause({term: 'study', usePipeline: false})
+          })
+        })
+
+        test('no matches', function () {
+          assert.lengthOf(this.results, 0)
+        })
+      })
+    })
   })
 
   suite('multiple terms', function () {
