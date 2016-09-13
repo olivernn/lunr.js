@@ -10,7 +10,25 @@
 
   "extends": "eslint:recommended",
 
+  "plugins": [
+    "spellcheck"
+  ],
+
   "rules": {
+    "spellcheck/spell-checker": [1,
+      {
+        "lang": "en_GB",
+        "skipWords": [
+          "lunr", "val", "param", "idx", "utils", "namespace", "eslint", "latin",
+          "str", "len", "sqrt", "wildcard", "concat", "metadata", "fn", "params",
+          "lexeme", "lex", "pos", "typedef", "wildcards", "lexemes", "fns", "stemmer",
+          "attrs", "tf", "idf", "lookups", "whitelist", "whitelisted", "tokenizer",
+          "whitespace", "automata", "i", "obj", "anymore", "lexer", "var", "refs",
+          "serializable", "tis", "twas", "int"
+        ]
+      }
+    ],
+
     "no-constant-condition": [
       "error",
       { "checkLoops": false }
