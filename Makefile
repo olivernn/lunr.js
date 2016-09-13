@@ -36,6 +36,7 @@ MOCHA ?= ./node_modules/.bin/mocha
 MUSTACHE ?= ./node_modules/.bin/mustache
 ESLINT ?= ./node_modules/.bin/eslint
 JSDOC ?= ./node_modules/.bin/jsdoc
+NODE_STATIC ?= ./node_modules/.bin/static
 
 all: node_modules lunr.js lunr.min.js docs bower.json package.json component.json example
 
@@ -54,7 +55,7 @@ size: lunr.min.js
 	@gzip -c lunr.min.js | wc -c
 
 server:
-	${NODE} server.js ${SERVER_PORT}
+	${NODE_STATIC} -H '{"Cache-Control": "no-cache, must-revalidate"}'
 
 lint:
 	${ESLINT} lib/*.js

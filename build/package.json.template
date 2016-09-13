@@ -21,7 +21,8 @@
     "eslint-plugin-spellcheck": "*",
     "benchmark": "*",
     "word-list": "*",
-    "jsdoc": "*"
+    "jsdoc": "*",
+    "node-static": "*"
   },
   "scripts": {
     "test": "make test"
