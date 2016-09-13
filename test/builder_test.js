@@ -20,6 +20,44 @@ suite('lunr.Builder', function () {
     })
   })
 
+  suite('#b', function () {
+    test('default value', function () {
+      var builder = new lunr.Builder
+      assert.equal(0.75, builder._b)
+    })
+
+    test('values less than zero', function () {
+      var builder = new lunr.Builder
+      builder.b(-1)
+      assert.equal(0, builder._b)
+    })
+
+    test('values higher than one', function () {
+      var builder = new lunr.Builder
+      builder.b(1.5)
+      assert.equal(1, builder._b)
+    })
+
+    test('value within range', function () {
+      var builder = new lunr.Builder
+      builder.b(0.5)
+      assert.equal(0.5, builder._b)
+    })
+  })
+
+  suite('#k1', function () {
+    test('default value', function () {
+      var builder = new lunr.Builder
+      assert.equal(1.2, builder._k1)
+    })
+
+    test('values less than zero', function () {
+      var builder = new lunr.Builder
+      builder.k1(1.6)
+      assert.equal(1.6, builder._k1)
+    })
+  })
+
   suite('#build', function () {
     setup(function () {
       var builder = new lunr.Builder,
