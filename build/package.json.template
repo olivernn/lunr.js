@@ -18,6 +18,7 @@
     "chai": "*",
     "mustache": "*",
     "eslint": "*",
+    "eslint-plugin-spellcheck": "*",
     "benchmark": "*",
     "word-list": "*",
     "jsdoc": "*"
