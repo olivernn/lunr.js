@@ -22,23 +22,17 @@ SRC = lib/lunr.js \
 YEAR = $(shell date +%Y)
 VERSION = $(shell cat VERSION)
 
-SERVER_PORT ?= 3000
-TEST_PORT ?= 32423
-
-DOX ?= ./node_modules/.bin/dox
-DOX_TEMPLATE ?= ./node_modules/.bin/dox-template
 NODE ?= $(shell which node)
 NPM ?= $(shell which npm)
-PHANTOMJS ?= ./node_modules/.bin/phantomjs
 UGLIFYJS ?= ./node_modules/.bin/uglifyjs
-QUNIT ?= ./node_modules/.bin/qunit
 MOCHA ?= ./node_modules/.bin/mocha
 MUSTACHE ?= ./node_modules/.bin/mustache
 ESLINT ?= ./node_modules/.bin/eslint
 JSDOC ?= ./node_modules/.bin/jsdoc
 NODE_STATIC ?= ./node_modules/.bin/static
 
-all: node_modules lunr.js lunr.min.js docs bower.json package.json component.json example
+all: test lint
+release: lunr.js lunr.min.js bower.json package.json component.json docs
 
 lunr.js: $(SRC)
 	cat build/wrapper_start $^ build/wrapper_end | \
@@ -54,7 +48,7 @@ lunr.min.js: lunr.js
 size: lunr.min.js
 	@gzip -c lunr.min.js | wc -c
 
-server:
+server: test/index.html
 	${NODE_STATIC} -H '{"Cache-Control": "no-cache, must-revalidate"}'
 
 lint:
