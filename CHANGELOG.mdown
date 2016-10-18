@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.2
+
+* Fix bug when loading a serialised tokeniser [#226](https://github.com/olivernn/lunr.js/issues/226), thanks [Alex Turpin](https://github.com/alexturpin) for reporting the issue.
+* Learn how to spell separator [#223](https://github.com/olivernn/lunr.js/pull/223), thanks [peterennis](https://github.com/peterennis) for helping me learn to spell.
+
 ## 0.7.1
 
 * Correctly set the license using the @license doc tag [#217](https://github.com/olivernn/lunr.js/issues/217), thanks [Carlos Araya](https://github.com/caraya).
