@@ -44,3 +44,16 @@ test('dumping and loading an index with a populated pipeline', function () {
   deepEqual(idx.pipeline._stack, clonedIdx.pipeline._stack)
   deepEqual(idx.search('water'), clonedIdx.search('water'))
 })
+
+test('dumping and loading an index with a custom tokenizer', function () {
+  var customTokenizer = function () {},
+      idx = lunr()
+
+  lunr.tokenizer.registerFunction(customTokenizer, 'custom')
+  idx.tokenizer(customTokenizer)
+
+  var dumpedIdx = JSON.stringify(idx),
+      clonedIndex = lunr.Index.load(JSON.parse(dumpedIdx))
+
+  equal(clonedIndex.tokenizerFn, idx.tokenizerFn)
+})
