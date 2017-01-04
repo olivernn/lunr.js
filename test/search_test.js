@@ -43,7 +43,7 @@ suite('search', function () {
       })
 
       test('matching term', function () {
-        assert.sameMembers(['scarlett'], this.results[0].matchData.terms)
+        assert.sameMembers(['scarlett'], Object.keys(this.results[0].matchData.metadata))
       })
     })
 
@@ -122,7 +122,7 @@ suite('search', function () {
       })
 
       test('matched terms returned', function () {
-        assert.sameMembers(['fellow', 'candlestick'], this.results[0].matchData.terms)
+        assert.sameMembers(['fellow', 'candlestick'], Object.keys(this.results[0].matchData.metadata))
       })
     })
 
@@ -140,7 +140,7 @@ suite('search', function () {
       })
 
       test('only matching terms returned', function () {
-        assert.sameMembers(['week'], this.results[0].matchData.terms)
+        assert.sameMembers(['week'], Object.keys(this.results[0].matchData.metadata))
       })
     })
 
@@ -165,9 +165,9 @@ suite('search', function () {
       })
 
       test('matching terms are returned', function () {
-        assert.sameMembers(['candlestick', 'green'], this.results[0].matchData.terms)
-        assert.sameMembers(['green'], this.results[1].matchData.terms)
-        assert.sameMembers(['green'], this.results[2].matchData.terms)
+        assert.sameMembers(['candlestick', 'green'], Object.keys(this.results[0].matchData.metadata))
+        assert.sameMembers(['green'], Object.keys(this.results[1].matchData.metadata))
+        assert.sameMembers(['green'], Object.keys(this.results[2].matchData.metadata))
       })
     })
 
@@ -213,7 +213,7 @@ suite('search', function () {
         })
 
         test('match data', function () {
-          assert.sameMembers(['plant'], this.results[0].matchData.terms)
+          assert.sameMembers(['plant'], Object.keys(this.results[0].matchData.metadata))
         })
       })
 
@@ -254,7 +254,7 @@ suite('search', function () {
           })
 
           test('matching terms returned', function () {
-            assert.sameMembers(['candlestick'], this.results[0].matchData.terms)
+            assert.sameMembers(['candlestick'], Object.keys(this.results[0].matchData.metadata))
           })
         })
 
@@ -275,8 +275,8 @@ suite('search', function () {
           })
 
           test('matching terms returned', function () {
-            assert.sameMembers(['plumb', 'plant'], this.results[0].matchData.terms)
-            assert.sameMembers(['plumb', 'plant'], this.results[1].matchData.terms)
+            assert.sameMembers(['plumb', 'plant'], Object.keys(this.results[0].matchData.metadata))
+            assert.sameMembers(['plumb', 'plant'], Object.keys(this.results[1].matchData.metadata))
           })
         })
       })
@@ -310,8 +310,8 @@ suite('search', function () {
         })
 
         test('matching terms returned', function () {
-          assert.sameMembers(['plant', 'plumb'], this.results[0].matchData.terms)
-          assert.sameMembers(['plant', 'plumb'], this.results[1].matchData.terms)
+          assert.sameMembers(['plant', 'plumb'], Object.keys(this.results[0].matchData.metadata))
+          assert.sameMembers(['plant', 'plumb'], Object.keys(this.results[1].matchData.metadata))
         })
       })
     })
@@ -342,8 +342,8 @@ suite('search', function () {
         })
 
         test('matching terms returned', function () {
-          assert.sameMembers(['plant'], this.results[0].matchData.terms)
-          assert.sameMembers(['plant'], this.results[1].matchData.terms)
+          assert.sameMembers(['plant'], Object.keys(this.results[0].matchData.metadata))
+          assert.sameMembers(['plant'], Object.keys(this.results[1].matchData.metadata))
         })
       })
     })
@@ -374,8 +374,8 @@ suite('search', function () {
         })
 
         test('matching terms returned', function () {
-          assert.sameMembers(['plant'], this.results[0].matchData.terms)
-          assert.sameMembers(['plant'], this.results[1].matchData.terms)
+          assert.sameMembers(['plant'], Object.keys(this.results[0].matchData.metadata))
+          assert.sameMembers(['plant'], Object.keys(this.results[1].matchData.metadata))
         })
       })
     })
@@ -407,8 +407,8 @@ suite('search', function () {
       })
 
       test('matching terms returned', function () {
-        assert.sameMembers(['plant'], this.results[0].matchData.terms)
-        assert.sameMembers(['plant'], this.results[1].matchData.terms)
+        assert.sameMembers(['plant'], Object.keys(this.results[0].matchData.metadata))
+        assert.sameMembers(['plant'], Object.keys(this.results[1].matchData.metadata))
       })
     })
   })
@@ -446,7 +446,7 @@ suite('search', function () {
       })
 
       test('matching terms returned', function () {
-        assert.sameMembers(['plant'], this.results[0].matchData.terms)
+        assert.sameMembers(['plant'], Object.keys(this.results[0].matchData.metadata))
       })
     })
   })
@@ -477,8 +477,8 @@ suite('search', function () {
       })
 
       test('matching terms returned', function () {
-        assert.sameMembers(['candlestick'], this.results[0].matchData.terms)
-        assert.sameMembers(['scarlett'], this.results[1].matchData.terms)
+        assert.sameMembers(['candlestick'], Object.keys(this.results[0].matchData.metadata))
+        assert.sameMembers(['scarlett'], Object.keys(this.results[1].matchData.metadata))
       })
     })
   })
