@@ -8,14 +8,19 @@ suite('lunr.MatchData', function () {
       this.match.combine(new lunr.MatchData('bar', 'title', {
         position: [2]
       }))
+
+      this.match.combine(new lunr.MatchData('baz', 'body', {
+        position: [3]
+      }))
     })
 
     test('terms', function () {
-      assert.sameMembers(['foo', 'bar'], this.match.terms)
+      assert.sameMembers(['foo', 'bar', 'baz'], this.match.terms)
     })
 
     test('metadata', function () {
       assert.deepEqual(this.match.metadata.title.position, [1,2])
+      assert.deepEqual(this.match.metadata.body.position, [3])
     })
   })
 })
