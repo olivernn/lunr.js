@@ -1,41 +1,7 @@
 require([
-  '/example/jquery.js',
-  '/example/mustache.js',
   '../lunr.js',
-  'text!templates/question_view.mustache',
-  'text!templates/question_list.mustache',
-  'text!example_data.json',
-  'text!example_index.json'
-], function (_, Mustache, lunr, questionView, questionList, data, indexDump) {
-
-  var renderQuestionList = function (qs) {
-    $("#question-list-container")
-      .empty()
-      .append(Mustache.to_html(questionList, {questions: qs}))
-  }
-
-  var renderQuestionView = function (question) {
-    $("#question-view-container")
-      .empty()
-      .append(Mustache.to_html(questionView, question))
-  }
-
-  window.profile = function (term) {
-    console.profile('search')
-    idx.search(term)
-    console.profileEnd('search')
-  }
-
-  window.search = function (term) {
-    console.time('search')
-    idx.search(term)
-    console.timeEnd('search')
-  }
-
-  var indexDump = JSON.parse(indexDump)
-  console.time('load')
-  window.idx = lunr.Index.load(indexDump)
-  console.timeEnd('load')
+  'text!example_data.json'
+], function (lunr, data) {
 
   var questions = JSON.parse(data).questions.map(function (raw) {
     return {
@@ -46,44 +12,42 @@ require([
     }
   })
 
-  renderQuestionList(questions)
-  renderQuestionView(questions[0])
+  console.time('load')
+  window.idx = lunr(function () {
+    this.ref('id')
+    this.field('title')
+    this.field('body')
+    this.field('tags')
 
-  $('a.all').bind('click', function () {
-    renderQuestionList(questions)
-    $('input').val('')
+    questions.forEach(function (q) {
+      this.add(q)
+    }, this)
   })
+  console.timeEnd('load')
 
-  var debounce = function (fn) {
-    var timeout
-    return function () {
-      var args = Array.prototype.slice.call(arguments),
-          ctx = this
-
-      clearTimeout(timeout)
-      timeout = setTimeout(function () {
-        fn.apply(ctx, args)
-      }, 100)
-    }
+  window.profile = function (term) {
+    console.profile('search')
+    window.idx.search(term)
+    console.profileEnd('search')
   }
 
-  $('input').bind('keyup', debounce(function () {
-    if ($(this).val() < 2) return
-    var query = $(this).val()
-    var results = idx.search(query).map(function (result) {
-      return questions.filter(function (q) { return q.id === parseInt(result.ref, 10) })[0]
-    })
+  window.search = function (term) {
+    console.time('search')
+    window.idx.search(term)
+    console.timeEnd('search')
+  }
 
-    renderQuestionList(results)
-  }))
+  window.serialize = function () {
+    console.time('dump')
+    var json = JSON.stringify(window.idx)
+    console.timeEnd('dump')
 
-  $("#question-list-container").delegate('li', 'click', function () {
-    var li = $(this)
-    var id = li.data('question-id')
+    var serialized = JSON.parse(json)
+    console.profile("load")
+    var newIdx = lunr.Index.load(serialized)
+    console.profileEnd("load")
 
-    renderQuestionView(questions.filter(function (question) {
-      return (question.id == id)
-    })[0])
-  })
+    return newIdx
+  }
 
 })
