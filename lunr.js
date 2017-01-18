@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.0-alpha.1
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.0-alpha.2
  * Copyright (C) 2017 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -51,9 +51,11 @@ var lunr = function (config) {
     lunr.stemmer
   )
 
-  config.call(builder)
+  config.call(builder, builder)
   return builder.build()
 }
+
+lunr.version = "2.0.0-alpha.2"
 /*!
  * lunr.utils
  * Copyright (C) 2017 Oliver Nightingale
