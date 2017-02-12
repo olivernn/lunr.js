@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.0-alpha.2
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.0-alpha.3
  * Copyright (C) 2017 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -55,7 +55,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.0.0-alpha.2"
+lunr.version = "2.0.0-alpha.3"
 /*!
  * lunr.utils
  * Copyright (C) 2017 Oliver Nightingale
@@ -2172,6 +2172,26 @@ lunr.Builder.prototype.build = function () {
     b: this._b,
     k1: this._k1
   })
+}
+
+/**
+ * Applies a plugin to the index builder.
+ *
+ * A plugin is a function that is called with the index builder as its context.
+ * Plugins can be used to customise or extend the behaviour of the index
+ * in some way. A plugin is just a function, that encapsulated the custom
+ * behaviour that should be applied when building the index.
+ *
+ * The plugin function will be called with the index builder as its argument, additional
+ * arguments can also be passed when calling use. The function will be called
+ * with the index builder as its context.
+ *
+ * @param {Function} plugin The plugin to apply.
+ */
+lunr.Builder.prototype.use = function (fn) {
+  var args = Array.prototype.slice.call(arguments, 1)
+  args.unshift(this)
+  fn.apply(this, args)
 }
 /**
  * Contains and collects metadata about a matching document.
