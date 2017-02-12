@@ -58,6 +58,44 @@ suite('lunr.Builder', function () {
     })
   })
 
+  suite('#use', function () {
+    setup(function () {
+      this.builder = new lunr.Builder
+    })
+
+    test('calls plugin function', function () {
+      var wasCalled = false,
+          plugin = function () { wasCalled = true }
+
+      this.builder.use(plugin)
+      assert.isTrue(wasCalled)
+    })
+
+    test('sets context to the builder instance', function () {
+      var context = null,
+          plugin = function () { context = this }
+
+      this.builder.use(plugin)
+      assert.equal(context, this.builder)
+    })
+
+    test('passes builder as first argument', function () {
+      var arg = null,
+          plugin = function (a) { arg = a }
+
+      this.builder.use(plugin)
+      assert.equal(arg, this.builder)
+    })
+
+    test('forwards arguments to the plugin', function () {
+      var args = null,
+          plugin = function () { args = [].slice.call(arguments) }
+
+      this.builder.use(plugin, 1, 2, 3)
+      assert.deepEqual(args, [this.builder, 1, 2, 3])
+    })
+  })
+
   suite('#build', function () {
     setup(function () {
       var builder = new lunr.Builder,

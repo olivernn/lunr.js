@@ -24,7 +24,7 @@
           "lexeme", "lex", "pos", "typedef", "wildcards", "lexemes", "fns", "stemmer",
           "attrs", "tf", "idf", "lookups", "whitelist", "whitelisted", "tokenizer",
           "whitespace", "automata", "i", "obj", "anymore", "lexer", "var", "refs",
-          "serializable", "tis", "twas", "int"
+          "serializable", "tis", "twas", "int", "args", "unshift", "plugins"
         ]
       }
     ],
