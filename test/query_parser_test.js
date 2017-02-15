@@ -37,6 +37,34 @@ suite('lunr.QueryParser', function () {
       })
     })
 
+    suite('single term, uppercase', function () {
+      setup(function () {
+        this.clauses = parse('FOO')
+      })
+
+      test('has 1 clause', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
+
+      suite('clauses', function () {
+        setup(function () {
+          this.clause = this.clauses[0]
+        })
+
+        test('term', function () {
+          assert.equal('foo', this.clause.term)
+        })
+
+        test('fields', function () {
+          assert.sameMembers(['title', 'body'], this.clause.fields)
+        })
+
+        test('usePipeline', function () {
+          assert.ok(this.clause.usePipeline)
+        })
+      })
+    })
+
     suite('single term with wildcard', function () {
       setup(function () {
         this.clauses = parse('fo*')
@@ -101,6 +129,31 @@ suite('lunr.QueryParser', function () {
 
       test('clause contains only scoped field', function () {
         assert.sameMembers(this.clauses[0].fields, ['title'])
+      })
+    })
+
+    suite('uppercase field with uppercase term', function () {
+      setup(function () {
+        // Using a different query to the rest of the tests
+        // so that only this test has to worry about an upcase field name
+        var query = new lunr.Query (['TITLE']),
+            parser = new lunr.QueryParser("TITLE:FOO", query)
+
+        parser.parse()
+
+        this.clauses = query.clauses
+      })
+
+      test('has 1 clause', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
+
+      test('clause contains downcased term', function () {
+        assert.equal(this.clauses[0].term, 'foo')
+      })
+
+      test('clause contains only scoped field', function () {
+        assert.sameMembers(this.clauses[0].fields, ['TITLE'])
       })
     })
 
