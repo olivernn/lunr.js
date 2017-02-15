@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.0-alpha.3
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.0-alpha.4
  * Copyright (C) 2017 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -55,7 +55,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.0.0-alpha.3"
+lunr.version = "2.0.0-alpha.4"
 /*!
  * lunr.utils
  * Copyright (C) 2017 Oliver Nightingale
@@ -2571,7 +2571,7 @@ lunr.QueryParser.parseTerm = function (parser) {
     return
   }
 
-  parser.currentClause.term = lexeme.str
+  parser.currentClause.term = lexeme.str.toLowerCase()
 
   if (lexeme.str.indexOf("*") != -1) {
     parser.currentClause.usePipeline = false
