@@ -26,25 +26,29 @@ suite('lunr.TokenSet', function () {
       assert.notEqual(twoEdges.toString(), zeroEdges.toString())
     })
 
-    test('includes child node', function () {
-      var a = new lunr.TokenSet,
-          b = new lunr.TokenSet,
-          c = new lunr.TokenSet
+    test('includes edge id', function () {
+      var childA = new lunr.TokenSet,
+          childB = new lunr.TokenSet,
+          parentA = new lunr.TokenSet,
+          parentB = new lunr.TokenSet
+          parentC = new lunr.TokenSet
 
-      a.edges['x'] = 1
-      b.edges['x'] = 2
-      c.edges['x'] = 1
+      parentA.edges['a'] = childA
+      parentB.edges['a'] = childB
+      parentC.edges['a'] = childB
 
-      assert.equal(a.toString(), c.toString())
-      assert.notEqual(a.toString(), b.toString())
+      assert.equal(parentB.toString(), parentC.toString())
+      assert.notEqual(parentA.toString(), parentC.toString())
+      assert.notEqual(parentA.toString(), parentB.toString())
     })
   })
 
   suite('.fromString', function () {
     test('without wildcard', function () {
+      lunr.TokenSet._nextId = 1
       var x = lunr.TokenSet.fromString('a')
 
-      assert.equal(x.toString(), '0a1')
+      assert.equal(x.toString(), '0a2')
       assert.isOk(x.edges['a'].final)
     })
 
