@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.0-alpha.4
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.0-alpha.5
  * Copyright (C) 2017 Oliver Nightingale
  * MIT Licensed
  * @license
@@ -55,7 +55,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.0.0-alpha.4"
+lunr.version = "2.0.0-alpha.5"
 /*!
  * lunr.utils
  * Copyright (C) 2017 Oliver Nightingale
@@ -1094,7 +1094,19 @@ lunr.Pipeline.registerFunction(lunr.trimmer, 'trimmer')
 lunr.TokenSet = function () {
   this.final = false
   this.edges = {}
+  this.id = lunr.TokenSet._nextId
+  lunr.TokenSet._nextId += 1
 }
+
+/**
+ * Keeps track of the next, auto increment, identifier to assign
+ * to a new tokenSet.
+ *
+ * TokenSets require a unique identifier to be correctly minimised.
+ *
+ * @private
+ */
+lunr.TokenSet._nextId = 1
 
 /**
  * Creates a TokenSet instance from the given sorted array of words.
@@ -1394,14 +1406,14 @@ lunr.TokenSet.prototype.toString = function () {
   }
 
   var str = this.final ? '1' : '0',
-      labels = Object.keys(this.edges),
+      labels = Object.keys(this.edges).sort(),
       len = labels.length
 
   for (var i = 0; i < len; i++) {
     var label = labels[i],
         node = this.edges[label]
 
-    str = str + label + node.toString()
+    str = str + label + node.id
   }
 
   return str
