@@ -109,17 +109,3 @@ test('custom separator', function () {
   }
 })
 
-// TODO: this test is only here to test backwards compatibility and
-// can and should be removed in 1.0.0
-test('custom separator using legacy seperator property', function () {
-  try {
-    var defaultSeparator = lunr.tokenizer.seperator,
-        str = 'foo|bar|baz'
-
-    lunr.tokenizer.seperator = '|'
-
-    deepEqual(lunr.tokenizer(str), ['foo', 'bar', 'baz'])
-  } finally {
-    lunr.tokenizer.seperator = defaultSeparator
-  }
-})
