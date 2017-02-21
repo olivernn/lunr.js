@@ -1,6 +1,6 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.7.2
- * Copyright (C) 2016 Oliver Nightingale
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 1.0.0
+ * Copyright (C) 2017 Oliver Nightingale
  * @license MIT
  */
 
@@ -55,10 +55,10 @@ var lunr = function (config) {
   return idx
 }
 
-lunr.version = "0.7.2"
+lunr.version = "1.0.0"
 /*!
  * lunr.utils
- * Copyright (C) 2016 Oliver Nightingale
+ * Copyright (C) 2017 Oliver Nightingale
  */
 
 /**
@@ -100,7 +100,7 @@ lunr.utils.asString = function (obj) {
 }
 /*!
  * lunr.EventEmitter
- * Copyright (C) 2016 Oliver Nightingale
+ * Copyright (C) 2017 Oliver Nightingale
  */
 
 /**
@@ -182,7 +182,7 @@ lunr.EventEmitter.prototype.hasHandler = function (name) {
 
 /*!
  * lunr.tokenizer
- * Copyright (C) 2016 Oliver Nightingale
+ * Copyright (C) 2017 Oliver Nightingale
  */
 
 /**
@@ -199,28 +199,8 @@ lunr.tokenizer = function (obj) {
   if (!arguments.length || obj == null || obj == undefined) return []
   if (Array.isArray(obj)) return obj.map(function (t) { return lunr.utils.asString(t).toLowerCase() })
 
-  // TODO: This exists so that the deprecated property lunr.tokenizer.seperator can still be used. By
-  // default it is set to false and so the correctly spelt lunr.tokenizer.separator is used unless
-  // the user is using the old property to customise the tokenizer.
-  //
-  // This should be removed when version 1.0.0 is released.
-  var separator = lunr.tokenizer.seperator || lunr.tokenizer.separator
-
-  return obj.toString().trim().toLowerCase().split(separator)
+  return obj.toString().trim().toLowerCase().split(lunr.tokenizer.separator)
 }
-
-/**
- * This property is legacy alias for lunr.tokenizer.separator to maintain backwards compatability.
- * When introduced the token was spelt incorrectly. It will remain until 1.0.0 when it will be removed,
- * all code should use the correctly spelt lunr.tokenizer.separator property instead.
- *
- * @static
- * @see lunr.tokenizer.separator
- * @deprecated since 0.7.2 will be removed in 1.0.0
- * @private
- * @see lunr.tokenizer
- */
-lunr.tokenizer.seperator = false
 
 /**
  * The sperator used to split a string into tokens. Override this property to change the behaviour of
@@ -278,7 +258,7 @@ lunr.tokenizer.registerFunction = function (fn, label) {
 }
 /*!
  * lunr.Pipeline
- * Copyright (C) 2016 Oliver Nightingale
+ * Copyright (C) 2017 Oliver Nightingale
  */
 
 /**
@@ -508,7 +488,7 @@ lunr.Pipeline.prototype.toJSON = function () {
 }
 /*!
  * lunr.Vector
- * Copyright (C) 2016 Oliver Nightingale
+ * Copyright (C) 2017 Oliver Nightingale
  */
 
 /**
@@ -639,7 +619,7 @@ lunr.Vector.prototype.similarity = function (otherVector) {
 }
 /*!
  * lunr.SortedSet
- * Copyright (C) 2016 Oliver Nightingale
+ * Copyright (C) 2017 Oliver Nightingale
  */
 
 /**
@@ -881,7 +861,7 @@ lunr.SortedSet.prototype.toJSON = function () {
 }
 /*!
  * lunr.Index
- * Copyright (C) 2016 Oliver Nightingale
+ * Copyright (C) 2017 Oliver Nightingale
  */
 
 /**
@@ -1350,7 +1330,7 @@ lunr.Index.prototype.use = function (plugin) {
 }
 /*!
  * lunr.Store
- * Copyright (C) 2016 Oliver Nightingale
+ * Copyright (C) 2017 Oliver Nightingale
  */
 
 /**
@@ -1446,7 +1426,7 @@ lunr.Store.prototype.toJSON = function () {
 
 /*!
  * lunr.stemmer
- * Copyright (C) 2016 Oliver Nightingale
+ * Copyright (C) 2017 Oliver Nightingale
  * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt
  */
 
@@ -1664,7 +1644,7 @@ lunr.stemmer = (function(){
 lunr.Pipeline.registerFunction(lunr.stemmer, 'stemmer')
 /*!
  * lunr.stopWordFilter
- * Copyright (C) 2016 Oliver Nightingale
+ * Copyright (C) 2017 Oliver Nightingale
  */
 
 /**
@@ -1828,7 +1808,7 @@ lunr.stopWordFilter = lunr.generateStopWordFilter([
 lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'stopWordFilter')
 /*!
  * lunr.trimmer
- * Copyright (C) 2016 Oliver Nightingale
+ * Copyright (C) 2017 Oliver Nightingale
  */
 
 /**
@@ -1852,7 +1832,7 @@ lunr.trimmer = function (token) {
 lunr.Pipeline.registerFunction(lunr.trimmer, 'trimmer')
 /*!
  * lunr.stemmer
- * Copyright (C) 2016 Oliver Nightingale
+ * Copyright (C) 2017 Oliver Nightingale
  * Includes code from - http://tartarus.org/~martin/PorterStemmer/js.txt
  */
 

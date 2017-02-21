@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0
+
+* Deprecate incorrectly spelled lunr.tokenizer.separator.
+* No other changes, but bumping to 1.0.0 because it's overdue, and the interfaces are pretty stable now. It also paves the way for 2.0.0...
+
 ## 0.7.2
 
 * Fix bug when loading a serialised tokeniser [#226](https://github.com/olivernn/lunr.js/issues/226), thanks [Alex Turpin](https://github.com/alexturpin) for reporting the issue.
