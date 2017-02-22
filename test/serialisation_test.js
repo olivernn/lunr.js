@@ -30,6 +30,20 @@ test('dumping and loading an index', function () {
   deepEqual(idx.search('green plant'), clonedIdx.search('green plant'))
 })
 
+test('dumping and loading an index without stringify', function () {
+  var idx = new lunr.Index
+
+  idx.field('title', { boost: 10 })
+  idx.field('body')
+
+  this.corpus.forEach(function (doc) { idx.add(doc) })
+
+  var dumpedIdx = idx.toJSON(),
+      clonedIdx = lunr.Index.load(dumpedIdx)
+
+  deepEqual(idx.search('green plant'), clonedIdx.search('green plant'))
+})
+
 test('dumping and loading an index with a populated pipeline', function () {
   var idx = lunr(function () {
     this.field('title', { boost: 10 })
