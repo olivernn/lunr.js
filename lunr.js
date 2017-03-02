@@ -1357,7 +1357,7 @@ lunr.Store.load = function (serialisedData) {
 
   store.length = serialisedData.length
   store.store = Object.keys(serialisedData.store).reduce(function (memo, key) {
-    memo[key] = lunr.SortedSet.load(serialisedData.store[key])
+    memo[key] = lunr.SortedSet.load(serialisedData.store[key].elements)
     return memo
   }, {})
 
