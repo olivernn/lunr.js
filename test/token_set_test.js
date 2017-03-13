@@ -30,7 +30,7 @@ suite('lunr.TokenSet', function () {
       var childA = new lunr.TokenSet,
           childB = new lunr.TokenSet,
           parentA = new lunr.TokenSet,
-          parentB = new lunr.TokenSet
+          parentB = new lunr.TokenSet,
           parentC = new lunr.TokenSet
 
       parentA.edges['a'] = childA
