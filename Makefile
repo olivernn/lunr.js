@@ -77,7 +77,7 @@ clean:
 	rm example/example_index.json
 
 reset:
-	git checkout lunr.* *.json docs/index.html example/example_index.json
+	git checkout lunr.* *.json example/example_index.json
 
 example: lunr.min.js
 	${NODE} example/index_builder.js
