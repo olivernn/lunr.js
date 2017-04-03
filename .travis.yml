@@ -5,3 +5,10 @@ node_js:
   - "5"
   - "4"
 script: "make"
+addons:
+  artifacts:
+    branch: master
+    paths:
+      - ./docs
+    target_paths: /docs
+
