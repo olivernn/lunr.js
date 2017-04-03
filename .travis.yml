@@ -7,6 +7,7 @@ node_js:
 script: "make"
 addons:
   artifacts:
+    branch: master
     paths:
       - ./docs
     target_paths: /docs
