@@ -31,7 +31,7 @@ ESLINT ?= ./node_modules/.bin/eslint
 JSDOC ?= ./node_modules/.bin/jsdoc
 NODE_STATIC ?= ./node_modules/.bin/static
 
-all: test lint
+all: test lint docs
 release: lunr.js lunr.min.js bower.json package.json component.json docs
 
 lunr.js: $(SRC)
@@ -73,6 +73,7 @@ docs: node_modules
 
 clean:
 	rm -f lunr{.min,}.js
+	rm -rf docs
 	rm *.json
 	rm example/example_index.json
 
