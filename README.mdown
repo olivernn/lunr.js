@@ -12,21 +12,16 @@ A very simple search index can be created using the following:
 
 ```javascript
 var idx = lunr(function () {
-    this.field('title', { boost: 10 })
-    this.field('body')
-})
-```
+  this.field('title')
+  this.field('body')
 
-Adding documents to be indexed is as simple as:
-
-```javascript
-var doc = {
+  this.add({
     "title": "Twelfth-Night",
     "body": "If music be the food of love, play on: Give me excess of it…",
     "author": "William Shakespeare",
-    "id": 1
-}
-idx.add(doc)
+    "id": "1"
+  })
+})
 ```
 
 Then searching is as simple:
@@ -35,13 +30,22 @@ Then searching is as simple:
 idx.search("love")
 ```
 
-This returns a list of matching documents with a score of how closely they match the search query:
+This returns a list of matching documents with a score of how closely they match the search query as well as any associated metadata about the match:
 
 ```javascript
-[{
-    "ref": 1,
-    "score": 0.87533
-}]
+[
+  {
+    "ref": "1",
+    "score": 0.3535533905932737,
+    "matchData": {
+      "metadata": {
+        "love": {
+          "body": {}
+        }
+      }
+    }
+  }
+]
 ```
 
 [API documentation](http://lunrjs.com/docs) is available, as well as a [full working example](http://lunrjs.com/example/).
