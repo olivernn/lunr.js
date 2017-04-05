@@ -75,15 +75,11 @@ clean:
 	rm -f lunr{.min,}.js
 	rm -rf docs
 	rm *.json
-	rm example/example_index.json
 
 reset:
-	git checkout lunr.* *.json example/example_index.json
-
-example: lunr.min.js
-	${NODE} example/index_builder.js
+	git checkout lunr.* *.json
 
 node_modules: package.json
 	${NPM} -s install
 
-.PHONY: test clean docs reset example perf/*_perf.js
+.PHONY: test clean docs reset perf/*_perf.js
