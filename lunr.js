@@ -1,8 +1,7 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.0-alpha.5
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.0
  * Copyright (C) 2017 Oliver Nightingale
- * MIT Licensed
- * @license
+ * @license MIT
  */
 
 ;(function(){
@@ -55,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.0.0-alpha.5"
+lunr.version = "2.0.0"
 /*!
  * lunr.utils
  * Copyright (C) 2017 Oliver Nightingale
@@ -1935,8 +1934,8 @@ lunr.Index.load = function (serializedIndex) {
  * @property {string} _ref - Internal reference to the document reference field.
  * @property {string[]} _fields - Internal reference to the document fields to index.
  * @property {object} invertedIndex - The inverted index maps terms to document fields.
- * @property {object} documentTermFrequencies - ???
- * @property {object} documentLengths - ???
+ * @property {object} documentTermFrequencies - Keeps track of document term frequencies.
+ * @property {object} documentLengths - Keeps track of the length of documents added to the index.
  * @property {lunr.tokenizer} tokenizer - Function for splitting strings into tokens for indexing.
  * @property {lunr.Pipeline} pipeline - The pipeline performs text processing on tokens before indexing.
  * @property {lunr.Pipeline} searchPipeline - A pipeline for processing search terms before querying the index.
@@ -1944,7 +1943,7 @@ lunr.Index.load = function (serializedIndex) {
  * @property {number} _b - A parameter to control field length normalization, setting this to 0 disabled normalization, 1 fully normalizes field lengths, the default value is 0.75.
  * @property {number} _k1 - A parameter to control how quickly an increase in term frequency results in term frequency saturation, the default value is 1.2.
  * @property {number} termIndex - A counter incremented for each unique term, used to identify a terms position in the vector space.
- * @property {array} metadataWhitelist - ???
+ * @property {array} metadataWhitelist - A list of metadata keys that have been whitelisted for entry in the index.
  */
 lunr.Builder = function () {
   this._ref = "id"

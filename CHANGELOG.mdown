@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0
+
+* Indexes are now immutable, this allows for more space efficient indexes, more advanced searching and better performance.
+* Text processing can now attach metadata to tokens the enter the index, this opens up the possibility of highlighting search terms in results.
+* More advanced searching including search time field boosts, search by field, fuzzy matching and leading and trailing wildcards.
+
 ## 1.0.0
 
 * Deprecate incorrectly spelled lunr.tokenizer.separator.
