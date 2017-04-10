@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1
+
+* Fix regression [#254](https://github.com/olivernn/lunr.js/issues/254) where documents containing terms that match properties from Object.prototype cause errors during indexing. Thanks [VonFry](https://github.com/VonFry) for reporting.
+
 ## 2.0.0
 
 * Indexes are now immutable, this allows for more space efficient indexes, more advanced searching and better performance.

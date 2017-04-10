@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.0
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.1
  * Copyright (C) 2017 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.0.0"
+lunr.version = "2.0.1"
 /*!
  * lunr.utils
  * Copyright (C) 2017 Oliver Nightingale
@@ -278,7 +278,7 @@ lunr.Pipeline = function () {
   this._stack = []
 }
 
-lunr.Pipeline.registeredFunctions = {}
+lunr.Pipeline.registeredFunctions = Object.create(null)
 
 /**
  * A pipeline function maps lunr.Token to lunr.Token. A lunr.Token contains the token
@@ -1695,7 +1695,7 @@ lunr.Index.prototype.query = function (fn) {
   // * score documents
 
   var query = new lunr.Query(this.fields),
-      matchingDocuments = {},
+      matchingDocuments = Object.create(null),
       queryVector = new lunr.Vector
 
   fn.call(query, query)
@@ -1948,7 +1948,7 @@ lunr.Index.load = function (serializedIndex) {
 lunr.Builder = function () {
   this._ref = "id"
   this._fields = []
-  this.invertedIndex = {}
+  this.invertedIndex = Object.create(null)
   this.documentTermFrequencies = {}
   this.documentLengths = {}
   this.tokenizer = lunr.tokenizer
@@ -2062,11 +2062,12 @@ lunr.Builder.prototype.add = function (doc) {
       // add to inverted index
       // create an initial posting if one doesn't exist
       if (this.invertedIndex[term] == undefined) {
-        var posting = { "_index": this.termIndex }
+        var posting = Object.create(null)
+        posting["_index"] = this.termIndex
         this.termIndex += 1
 
         for (var k = 0; k < this._fields.length; k++) {
-          posting[this._fields[k]] = {}
+          posting[this._fields[k]] = Object.create(null)
         }
 
         this.invertedIndex[term] = posting
@@ -2074,7 +2075,7 @@ lunr.Builder.prototype.add = function (doc) {
 
       // add an entry for this term/fieldName/docRef to the invertedIndex
       if (this.invertedIndex[term][fieldName][docRef] == undefined) {
-        this.invertedIndex[term][fieldName][docRef] = {}
+        this.invertedIndex[term][fieldName][docRef] = Object.create(null)
       }
 
       // store all whitelisted metadata about this token in the
