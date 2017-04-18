@@ -113,6 +113,16 @@ suite('lunr.QueryLexer', function () {
       })
     })
 
+    suite('hyphen (-) considered a seperator', function () {
+      setup(function () {
+        this.lexer = lex('foo-bar')
+      })
+
+      test('produces 1 lexeme', function () {
+        assert.lengthOf(this.lexer.lexemes, 2)
+      })
+    })
+
     suite('term with field', function () {
       setup(function () {
         this.lexer = lex('title:foo')
