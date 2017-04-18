@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.2
+
+* Fix bug [#255](https://github.com/olivernn/lunr.js/issues/255) where search queries used a different separator than the tokeniser causing some terms to not be searchable. Thanks [Wes Cossick](https://github.com/WesCossick) for reporting.
+* Reduce precision of term scores stored in document vectors to reduce the size of serialised indexes by ~15%, thanks [Qvatra](https://github.com/Qvatra) for the idea.
+
 ## 2.0.1
 
 * Fix regression [#254](https://github.com/olivernn/lunr.js/issues/254) where documents containing terms that match properties from Object.prototype cause errors during indexing. Thanks [VonFry](https://github.com/VonFry) for reporting.

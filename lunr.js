@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.1
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.2
  * Copyright (C) 2017 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.0.1"
+lunr.version = "2.0.2"
 /*!
  * lunr.utils
  * Copyright (C) 2017 Oliver Nightingale
@@ -2137,9 +2137,16 @@ lunr.Builder.prototype.createDocumentVectors = function () {
           tf = termFrequencies[term],
           termIndex = this.invertedIndex[term]._index,
           idf = lunr.idf(this.invertedIndex[term], this.documentCount),
-          score = idf * ((this._k1 + 1) * tf) / (this._k1 * (1 - this._b + this._b * (documentLength / this.averageDocumentLength)) + tf)
+          score = idf * ((this._k1 + 1) * tf) / (this._k1 * (1 - this._b + this._b * (documentLength / this.averageDocumentLength)) + tf),
+          scoreWithPrecision = Math.round(score * 1000) / 1000
+          // Converts 1.23456789 to 1.234.
+          // Reducing the precision so that the vectors take up less
+          // space when serialised. Doing it now so that they behave
+          // the same before and after serialisation. Also, this is
+          // the fastest approach to reducing a number's precision in
+          // JavaScript.
 
-      documentVector.insert(termIndex, score)
+      documentVector.insert(termIndex, scoreWithPrecision)
     }
 
     documentVectors[docRef] = documentVector
@@ -2455,6 +2462,19 @@ lunr.QueryLexer.lexEOS = function (lexer) {
   }
 }
 
+// This matches the separator used when tokenising fields
+// within a document. These should match otherwise it is
+// not possible to search for some tokens within a document.
+//
+// It is possible for the user to change the separator on the
+// tokenizer so it _might_ clash with any other of the special
+// characters already used within the search string, e.g. :.
+//
+// This means that it is possible to change the separator in
+// such a way that makes some words unsearchable using a search
+// string.
+lunr.QueryLexer.termSeparator = lunr.tokenizer.separator
+
 lunr.QueryLexer.lexText = function (lexer) {
   while (true) {
     var char = lexer.next()
@@ -2483,8 +2503,7 @@ lunr.QueryLexer.lexText = function (lexer) {
       return lunr.QueryLexer.lexBoost
     }
 
-    // TODO: there may be more separators we want to consider
-    if (char == " ") {
+    if (char.match(lunr.QueryLexer.termSeparator)) {
       return lunr.QueryLexer.lexTerm
     }
   }
