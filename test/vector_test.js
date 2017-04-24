@@ -55,5 +55,84 @@ suite('lunr.Vector', function () {
 
       assert.deepEqual([6,5,4], vector.toArray())
     })
+
+    test('fails when duplicate entry', function () {
+      var vector = vectorFromArgs(4, 5, 6)
+      assert.throws(function () { vector.insert(0, 44) })
+    })
+  })
+
+  suite('#upsert', function () {
+    test('invalidates magnitude cache', function () {
+      var vector = vectorFromArgs(4,5,6)
+
+      assert.equal(Math.sqrt(77), vector.magnitude())
+
+      vector.upsert(3, 7)
+
+      assert.equal(Math.sqrt(126), vector.magnitude())
+    })
+
+    test('keeps items in index specified order', function () {
+      var vector = new lunr.Vector
+
+      vector.upsert(2, 4)
+      vector.upsert(1, 5)
+      vector.upsert(0, 6)
+
+      assert.deepEqual([6,5,4], vector.toArray())
+    })
+
+    test('calls fn for value on duplicate', function () {
+      var vector = vectorFromArgs(4, 5, 6)
+      vector.upsert(0, 4, function (current, passed) { return current + passed })
+      assert.deepEqual([8, 5, 6], vector.toArray())
+    })
+  })
+
+  suite('#positionForIndex', function () {
+    var vector = new lunr.Vector ([
+        1, 'a',
+        2, 'b',
+        4, 'c',
+        7, 'd',
+        11, 'e'
+    ])
+
+    test('at the beginning', function () {
+      assert.equal(0, vector.positionForIndex(0))
+    })
+
+    test('at the end', function () {
+      assert.equal(10, vector.positionForIndex(20))
+    })
+
+    test('consecutive', function () {
+      assert.equal(4, vector.positionForIndex(3))
+    })
+
+    test('non-consecutive gap after', function () {
+      assert.equal(6, vector.positionForIndex(5))
+    })
+
+    test('non-consecutive gap before', function () {
+      assert.equal(6, vector.positionForIndex(6))
+    })
+
+    test('non-consecutive gave before and after', function () {
+      assert.equal(8, vector.positionForIndex(9))
+    })
+
+    test('duplicate at the beginning', function () {
+      assert.equal(0, vector.positionForIndex(1))
+    })
+
+    test('duplicate at the end', function () {
+      assert.equal(8, vector.positionForIndex(11))
+    })
+
+    test('duplicate consecutive', function () {
+      assert.equal(4, vector.positionForIndex(4))
+    })
   })
 })

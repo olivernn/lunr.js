@@ -144,6 +144,19 @@ suite('search', function () {
       })
     })
 
+    suite('duplicate query terms', function () {
+      // https://github.com/olivernn/lunr.js/issues/256
+      // previously this would throw a duplicate index error
+      // because the query vector already contained an entry
+      // for the term 'fellow'
+      test('no errors', function () {
+        var idx = this.idx
+        assert.doesNotThrow(function () {
+          idx.search('fellow candlestick foo bar green plant fellow')
+        })
+      })
+    })
+
     suite('documents with all terms score higher', function () {
       setup(function () {
         this.results = this.idx.search('candlestick green')
