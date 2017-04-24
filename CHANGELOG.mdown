@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.3
+
+* Fix bug [#256](https://github.com/olivernn/lunr.js/issues/256) where duplicate query terms could cause a 'duplicate index' error when building the query vector. Thanks [Bjorn Svensson](https://github.com/bsvensson), [Jason Feng](https://github.com/IYCI), and [et1421](https://github.com/et1421) for reporting and confirming the issue.
+
 ## 2.0.2
 
 * Fix bug [#255](https://github.com/olivernn/lunr.js/issues/255) where search queries used a different separator than the tokeniser causing some terms to not be searchable. Thanks [Wes Cossick](https://github.com/WesCossick) for reporting.
