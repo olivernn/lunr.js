@@ -49,5 +49,82 @@ suite('lunr.Query', function () {
         assert.isFalse(this.clause.usePipeline)
       })
     })
+
+    suite('wildcards', function () {
+      suite('none', function () {
+        setup(function () {
+          this.query.clause({
+            term: 'foo',
+            wildcard: lunr.Query.wildcard.NONE
+          })
+
+          this.clause = this.query.clauses[0]
+        })
+
+        test('no wildcard', function () {
+          assert.equal(this.clause.term, 'foo')
+        })
+      })
+
+      suite('leading', function () {
+        setup(function () {
+          this.query.clause({
+            term: 'foo',
+            wildcard: lunr.Query.wildcard.LEADING
+          })
+
+          this.clause = this.query.clauses[0]
+        })
+
+        test('adds wildcard', function () {
+          assert.equal(this.clause.term, '*foo')
+        })
+      })
+
+      suite('trailing', function () {
+        setup(function () {
+          this.query.clause({
+            term: 'foo',
+            wildcard: lunr.Query.wildcard.TRAILING
+          })
+
+          this.clause = this.query.clauses[0]
+        })
+
+        test('adds wildcard', function () {
+          assert.equal(this.clause.term, 'foo*')
+        })
+      })
+
+      suite('leading and trailing', function () {
+        setup(function () {
+          this.query.clause({
+            term: 'foo',
+            wildcard: lunr.Query.wildcard.TRAILING | lunr.Query.wildcard.LEADING
+          })
+
+          this.clause = this.query.clauses[0]
+        })
+
+        test('adds wildcards', function () {
+          assert.equal(this.clause.term, '*foo*')
+        })
+      })
+
+      suite('existing', function () {
+        setup(function () {
+          this.query.clause({
+            term: '*foo*',
+            wildcard: lunr.Query.wildcard.TRAILING | lunr.Query.wildcard.LEADING
+          })
+
+          this.clause = this.query.clauses[0]
+        })
+
+        test('no additional wildcards', function () {
+          assert.equal(this.clause.term, '*foo*')
+        })
+      })
+    })
   })
 })
