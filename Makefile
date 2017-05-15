@@ -1,6 +1,7 @@
 
 SRC = lib/lunr.js \
 	lib/utils.js \
+	lib/field_ref.js \
 	lib/idf.js \
 	lib/token.js \
 	lib/tokenizer.js \
