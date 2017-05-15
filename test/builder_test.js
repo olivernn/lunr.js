@@ -164,9 +164,9 @@ suite('lunr.Builder', function () {
       assert.deepProperty(this.builder.invertedIndex, 'test.title.id')
     })
 
-    test('builds a vector space of the document', function () {
-      assert.property(this.builder.documentVectors, 'id')
-      assert.instanceOf(this.builder.documentVectors.id, lunr.Vector)
+    test('builds a vector space of the document fields', function () {
+      assert.property(this.builder.fieldVectors, 'title/id')
+      assert.instanceOf(this.builder.fieldVectors['title/id'], lunr.Vector)
     })
 
     test('skips fields not defined for indexing', function () {
@@ -182,8 +182,8 @@ suite('lunr.Builder', function () {
       assert.equal(1, this.builder.documentCount)
     })
 
-    test('calculates average document length', function () {
-      assert.equal(1, this.builder.averageDocumentLength)
+    test('calculates average field length', function () {
+      assert.equal(1, this.builder.averageFieldLength['title'])
     })
   })
 })
