@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.3
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.1.0-alpha1
  * Copyright (C) 2017 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.0.3"
+lunr.version = "2.1.0-alpha1"
 /*!
  * lunr.utils
  * Copyright (C) 2017 Oliver Nightingale
@@ -99,6 +99,30 @@ lunr.utils.asString = function (obj) {
     return obj.toString()
   }
 }
+lunr.FieldRef = function (docRef, fieldName) {
+  this.docRef = docRef
+  this.fieldName = fieldName
+  this._stringValue = fieldName + lunr.FieldRef.joiner + docRef
+}
+
+lunr.FieldRef.joiner = "/"
+
+lunr.FieldRef.fromString = function (s) {
+  var n = s.indexOf(lunr.FieldRef.joiner)
+
+  if (n === -1) {
+    throw "malformed field ref string"
+  }
+
+  var fieldRef = s.slice(0, n),
+      docRef = s.slice(n + 1)
+
+  return new lunr.FieldRef (docRef, fieldRef)
+}
+
+lunr.FieldRef.prototype.toString = function () {
+  return this._stringValue
+}
 /**
  * A function to calculate the inverse document frequency for
  * a posting. This is shared between the builder and the index
@@ -115,7 +139,9 @@ lunr.idf = function (posting, documentCount) {
     documentsWithTerm += Object.keys(posting[fieldName]).length
   }
 
-  return (documentCount - documentsWithTerm + 0.5) / (documentsWithTerm + 0.5)
+  var x = (documentCount - documentsWithTerm + 0.5) / (documentsWithTerm + 0.5)
+
+  return Math.log(1 + Math.abs(x))
 }
 
 /**
@@ -1618,21 +1644,13 @@ lunr.TokenSet.Builder.prototype.minimize = function (downTo) {
  * @param {Object} attrs.invertedIndex - An index of term/field to document reference.
  * @param {Object<string, lunr.Vector>} attrs.documentVectors - Document vectors keyed by document reference.
  * @param {lunr.TokenSet} attrs.tokenSet - An set of all corpus tokens.
- * @param {number} attrs.documentCount - The total number of documents held in the index.
- * @param {number} attrs.averageDocumentLength - The average length of all documents in the index.
- * @param {number} attrs.b - A parameter for the document scoring algorithm.
- * @param {number} attrs.k1 - A parameter for the document scoring algorithm.
  * @param {string[]} attrs.fields - The names of indexed document fields.
  * @param {lunr.Pipeline} attrs.pipeline - The pipeline to use for search terms.
  */
 lunr.Index = function (attrs) {
   this.invertedIndex = attrs.invertedIndex
-  this.documentVectors = attrs.documentVectors
+  this.fieldVectors = attrs.fieldVectors
   this.tokenSet = attrs.tokenSet
-  this.documentCount = attrs.documentCount
-  this.averageDocumentLength = attrs.averageDocumentLength
-  this.b = attrs.b
-  this.k1 = attrs.k1
   this.fields = attrs.fields
   this.pipeline = attrs.pipeline
 }
@@ -1736,7 +1754,7 @@ lunr.Index.prototype.query = function (fn) {
   // * score documents
 
   var query = new lunr.Query(this.fields),
-      matchingDocuments = Object.create(null),
+      matchingFields = Object.create(null),
       queryVector = new lunr.Vector
 
   fn.call(query, query)
@@ -1790,10 +1808,7 @@ lunr.Index.prototype.query = function (fn) {
          */
         var expandedTerm = expandedTerms[j],
             posting = this.invertedIndex[expandedTerm],
-            termIndex = posting._index,
-            idf = lunr.idf(posting, this.documentCount),
-            tf = 1,
-            score = idf * ((this.k1 + 1) * tf) / (this.k1 * (1 - this.b + this.b * (query.clauses.length / this.averageDocumentLength)) + tf)
+            termIndex = posting._index
 
         /*
          * Upserting the found query term, along with its term index
@@ -1806,7 +1821,7 @@ lunr.Index.prototype.query = function (fn) {
          * for the term we are working with. In that case we just add the scores
          * together.
          */
-        queryVector.upsert(termIndex, score * clause.boost, function (a, b) { return a + b })
+        queryVector.upsert(termIndex, 1 * clause.boost, function (a, b) { return a + b })
 
         for (var k = 0; k < clause.fields.length; k++) {
           /*
@@ -1829,15 +1844,16 @@ lunr.Index.prototype.query = function (fn) {
              * results
              */
             var matchingDocumentRef = matchingDocumentRefs[l],
+                matchingFieldRef = new lunr.FieldRef (matchingDocumentRef, field),
                 documentMetadata, matchData
 
             documentMetadata = fieldPosting[matchingDocumentRef]
             matchData = new lunr.MatchData (expandedTerm, field, documentMetadata)
 
-            if (matchingDocumentRef in matchingDocuments) {
-              matchingDocuments[matchingDocumentRef].combine(matchData)
+            if (matchingFieldRef in matchingFields) {
+              matchingFields[matchingFieldRef].combine(matchData)
             } else {
-              matchingDocuments[matchingDocumentRef] = matchData
+              matchingFields[matchingFieldRef] = matchData
             }
 
           }
@@ -1846,10 +1862,10 @@ lunr.Index.prototype.query = function (fn) {
     }
   }
 
-  var matchingDocumentRefs = Object.keys(matchingDocuments),
-      results = []
+  var matchingFieldRefs = Object.keys(matchingFields),
+      results = {}
 
-  for (var i = 0; i < matchingDocumentRefs.length; i++) {
+  for (var i = 0; i < matchingFieldRefs.length; i++) {
     /*
      * With all the matching documents found they now need
      * to be sorted by their relevance to the query. This
@@ -1861,20 +1877,30 @@ lunr.Index.prototype.query = function (fn) {
      * we collected into a lunr.MatchData instance are stored
      * in the results array ready for returning to the caller
      */
-    var ref = matchingDocumentRefs[i],
-        documentVector = this.documentVectors[ref],
-        score = queryVector.similarity(documentVector)
+    var fieldRef = lunr.FieldRef.fromString(matchingFieldRefs[i]),
+        docRef = fieldRef.docRef,
+        fieldVector = this.fieldVectors[fieldRef],
+        score = queryVector.similarity(fieldVector)
 
-    results.push({
-      ref: ref,
-      score: score,
-      matchData: matchingDocuments[ref]
-    })
+    if (docRef in results) {
+      results[docRef].score += score
+      results[docRef].matchData.combine(matchingFields[fieldRef])
+    } else {
+      results[docRef] = {
+        ref: docRef,
+        score: score,
+        matchData: matchingFields[fieldRef]
+      }
+    }
   }
 
-  return results.sort(function (a, b) {
-    return b.score - a.score
-  })
+  return Object.keys(results)
+    .map(function (key) {
+      return results[key]
+    })
+    .sort(function (a, b) {
+      return b.score - a.score
+    })
 }
 
 /**
@@ -1892,18 +1918,15 @@ lunr.Index.prototype.toJSON = function () {
       return [term, this.invertedIndex[term]]
     }, this)
 
-  var documentVectors = Object.keys(this.documentVectors)
+  var fieldVectors = Object.keys(this.fieldVectors)
     .map(function (ref) {
-      return [ref, this.documentVectors[ref].toJSON()]
+      return [ref, this.fieldVectors[ref].toJSON()]
     }, this)
 
   return {
     version: lunr.version,
-    averageDocumentLength: this.averageDocumentLength,
-    b: this.b,
-    k1: this.k1,
     fields: this.fields,
-    documentVectors: documentVectors,
+    fieldVectors: fieldVectors,
     invertedIndex: invertedIndex,
     pipeline: this.pipeline.toJSON()
   }
@@ -1917,9 +1940,8 @@ lunr.Index.prototype.toJSON = function () {
  */
 lunr.Index.load = function (serializedIndex) {
   var attrs = {},
-      documentVectors = {},
-      serializedVectors = serializedIndex.documentVectors,
-      documentCount = 0,
+      fieldVectors = {},
+      serializedVectors = serializedIndex.fieldVectors,
       invertedIndex = {},
       serializedInvertedIndex = serializedIndex.invertedIndex,
       tokenSetBuilder = new lunr.TokenSet.Builder,
@@ -1929,12 +1951,12 @@ lunr.Index.load = function (serializedIndex) {
     lunr.utils.warn("Version mismatch when loading serialised index. Current version of lunr '" + lunr.version + "' does not match serialized index '" + serializedIndex.version + "'")
   }
 
-  for (var i = 0; i < serializedVectors.length; i++, documentCount++) {
+  for (var i = 0; i < serializedVectors.length; i++) {
     var tuple = serializedVectors[i],
         ref = tuple[0],
         elements = tuple[1]
 
-    documentVectors[ref] = new lunr.Vector(elements)
+    fieldVectors[ref] = new lunr.Vector(elements)
   }
 
   for (var i = 0; i < serializedInvertedIndex.length; i++) {
@@ -1948,13 +1970,9 @@ lunr.Index.load = function (serializedIndex) {
 
   tokenSetBuilder.finish()
 
-  attrs.b = serializedIndex.b
-  attrs.k1 = serializedIndex.k1
   attrs.fields = serializedIndex.fields
-  attrs.averageDocumentLength = serializedIndex.averageDocumentLength
 
-  attrs.documentCount = documentCount
-  attrs.documentVectors = documentVectors
+  attrs.fieldVectors = fieldVectors
   attrs.invertedIndex = invertedIndex
   attrs.tokenSet = tokenSetBuilder.root
   attrs.pipeline = pipeline
@@ -1994,8 +2012,8 @@ lunr.Builder = function () {
   this._ref = "id"
   this._fields = []
   this.invertedIndex = Object.create(null)
-  this.documentTermFrequencies = {}
-  this.documentLengths = {}
+  this.fieldTermFrequencies = {}
+  this.fieldLengths = {}
   this.tokenizer = lunr.tokenizer
   this.pipeline = new lunr.Pipeline
   this.searchPipeline = new lunr.Pipeline
@@ -2078,31 +2096,33 @@ lunr.Builder.prototype.k1 = function (number) {
  * @param {object} doc - The document to add to the index.
  */
 lunr.Builder.prototype.add = function (doc) {
-  var docRef = doc[this._ref],
-      documentTerms = {}
+  var docRef = doc[this._ref]
 
   this.documentCount += 1
-  this.documentTermFrequencies[docRef] = documentTerms
-  this.documentLengths[docRef] = 0
 
   for (var i = 0; i < this._fields.length; i++) {
     var fieldName = this._fields[i],
         field = doc[fieldName],
         tokens = this.tokenizer(field),
-        terms = this.pipeline.run(tokens)
+        terms = this.pipeline.run(tokens),
+        fieldRef = new lunr.FieldRef (docRef, fieldName),
+        fieldTerms = {}
+
+    this.fieldTermFrequencies[fieldRef] = fieldTerms
+    this.fieldLengths[fieldRef] = 0
 
     // store the length of this field for this document
-    this.documentLengths[docRef] += terms.length
+    this.fieldLengths[fieldRef] += terms.length
 
     // calculate term frequencies for this field
     for (var j = 0; j < terms.length; j++) {
       var term = terms[j]
 
-      if (documentTerms[term] == undefined) {
-        documentTerms[term] = 0
+      if (fieldTerms[term] == undefined) {
+        fieldTerms[term] = 0
       }
 
-      documentTerms[term] += 1
+      fieldTerms[term] += 1
 
       // add to inverted index
       // create an initial posting if one doesn't exist
@@ -2145,18 +2165,30 @@ lunr.Builder.prototype.add = function (doc) {
  *
  * @private
  */
-lunr.Builder.prototype.calculateAverageDocumentLengths = function () {
+lunr.Builder.prototype.calculateAverageFieldLengths = function () {
 
-  var documentRefs = Object.keys(this.documentLengths),
-      numberOfDocuments = documentRefs.length,
-      allDocumentsLength = 0
+  var fieldRefs = Object.keys(this.fieldLengths),
+      numberOfFields = fieldRefs.length,
+      accumulator = {},
+      documentsWithField = {}
 
-  for (var i = 0; i < numberOfDocuments; i++) {
-    var documentRef = documentRefs[i]
-    allDocumentsLength += this.documentLengths[documentRef]
+  for (var i = 0; i < numberOfFields; i++) {
+    var fieldRef = lunr.FieldRef.fromString(fieldRefs[i]),
+        field = fieldRef.fieldName
+
+    documentsWithField[field] || (documentsWithField[field] = 0)
+    documentsWithField[field] += 1
+
+    accumulator[field] || (accumulator[field] = 0)
+    accumulator[field] += this.fieldLengths[fieldRef]
   }
 
-  this.averageDocumentLength = allDocumentsLength / numberOfDocuments
+  for (var i = 0; i < this._fields.length; i++) {
+    var field = this._fields[i]
+    accumulator[field] = accumulator[field] / documentsWithField[field]
+  }
+
+  this.averageFieldLength = accumulator
 }
 
 /**
@@ -2164,16 +2196,17 @@ lunr.Builder.prototype.calculateAverageDocumentLengths = function () {
  *
  * @private
  */
-lunr.Builder.prototype.createDocumentVectors = function () {
-  var documentVectors = {},
-      docRefs = Object.keys(this.documentTermFrequencies),
-      docRefsLength = docRefs.length
+lunr.Builder.prototype.createFieldVectors = function () {
+  var fieldVectors = {},
+      fieldRefs = Object.keys(this.fieldTermFrequencies),
+      fieldRefsLength = fieldRefs.length
 
-  for (var i = 0; i < docRefsLength; i++) {
-    var docRef = docRefs[i],
-        documentLength = this.documentLengths[docRef],
-        documentVector = new lunr.Vector,
-        termFrequencies = this.documentTermFrequencies[docRef],
+  for (var i = 0; i < fieldRefsLength; i++) {
+    var fieldRef = lunr.FieldRef.fromString(fieldRefs[i]),
+        field = fieldRef.fieldName,
+        fieldLength = this.fieldLengths[fieldRef],
+        fieldVector = new lunr.Vector,
+        termFrequencies = this.fieldTermFrequencies[fieldRef],
         terms = Object.keys(termFrequencies),
         termsLength = terms.length
 
@@ -2182,7 +2215,7 @@ lunr.Builder.prototype.createDocumentVectors = function () {
           tf = termFrequencies[term],
           termIndex = this.invertedIndex[term]._index,
           idf = lunr.idf(this.invertedIndex[term], this.documentCount),
-          score = idf * ((this._k1 + 1) * tf) / (this._k1 * (1 - this._b + this._b * (documentLength / this.averageDocumentLength)) + tf),
+          score = idf * ((this._k1 + 1) * tf) / (this._k1 * (1 - this._b + this._b * (fieldLength / this.averageFieldLength[field])) + tf),
           scoreWithPrecision = Math.round(score * 1000) / 1000
           // Converts 1.23456789 to 1.234.
           // Reducing the precision so that the vectors take up less
@@ -2191,13 +2224,13 @@ lunr.Builder.prototype.createDocumentVectors = function () {
           // the fastest approach to reducing a number's precision in
           // JavaScript.
 
-      documentVector.insert(termIndex, scoreWithPrecision)
+      fieldVector.insert(termIndex, scoreWithPrecision)
     }
 
-    documentVectors[docRef] = documentVector
+    fieldVectors[fieldRef] = fieldVector
   }
 
-  this.documentVectors = documentVectors
+  this.fieldVectors = fieldVectors
 }
 
 /**
@@ -2221,20 +2254,16 @@ lunr.Builder.prototype.createTokenSet = function () {
  * @returns {lunr.Index}
  */
 lunr.Builder.prototype.build = function () {
-  this.calculateAverageDocumentLengths()
-  this.createDocumentVectors()
+  this.calculateAverageFieldLengths()
+  this.createFieldVectors()
   this.createTokenSet()
 
   return new lunr.Index({
     invertedIndex: this.invertedIndex,
-    documentVectors: this.documentVectors,
+    fieldVectors: this.fieldVectors,
     tokenSet: this.tokenSet,
-    averageDocumentLength: this.averageDocumentLength,
-    documentCount: this.documentCount,
     fields: this._fields,
-    pipeline: this.searchPipeline,
-    b: this._b,
-    k1: this._k1
+    pipeline: this.searchPipeline
   })
 }
 
@@ -2329,6 +2358,11 @@ lunr.Query = function (allFields) {
   this.allFields = allFields
 }
 
+lunr.Query.wildcard = new String ("*")
+lunr.Query.wildcard.NONE = 0
+lunr.Query.wildcard.LEADING = 1
+lunr.Query.wildcard.TRAILING = 2
+
 /**
  * A single clause in a {@link lunr.Query} contains a term and details on how to
  * match that term against a {@link lunr.Index}.
@@ -2360,6 +2394,18 @@ lunr.Query.prototype.clause = function (clause) {
 
   if (!('usePipeline' in clause)) {
     clause.usePipeline = true
+  }
+
+  if (!('wildcard' in clause)) {
+    clause.wildcard = lunr.Query.wildcard.NONE
+  }
+
+  if ((clause.wildcard & lunr.Query.wildcard.LEADING) && (clause.term.charAt(0) != lunr.Query.wildcard)) {
+    clause.term = "*" + clause.term
+  }
+
+  if ((clause.wildcard & lunr.Query.wildcard.TRAILING) && (clause.term.slice(-1) != lunr.Query.wildcard)) {
+    clause.term = "" + clause.term + "*"
   }
 
   this.clauses.push(clause)
