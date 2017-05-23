@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.3
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.4
  * Copyright (C) 2017 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.0.3"
+lunr.version = "2.0.4"
 /*!
  * lunr.utils
  * Copyright (C) 2017 Oliver Nightingale
@@ -115,7 +115,9 @@ lunr.idf = function (posting, documentCount) {
     documentsWithTerm += Object.keys(posting[fieldName]).length
   }
 
-  return (documentCount - documentsWithTerm + 0.5) / (documentsWithTerm + 0.5)
+  var x = (documentCount - documentsWithTerm + 0.5) / (documentsWithTerm + 0.5)
+
+  return Math.log(1 + Math.abs(x))
 }
 
 /**

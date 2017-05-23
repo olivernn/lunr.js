@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.4
+
+* Fix bug in IDF calculation that meant the weight for common words was not correctly calculated.
+
 ## 2.0.3
 
 * Fix bug [#256](https://github.com/olivernn/lunr.js/issues/256) where duplicate query terms could cause a 'duplicate index' error when building the query vector. Thanks [Bjorn Svensson](https://github.com/bsvensson), [Jason Feng](https://github.com/IYCI), and [et1421](https://github.com/et1421) for reporting and confirming the issue.
