@@ -39,6 +39,38 @@ suite('lunr.QueryLexer', function () {
       })
     })
 
+    suite('term escape char', function () {
+      setup(function () {
+        this.lexer = lex("foo\\:bar")
+      })
+
+      test('produces 1 lexeme', function () {
+        assert.lengthOf(this.lexer.lexemes, 1)
+      })
+
+      suite('lexeme', function () {
+        setup(function () {
+          this.lexeme = this.lexer.lexemes[0]
+        })
+
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.TERM, this.lexeme.type)
+        })
+
+        test('#str', function () {
+          assert.equal('foo:bar', this.lexeme.str)
+        })
+
+        test('#start', function () {
+          assert.equal(0, this.lexeme.start)
+        })
+
+        test('#end', function () {
+          assert.equal(8, this.lexeme.end)
+        })
+      })
+    })
+
     suite('multiple terms', function () {
       setup(function () {
         this.lexer = lex('foo bar')
@@ -159,6 +191,44 @@ suite('lunr.QueryLexer', function () {
         })
       })
     })
+
+    suite('term with field with escape char', function () {
+      setup(function () {
+        this.lexer = lex("ti\\:tle:foo")
+      })
+
+      test('produces 1 lexeme', function () {
+        assert.lengthOf(this.lexer.lexemes, 2)
+      })
+
+      suite('lexeme', function () {
+        setup(function () {
+          this.fieldLexeme = this.lexer.lexemes[0]
+          this.termLexeme = this.lexer.lexemes[1]
+        })
+
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.FIELD, this.fieldLexeme.type)
+          assert.equal(lunr.QueryLexer.TERM, this.termLexeme.type)
+        })
+
+        test('#str', function () {
+          assert.equal('ti:tle', this.fieldLexeme.str)
+          assert.equal('foo', this.termLexeme.str)
+        })
+
+        test('#start', function () {
+          assert.equal(0, this.fieldLexeme.start)
+          assert.equal(8, this.termLexeme.start)
+        })
+
+        test('#end', function () {
+          assert.equal(7, this.fieldLexeme.end)
+          assert.equal(11, this.termLexeme.end)
+        })
+      })
+    })
+
 
     suite('term with edit distance', function () {
       setup(function () {
