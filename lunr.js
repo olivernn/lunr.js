@@ -1755,7 +1755,7 @@ lunr.Index.prototype.query = function (fn) {
 
   var query = new lunr.Query(this.fields),
       matchingFields = Object.create(null),
-      queryVector = new lunr.Vector
+      queryVectors = Object.create(null)
 
   fn.call(query, query)
 
@@ -1798,30 +1798,12 @@ lunr.Index.prototype.query = function (fn) {
 
       for (var j = 0; j < expandedTerms.length; j++) {
         /*
-         * For each term calculate the score as the term relates to the
-         * query using the same calculation used to score documents during
-         * indexing. This score will be used to build a vector space
-         * representation  of the query.
-         *
-         * Also need to discover the terms index to insert into the query
-         * vector at the right position
+         * For each term get the posting and termIndex, this is required for
+         * building the query vector.
          */
         var expandedTerm = expandedTerms[j],
             posting = this.invertedIndex[expandedTerm],
             termIndex = posting._index
-
-        /*
-         * Upserting the found query term, along with its term index
-         * into the vector representing the query. It is here that
-         * any boosts are applied to the score. They could have been
-         * applied when calculating the score above, but that expression
-         * is already quite busy.
-         *
-         * Using upsert because there could already be an entry in the vector
-         * for the term we are working with. In that case we just add the scores
-         * together.
-         */
-        queryVector.upsert(termIndex, 1 * clause.boost, function (a, b) { return a + b })
 
         for (var k = 0; k < clause.fields.length; k++) {
           /*
@@ -1835,6 +1817,25 @@ lunr.Index.prototype.query = function (fn) {
           var field = clause.fields[k],
               fieldPosting = posting[field],
               matchingDocumentRefs = Object.keys(fieldPosting)
+
+          /*
+           * To support field level boosts a query vector is created per
+           * field. This vector is populated using the termIndex found for
+           * the term and a unit value with the appropriate boost applied.
+           *
+           * If the query vector for this field does not exist yet it needs
+           * to be created.
+           */
+          if (!(field in queryVectors)) {
+            queryVectors[field] = new lunr.Vector
+          }
+
+          /*
+           * Using upsert because there could already be an entry in the vector
+           * for the term we are working with. In that case we just add the scores
+           * together.
+           */
+          queryVectors[field].upsert(termIndex, 1 * clause.boost, function (a, b) { return a + b })
 
           for (var l = 0; l < matchingDocumentRefs.length; l++) {
             /*
@@ -1867,20 +1868,17 @@ lunr.Index.prototype.query = function (fn) {
 
   for (var i = 0; i < matchingFieldRefs.length; i++) {
     /*
-     * With all the matching documents found they now need
-     * to be sorted by their relevance to the query. This
-     * is done by retrieving the documents vector representation
-     * and then finding its similarity with the query vector
-     * that was constructed earlier.
+     * Currently we have document fields that match the query, but we
+     * need to return documents. The matchData and scores are combined
+     * from multiple fields belonging to the same document.
      *
-     * This score, along with the document ref and any metadata
-     * we collected into a lunr.MatchData instance are stored
-     * in the results array ready for returning to the caller
+     * Scores are calculated by field, using the query vectors created
+     * above, and combined into a final document score using addition.
      */
     var fieldRef = lunr.FieldRef.fromString(matchingFieldRefs[i]),
         docRef = fieldRef.docRef,
         fieldVector = this.fieldVectors[fieldRef],
-        score = queryVector.similarity(fieldVector)
+        score = queryVectors[fieldRef.fieldName].similarity(fieldVector)
 
     if (docRef in results) {
       results[docRef].score += score
@@ -1894,6 +1892,10 @@ lunr.Index.prototype.query = function (fn) {
     }
   }
 
+  /*
+   * The results object needs to be converted into a list
+   * of results, sorted by score before being returned.
+   */
   return Object.keys(results)
     .map(function (key) {
       return results[key]
@@ -2443,6 +2445,7 @@ lunr.QueryLexer = function (str) {
   this.length = str.length
   this.pos = 0
   this.start = 0
+  this.escapeCharPositions = []
 }
 
 lunr.QueryLexer.prototype.run = function () {
@@ -2453,10 +2456,27 @@ lunr.QueryLexer.prototype.run = function () {
   }
 }
 
+lunr.QueryLexer.prototype.sliceString = function () {
+  var subSlices = [],
+      sliceStart = this.start,
+      sliceEnd = this.pos
+
+  for (var i = 0; i < this.escapeCharPositions.length; i++) {
+    sliceEnd = this.escapeCharPositions[i]
+    subSlices.push(this.str.slice(sliceStart, sliceEnd))
+    sliceStart = sliceEnd + 1
+  }
+
+  subSlices.push(this.str.slice(sliceStart, this.pos))
+  this.escapeCharPositions.length = 0
+
+  return subSlices.join('')
+}
+
 lunr.QueryLexer.prototype.emit = function (type) {
   this.lexemes.push({
     type: type,
-    str: this.str.slice(this.start, this.pos),
+    str: this.sliceString(),
     start: this.start,
     end: this.pos
   })
@@ -2464,8 +2484,13 @@ lunr.QueryLexer.prototype.emit = function (type) {
   this.start = this.pos
 }
 
+lunr.QueryLexer.prototype.escapeCharacter = function () {
+  this.escapeCharPositions.push(this.pos - 1)
+  this.pos += 1
+}
+
 lunr.QueryLexer.prototype.next = function () {
-  if (this.pos == this.length) {
+  if (this.pos >= this.length) {
     return lunr.QueryLexer.EOS
   }
 
@@ -2572,6 +2597,12 @@ lunr.QueryLexer.lexText = function (lexer) {
 
     if (char == lunr.QueryLexer.EOS) {
       return lunr.QueryLexer.lexEOS
+    }
+
+    // Escape character is '\'
+    if (char.charCodeAt(0) == 92) {
+      lexer.escapeCharacter()
+      continue
     }
 
     if (char == ":") {
