@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.0.4
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.1.0
  * Copyright (C) 2017 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.0.4"
+lunr.version = "2.1.0"
 /*!
  * lunr.utils
  * Copyright (C) 2017 Oliver Nightingale
@@ -1688,6 +1688,10 @@ lunr.Index = function (attrs) {
  * to provide fuzzy matching, e.g. 'hello~2' will match documents with hello with an edit distance of 2.
  * Avoid large values for edit distance to improve query performance.
  *
+ * To escape special characters the backslash character '\' can be used, this allows searches to include
+ * characters that would normally be considered modifiers, e.g. `foo\~2` will search for a term "foo~2" instead
+ * of attempting to apply a boost of 2 to the search term "foo".
+ *
  * @typedef {string} lunr.Index~QueryString
  * @example <caption>Simple single term query</caption>
  * hello
@@ -2360,6 +2364,29 @@ lunr.Query = function (allFields) {
   this.allFields = allFields
 }
 
+/**
+ * Constants for indicating what kind of automatic wildcard insertion will be used when constructing a query clause.
+ *
+ * This allows wildcards to be added to the beginning and end of a term without having to manually do any string
+ * concatenation.
+ *
+ * The wildcard constants can be bitwise combined to select both leading and trailing wildcards.
+ *
+ * @constant
+ * @default
+ * @property {number} wildcard.NONE - The term will have no wildcards inserted, this is the default behaviour
+ * @property {number} wildcard.LEADING - Prepend the term with a wildcard, unless a leading wildcard already exists
+ * @property {number} wildcard.TRAILING - Append a wildcard to the term, unless a trailing wildcard already exists
+ * @see lunr.Query~Clause
+ * @see lunr.Query#clause
+ * @see lunr.Query#term
+ * @example <caption>query term with trailing wildcard</caption>
+ * query.term('foo', { wildcard: lunr.Query.wildcard.TRAILING })
+ * @example <caption>query term with leading and trailing wildcard</caption>
+ * query.term('foo', {
+ *   wildcard: lunr.Query.wildcard.LEADING | lunr.Query.wildcard.TRAILING
+ * })
+ */
 lunr.Query.wildcard = new String ("*")
 lunr.Query.wildcard.NONE = 0
 lunr.Query.wildcard.LEADING = 1
@@ -2371,9 +2398,10 @@ lunr.Query.wildcard.TRAILING = 2
  *
  * @typedef {Object} lunr.Query~Clause
  * @property {string[]} fields - The fields in an index this clause should be matched against.
- * @property {number} boost - Any boost that should be applied when matching this clause.
+ * @property {number} [boost=1] - Any boost that should be applied when matching this clause.
  * @property {number} [editDistance] - Whether the term should have fuzzy matching applied, and how fuzzy the match should be.
  * @property {boolean} [usePipeline] - Whether the term should be passed through the search pipeline.
+ * @property {number} [wildcard=0] - Whether the term should have wildcards appended or prepended.
  */
 
 /**
@@ -2383,6 +2411,7 @@ lunr.Query.wildcard.TRAILING = 2
  * a default boost of 1 is applied to the clause.
  *
  * @param {lunr.Query~Clause} clause - The clause to add to this query.
+ * @see lunr.Query~Clause
  * @returns {lunr.Query}
  */
 lunr.Query.prototype.clause = function (clause) {
@@ -2422,6 +2451,16 @@ lunr.Query.prototype.clause = function (clause) {
  * @param {string} term - The term to add to the query.
  * @param {Object} [options] - Any additional properties to add to the query clause.
  * @returns {lunr.Query}
+ * @see lunr.Query#clause
+ * @see lunr.Query~Clause
+ * @example <caption>adding a single term to a query</caption>
+ * query.term("foo")
+ * @example <caption>adding a single term to a query and specifying search fields, term boost and automatic trailing wildcard</caption>
+ * query.term("foo", {
+ *   fields: ["title"],
+ *   boost: 10,
+ *   wildcard: lunr.Query.wildcard.TRAILING
+ * })
  */
 lunr.Query.prototype.term = function (term, options) {
   var clause = options || {}
@@ -2680,7 +2719,12 @@ lunr.QueryParser.parseFieldOrTerm = function (parser) {
     case lunr.QueryLexer.TERM:
       return lunr.QueryParser.parseTerm
     default:
-      var errorMessage = "expected either a field or a term, found " + lexeme.type + " with value '" + lexeme.str + "'"
+      var errorMessage = "expected either a field or a term, found " + lexeme.type
+
+      if (lexeme.str.length >= 1) {
+        errorMessage += " with value '" + lexeme.str + "'"
+      }
+
       throw new lunr.QueryParseError (errorMessage, lexeme.start, lexeme.end)
   }
 }
@@ -2693,7 +2737,7 @@ lunr.QueryParser.parseField = function (parser) {
   }
 
   if (parser.query.allFields.indexOf(lexeme.str) == -1) {
-    var possibleFields = parser.query.allFields.map(function (f) { return "'" + f + "'" }).join(),
+    var possibleFields = parser.query.allFields.map(function (f) { return "'" + f + "'" }).join(', '),
         errorMessage = "unrecognised field '" + lexeme.str + "', possible fields: " + possibleFields
 
     throw new lunr.QueryParseError (errorMessage, lexeme.start, lexeme.end)
@@ -2712,7 +2756,7 @@ lunr.QueryParser.parseField = function (parser) {
     case lunr.QueryLexer.TERM:
       return lunr.QueryParser.parseTerm
     default:
-      var errorMessage = "expecting a field, found '" + nextLexeme.type + "'"
+      var errorMessage = "expecting term, found '" + nextLexeme.type + "'"
       throw new lunr.QueryParseError (errorMessage, nextLexeme.start, nextLexeme.end)
   }
 }

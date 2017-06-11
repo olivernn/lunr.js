@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.0
+
+* Improve handling of term boosts across multiple fields [#263](https://github.com/olivernn/lunr.js/issues/263)
+* Enable escaping of special characters when performing a search [#271](https://github.com/olivernn/lunr.js/issues/271)
+* Add ability to programatically include leading and trailing wildcards when performing a query.
+
 ## 2.0.4
 
 * Fix bug in IDF calculation that meant the weight for common words was not correctly calculated.
