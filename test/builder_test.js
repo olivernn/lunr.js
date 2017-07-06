@@ -10,6 +10,8 @@ suite('lunr.Builder', function () {
 
       assert.deepProperty(this.builder.invertedIndex, 'constructor.title.id')
       assert.deepEqual(this.builder.invertedIndex.constructor.title.id, {})
+
+      assert.equal(this.builder.fieldTermFrequencies['title/id'].constructor, 1)
     })
 
     test('field name clashes with object prototype', function () {
