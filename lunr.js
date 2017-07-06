@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.1.0
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.1.1
  * Copyright (C) 2017 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.1.0"
+lunr.version = "2.1.1"
 /*!
  * lunr.utils
  * Copyright (C) 2017 Oliver Nightingale
@@ -2112,7 +2112,7 @@ lunr.Builder.prototype.add = function (doc) {
         tokens = this.tokenizer(field),
         terms = this.pipeline.run(tokens),
         fieldRef = new lunr.FieldRef (docRef, fieldName),
-        fieldTerms = {}
+        fieldTerms = Object.create(null)
 
     this.fieldTermFrequencies[fieldRef] = fieldTerms
     this.fieldLengths[fieldRef] = 0

@@ -1,9 +1,11 @@
 {
   "name": "lunr",
   "description": "Simple full-text search in your browser.",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "author": "Oliver Nightingale",
-  "keywords": ["search"],
+  "keywords": [
+    "search"
+  ],
   "homepage": "http://lunrjs.com",
   "bugs": "http://github.com/olivernn/lunr.js/issues",
   "main": "lunr.js",

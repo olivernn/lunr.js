@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.1
+
+* Fix bug [#280](https://github.com/olivernn/lunr.js/issues/280) in builder where an object with prototype was being used as a Map, thanks [Pete Bacon Darwin](https://github.com/petebacondarwin).
+
 ## 2.1.0
 
 * Improve handling of term boosts across multiple fields [#263](https://github.com/olivernn/lunr.js/issues/263)
