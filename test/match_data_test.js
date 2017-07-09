@@ -27,5 +27,15 @@ suite('lunr.MatchData', function () {
       assert.deepEqual(this.match.metadata.bar.title.position, [2])
       assert.deepEqual(this.match.metadata.baz.body.position, [3, 4])
     })
+
+    test('does not mutate source data', function () {
+      var metadata = { foo: [1] },
+          matchData1 = new lunr.MatchData('foo', 'title', metadata),
+          matchData2 = new lunr.MatchData('foo', 'title', metadata)
+
+      matchData1.combine(matchData2)
+
+      assert.deepEqual(metadata.foo, [1])
+    })
   })
 })
