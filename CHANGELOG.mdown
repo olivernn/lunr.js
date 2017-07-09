@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.2
+
+* Fix bug [#282](https://github.com/olivernn/lunr.js/issues/282) which caused metadata stored in the index to be mutated during search, thanks [Andrew Aldridge](https://github.com/i80and).
+
 ## 2.1.1
 
 * Fix bug [#280](https://github.com/olivernn/lunr.js/issues/280) in builder where an object with prototype was being used as a Map, thanks [Pete Bacon Darwin](https://github.com/petebacondarwin).
