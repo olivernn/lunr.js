@@ -495,4 +495,44 @@ suite('search', function () {
       })
     })
   })
+
+  suite('typeahead style search', function () {
+    suite('no results found', function () {
+      setup(function () {
+        this.results = this.idx.query(function (q) {
+          q.term("xyz", { boost: 100, usePipeline: true })
+          q.term("xyz", { boost: 10, usePipeline: false, wildcard: lunr.Query.wildcard.TRAILING })
+          q.term("xyz", { boost: 1, editDistance: 1 })
+        })
+      })
+
+      test('no results found', function () {
+        assert.lengthOf(this.results, 0)
+      })
+    })
+
+    suite('results found', function () {
+      setup(function () {
+        this.results = this.idx.query(function (q) {
+          q.term("pl", { boost: 100, usePipeline: true })
+          q.term("pl", { boost: 10, usePipeline: false, wildcard: lunr.Query.wildcard.TRAILING })
+          q.term("pl", { boost: 1, editDistance: 1 })
+        })
+      })
+
+      test('two results found', function () {
+        assert.lengthOf(this.results, 2)
+      })
+
+      test('matching documents returned', function () {
+        assert.equal('b', this.results[0].ref)
+        assert.equal('c', this.results[1].ref)
+      })
+
+      test('matching terms returned', function () {
+        assert.sameMembers(['plumb', 'plant'], Object.keys(this.results[0].matchData.metadata))
+        assert.sameMembers(['plumb', 'plant'], Object.keys(this.results[1].matchData.metadata))
+      })
+    })
+  })
 })
