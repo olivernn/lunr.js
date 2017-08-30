@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.3
+
+* Remove private tag from `lunr.Builder#build`, it should be public, thanks [Sean Tan](https://github.com/seantanly).
+
 ## 2.1.2
 
 * Fix bug [#282](https://github.com/olivernn/lunr.js/issues/282) which caused metadata stored in the index to be mutated during search, thanks [Andrew Aldridge](https://github.com/i80and).

@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.1.2
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.1.3
  * Copyright (C) 2017 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.1.2"
+lunr.version = "2.1.3"
 /*!
  * lunr.utils
  * Copyright (C) 2017 Oliver Nightingale
@@ -2256,7 +2256,6 @@ lunr.Builder.prototype.createTokenSet = function () {
  * This completes the indexing process and should only be called
  * once all documents have been added to the index.
  *
- * @private
  * @returns {lunr.Index}
  */
 lunr.Builder.prototype.build = function () {
