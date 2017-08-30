@@ -187,5 +187,15 @@ suite('lunr.Builder', function () {
     test('calculates average field length', function () {
       assert.equal(1, this.builder.averageFieldLength['title'])
     })
+
+    test('index returned', function () {
+      var builder = new lunr.Builder,
+          doc = { id: 'id', title: 'test', body: 'missing' }
+
+      builder.ref('id')
+      builder.field('title')
+      builder.add(doc)
+      assert.instanceOf(builder.build(), lunr.Index)
+    })
   })
 })
