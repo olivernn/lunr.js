@@ -168,6 +168,14 @@ suite('lunr.TokenSet', function () {
       assert.equal(0, z.toArray().length)
     })
 
+    test('wildcard matches zero or more characters', function () {
+      var x = lunr.TokenSet.fromString('foo'),
+          y = lunr.TokenSet.fromString('foo*'),
+          z = x.intersect(y)
+
+      assert.sameMembers(['foo'], z.toArray())
+    })
+
     test('intersect with fuzzy string substitution', function () {
       var x1 = lunr.TokenSet.fromString('bar'),
           x2 = lunr.TokenSet.fromString('cur'),
