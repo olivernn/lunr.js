@@ -38,8 +38,8 @@ if ! file_has_changed "VERSION"; then
   exit 1
 fi
 
-if ! file_has_changed "CHANGELOG.mdown"; then
-  echo -e "\033[0;31mRefusing to release because CHANGELOG.mdown has not been updated.\033[0m"
+if ! file_has_changed "CHANGELOG.md"; then
+  echo -e "\033[0;31mRefusing to release because CHANGELOG.md has not been updated.\033[0m"
   exit 1
 fi
 
