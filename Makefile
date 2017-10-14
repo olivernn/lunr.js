@@ -70,7 +70,7 @@ test/index.html: test/env/file_list.json test/env/index.mustache
 	${MUSTACHE} $^ > $@
 
 docs: $(SRC)
-	${JSDOC} -R README.mdown -d docs -c build/jsdoc.conf.json $^
+	${JSDOC} -R README.md -d docs -c build/jsdoc.conf.json $^
 
 clean:
 	rm -f lunr{.min,}.js
