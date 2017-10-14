@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.1.4
+
+* Cache inverse document calculation during build to improve build performance.
+* Introduce new method for combining term metadata at search time.
+* Improve performance of searches with duplicate search terms.
+* Tweaks to build process.
+
 ## 2.1.3
 
 * Remove private tag from `lunr.Builder#build`, it should be public, thanks [Sean Tan](https://github.com/seantanly).

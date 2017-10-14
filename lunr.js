@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.1.3
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.1.4
  * Copyright (C) 2017 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.1.3"
+lunr.version = "2.1.4"
 /*!
  * lunr.utils
  * Copyright (C) 2017 Oliver Nightingale
@@ -99,10 +99,10 @@ lunr.utils.asString = function (obj) {
     return obj.toString()
   }
 }
-lunr.FieldRef = function (docRef, fieldName) {
+lunr.FieldRef = function (docRef, fieldName, stringValue) {
   this.docRef = docRef
   this.fieldName = fieldName
-  this._stringValue = fieldName + lunr.FieldRef.joiner + docRef
+  this._stringValue = stringValue
 }
 
 lunr.FieldRef.joiner = "/"
@@ -117,10 +117,14 @@ lunr.FieldRef.fromString = function (s) {
   var fieldRef = s.slice(0, n),
       docRef = s.slice(n + 1)
 
-  return new lunr.FieldRef (docRef, fieldRef)
+  return new lunr.FieldRef (docRef, fieldRef, s)
 }
 
 lunr.FieldRef.prototype.toString = function () {
+  if (this._stringValue == undefined) {
+    this._stringValue = this.fieldName + lunr.FieldRef.joiner + this.docRef
+  }
+
   return this._stringValue
 }
 /**
@@ -1759,7 +1763,8 @@ lunr.Index.prototype.query = function (fn) {
 
   var query = new lunr.Query(this.fields),
       matchingFields = Object.create(null),
-      queryVectors = Object.create(null)
+      queryVectors = Object.create(null),
+      termFieldCache = Object.create(null)
 
   fn.call(query, query)
 
@@ -1820,7 +1825,8 @@ lunr.Index.prototype.query = function (fn) {
            */
           var field = clause.fields[k],
               fieldPosting = posting[field],
-              matchingDocumentRefs = Object.keys(fieldPosting)
+              matchingDocumentRefs = Object.keys(fieldPosting),
+              termField = expandedTerm + "/" + field
 
           /*
            * To support field level boosts a query vector is created per
@@ -1830,7 +1836,7 @@ lunr.Index.prototype.query = function (fn) {
            * If the query vector for this field does not exist yet it needs
            * to be created.
            */
-          if (!(field in queryVectors)) {
+          if (queryVectors[field] === undefined) {
             queryVectors[field] = new lunr.Vector
           }
 
@@ -1841,6 +1847,14 @@ lunr.Index.prototype.query = function (fn) {
            */
           queryVectors[field].upsert(termIndex, 1 * clause.boost, function (a, b) { return a + b })
 
+          /**
+           * If we've already seen this term, field combo then we've already collected
+           * the matching documents and metadata, no need to go through all that again
+           */
+          if (termFieldCache[termField]) {
+            continue
+          }
+
           for (var l = 0; l < matchingDocumentRefs.length; l++) {
             /*
              * All metadata for this term/field/document triple
@@ -1850,25 +1864,26 @@ lunr.Index.prototype.query = function (fn) {
              */
             var matchingDocumentRef = matchingDocumentRefs[l],
                 matchingFieldRef = new lunr.FieldRef (matchingDocumentRef, field),
-                documentMetadata, matchData
+                metadata = fieldPosting[matchingDocumentRef],
+                fieldMatch
 
-            documentMetadata = fieldPosting[matchingDocumentRef]
-            matchData = new lunr.MatchData (expandedTerm, field, documentMetadata)
-
-            if (matchingFieldRef in matchingFields) {
-              matchingFields[matchingFieldRef].combine(matchData)
+            if ((fieldMatch = matchingFields[matchingFieldRef]) === undefined) {
+              matchingFields[matchingFieldRef] = new lunr.MatchData (expandedTerm, field, metadata)
             } else {
-              matchingFields[matchingFieldRef] = matchData
+              fieldMatch.add(expandedTerm, term, metadata)
             }
 
           }
+
+          termFieldCache[termField] = true
         }
       }
     }
   }
 
   var matchingFieldRefs = Object.keys(matchingFields),
-      results = {}
+      results = [],
+      matches = Object.create(null)
 
   for (var i = 0; i < matchingFieldRefs.length; i++) {
     /*
@@ -1882,31 +1897,29 @@ lunr.Index.prototype.query = function (fn) {
     var fieldRef = lunr.FieldRef.fromString(matchingFieldRefs[i]),
         docRef = fieldRef.docRef,
         fieldVector = this.fieldVectors[fieldRef],
-        score = queryVectors[fieldRef.fieldName].similarity(fieldVector)
+        score = queryVectors[fieldRef.fieldName].similarity(fieldVector),
+        docMatch
 
-    if (docRef in results) {
-      results[docRef].score += score
-      results[docRef].matchData.combine(matchingFields[fieldRef])
+    if ((docMatch = matches[docRef]) !== undefined) {
+      docMatch.score += score
+      docMatch.matchData.combine(matchingFields[fieldRef])
     } else {
-      results[docRef] = {
+      var match = {
         ref: docRef,
         score: score,
         matchData: matchingFields[fieldRef]
       }
+      matches[docRef] = match
+      results.push(match)
     }
   }
 
   /*
-   * The results object needs to be converted into a list
-   * of results, sorted by score before being returned.
+   * Sort the results objects by score, highest first.
    */
-  return Object.keys(results)
-    .map(function (key) {
-      return results[key]
-    })
-    .sort(function (a, b) {
-      return b.score - a.score
-    })
+  return results.sort(function (a, b) {
+    return b.score - a.score
+  })
 }
 
 /**
@@ -2205,7 +2218,8 @@ lunr.Builder.prototype.calculateAverageFieldLengths = function () {
 lunr.Builder.prototype.createFieldVectors = function () {
   var fieldVectors = {},
       fieldRefs = Object.keys(this.fieldTermFrequencies),
-      fieldRefsLength = fieldRefs.length
+      fieldRefsLength = fieldRefs.length,
+      termIdfCache = Object.create(null)
 
   for (var i = 0; i < fieldRefsLength; i++) {
     var fieldRef = lunr.FieldRef.fromString(fieldRefs[i]),
@@ -2220,15 +2234,23 @@ lunr.Builder.prototype.createFieldVectors = function () {
       var term = terms[j],
           tf = termFrequencies[term],
           termIndex = this.invertedIndex[term]._index,
-          idf = lunr.idf(this.invertedIndex[term], this.documentCount),
-          score = idf * ((this._k1 + 1) * tf) / (this._k1 * (1 - this._b + this._b * (fieldLength / this.averageFieldLength[field])) + tf),
-          scoreWithPrecision = Math.round(score * 1000) / 1000
-          // Converts 1.23456789 to 1.234.
-          // Reducing the precision so that the vectors take up less
-          // space when serialised. Doing it now so that they behave
-          // the same before and after serialisation. Also, this is
-          // the fastest approach to reducing a number's precision in
-          // JavaScript.
+          idf, score, scoreWithPrecision
+
+      if (termIdfCache[term] === undefined) {
+        idf = lunr.idf(this.invertedIndex[term], this.documentCount)
+        termIdfCache[term] = idf
+      } else {
+        idf = termIdfCache[term]
+      }
+
+      score = idf * ((this._k1 + 1) * tf) / (this._k1 * (1 - this._b + this._b * (fieldLength / this.averageFieldLength[field])) + tf)
+      scoreWithPrecision = Math.round(score * 1000) / 1000
+      // Converts 1.23456789 to 1.234.
+      // Reducing the precision so that the vectors take up less
+      // space when serialised. Doing it now so that they behave
+      // the same before and after serialisation. Also, this is
+      // the fastest approach to reducing a number's precision in
+      // JavaScript.
 
       fieldVector.insert(termIndex, scoreWithPrecision)
     }
@@ -2360,6 +2382,38 @@ lunr.MatchData.prototype.combine = function (otherMatchData) {
         }
 
       }
+    }
+  }
+}
+
+/**
+ * Add metadata for a term/field pair to this instance of match data.
+ *
+ * @param {string} term - The term this match data is associated with
+ * @param {string} field - The field in which the term was found
+ * @param {object} metadata - The metadata recorded about this term in this field
+ */
+lunr.MatchData.prototype.add = function (term, field, metadata) {
+  if (!(term in this.metadata)) {
+    this.metadata[term] = Object.create(null)
+    this.metadata[term][field] = metadata
+    return
+  }
+
+  if (!(field in this.metadata[term])) {
+    this.metadata[term][field] = metadata
+    return
+  }
+
+  var metadataKeys = Object.keys(metadata)
+
+  for (var i = 0; i < metadataKeys.length; i++) {
+    var key = metadataKeys[i]
+
+    if (key in this.metadata[term][field]) {
+      this.metadata[term][field][key] = this.metadata[term][field][key].concat(metadata[key])
+    } else {
+      this.metadata[term][field][key] = metadata[key]
     }
   }
 }
