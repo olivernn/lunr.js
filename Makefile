@@ -52,8 +52,8 @@ size: lunr.min.js
 server: test/index.html
 	${NODE_STATIC} -H '{"Cache-Control": "no-cache, must-revalidate"}'
 
-lint:
-	${ESLINT} lib/*.js
+lint: $(SRC)
+	${ESLINT} $^
 
 perf/*_perf.js:
 	${NODE} -r ./perf/perf_helper.js $@
@@ -69,8 +69,8 @@ test/env/file_list.json: $(wildcard test/*test.js)
 test/index.html: test/env/file_list.json test/env/index.mustache
 	${MUSTACHE} $^ > $@
 
-docs: node_modules
-	${JSDOC} -R README.mdown -d docs -c build/jsdoc.conf.json lib/*.js
+docs: $(SRC)
+	${JSDOC} -R README.mdown -d docs -c build/jsdoc.conf.json $^
 
 clean:
 	rm -f lunr{.min,}.js
