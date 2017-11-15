@@ -19,6 +19,8 @@ SRC = lib/lunr.js \
 	lib/query_parse_error.js \
 	lib/query_lexer.js \
 	lib/query_parser.js \
+	lib/mutable_index.js \
+	lib/mutable_builder.js \
 
 YEAR = $(shell date +%Y)
 VERSION = $(shell cat VERSION)
