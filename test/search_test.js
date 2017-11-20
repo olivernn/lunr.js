@@ -537,4 +537,171 @@ suite('search', function () {
       })
     })
   })
+
+  suite('term presence', function () {
+    suite('prohibited', function () {
+      suite('match', function () {
+        setup(function () {
+          this.results = this.idx.query(function (q) {
+            q.term('candlestick', { presence: lunr.Query.presence.PROHIBITED })
+            q.term('green', { presence: lunr.Query.presence.OPTIONAL })
+          })
+        })
+
+        test('two results found', function () {
+          assert.lengthOf(this.results, 2)
+        })
+
+        test('matching documents returned', function () {
+          assert.equal('b', this.results[0].ref)
+          assert.equal('c', this.results[1].ref)
+        })
+
+        test('matching terms returned', function () {
+          assert.sameMembers(['green'], Object.keys(this.results[0].matchData.metadata))
+          assert.sameMembers(['green'], Object.keys(this.results[1].matchData.metadata))
+        })
+      })
+
+      suite('no match', function () {
+        setup(function () {
+          this.results = this.idx.query(function (q) {
+            q.term('green', { presence: lunr.Query.presence.PROHIBITED })
+          })
+        })
+
+        test('no matches', function () {
+          assert.lengthOf(this.results, 0)
+        })
+      })
+
+      suite('no matching term', function () {
+        setup(function () {
+          this.results = this.idx.query(function (q) {
+            q.term('qwertyuiop', { presence: lunr.Query.presence.PROHIBITED })
+          })
+        })
+
+        // TODO: what is the right behaviour here?
+        // logically it _should_ return all results, but is that useful? It would
+        // require a bunch of extra work to return a result set that isn't very useful.
+        // Perhaps instead it should just mark queries that only have prohibited clauses
+        // as invalid?
+        test('all results returned?')
+      })
+
+      suite('field match', function () {
+        setup(function () {
+          this.results = this.idx.query(function (q) {
+            q.term('plant', { presence: lunr.Query.presence.PROHIBITED, fields: ['title'] })
+            q.term('plumb', { presence: lunr.Query.presence.OPTIONAL })
+          })
+        })
+
+        test('one result found', function () {
+          assert.lengthOf(this.results, 1)
+        })
+
+        test('matching documents returned', function () {
+          assert.equal('c', this.results[0].ref)
+        })
+
+        test('matching terms returned', function () {
+          assert.sameMembers(['plumb'], Object.keys(this.results[0].matchData.metadata))
+        })
+      })
+    })
+
+    suite('required', function () {
+      suite('match', function () {
+        setup(function () {
+          this.results = this.idx.query(function (q) {
+            q.term('candlestick', { presence: lunr.Query.presence.REQUIRED })
+            q.term('green', { presence: lunr.Query.presence.OPTIONAL })
+          })
+        })
+
+        test('one result found', function () {
+          assert.lengthOf(this.results, 1)
+        })
+
+        test('matching documents returned', function () {
+          assert.equal('a', this.results[0].ref)
+        })
+
+        test('matching terms returned', function () {
+          assert.sameMembers(['candlestick', 'green'], Object.keys(this.results[0].matchData.metadata))
+        })
+      })
+
+      suite('no match', function () {
+        setup(function () {
+          this.results = this.idx.query(function (q) {
+            q.term('mustard', { presence: lunr.Query.presence.REQUIRED })
+            q.term('plant', { presence: lunr.Query.presence.REQUIRED })
+          })
+        })
+
+        test('no matches', function () {
+          assert.lengthOf(this.results, 0)
+        })
+      })
+
+      suite('no matching term', function () {
+        setup(function () {
+          this.results = this.idx.query(function (q) {
+            q.term('qwertyuiop', { presence: lunr.Query.presence.REQUIRED })
+            q.term('green', { presence: lunr.Query.presence.OPTIONAL })
+          })
+        })
+
+        test('no matches', function () {
+          assert.lengthOf(this.results, 0)
+        })
+      })
+
+      suite('field match', function () {
+        setup(function () {
+          this.results = this.idx.query(function (q) {
+            q.term('plant', { presence: lunr.Query.presence.REQUIRED, fields: ['title'] })
+            q.term('green', { presence: lunr.Query.presence.OPTIONAL })
+          })
+        })
+
+        test('one result found', function () {
+          assert.lengthOf(this.results, 1)
+        })
+
+        test('matching documents returned', function () {
+          assert.equal('b', this.results[0].ref)
+        })
+
+        test('matching terms returned', function () {
+          assert.sameMembers(['plant', 'green'], Object.keys(this.results[0].matchData.metadata))
+        })
+      })
+    })
+
+    suite('combined', function () {
+      setup(function () {
+        this.results = this.idx.query(function (q) {
+          q.term('plant', { presence: lunr.Query.presence.REQUIRED })
+          q.term('green', { presence: lunr.Query.presence.OPTIONAL })
+          q.term('office', { presence: lunr.Query.presence.PROHIBITED })
+        })
+      })
+
+      test('one result found', function () {
+        assert.lengthOf(this.results, 1)
+      })
+
+      test('matching documents returned', function () {
+        assert.equal('b', this.results[0].ref)
+      })
+
+      test('matching terms returned', function () {
+        assert.sameMembers(['plant', 'green'], Object.keys(this.results[0].matchData.metadata))
+      })
+    })
+  })
 })
