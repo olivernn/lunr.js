@@ -1,7 +1,7 @@
 {
   "plugins": ["plugins/markdown"],
   "destination": "docs",
-  "readme": "README.mdown",
+  "readme": "README.md",
   "templates": {
     "default": {
       "useLongnameInNav": true

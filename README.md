@@ -68,4 +68,4 @@ Browsers that do not support ES5 will require a JavaScript shim for Lunr to work
 
 ## Contributing
 
-See the [`CONTRIBUTING.mdown` file](CONTRIBUTING.mdown).
+See the [`CONTRIBUTING.md` file](CONTRIBUTING.md).
