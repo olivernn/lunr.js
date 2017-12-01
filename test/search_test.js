@@ -123,6 +123,8 @@ suite('search', function () {
 
       test('matched terms returned', function () {
         assert.sameMembers(['fellow', 'candlestick'], Object.keys(this.results[0].matchData.metadata))
+        assert.sameMembers(['body'], Object.keys(this.results[0].matchData.metadata['fellow']));
+        assert.sameMembers(['body'], Object.keys(this.results[0].matchData.metadata['candlestick']));
       })
     })
 
