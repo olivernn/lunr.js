@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.1.4
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.1.5
  * Copyright (C) 2017 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.1.4"
+lunr.version = "2.1.5"
 /*!
  * lunr.utils
  * Copyright (C) 2017 Oliver Nightingale
@@ -1870,7 +1870,7 @@ lunr.Index.prototype.query = function (fn) {
             if ((fieldMatch = matchingFields[matchingFieldRef]) === undefined) {
               matchingFields[matchingFieldRef] = new lunr.MatchData (expandedTerm, field, metadata)
             } else {
-              fieldMatch.add(expandedTerm, term, metadata)
+              fieldMatch.add(expandedTerm, field, metadata)
             }
 
           }
