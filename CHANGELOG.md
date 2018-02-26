@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.6
+
+* Improve pipeline performance for large fields [#329](https://github.com/olivernn/lunr.js/pull/329), thanks [andymcm](https://github.com/andymcm).
+
 ## 2.1.5
 
 * Fix bug [#320](https://github.com/olivernn/lunr.js/issues/320) which caused result metadata to be nested under search term instead of field name. Thanks [Jonny Gerig Meyer](https://github.com/jgerigmeyer) for reporting and fixing.
