@@ -39,6 +39,45 @@ suite('lunr.QueryLexer', function () {
       })
     })
 
+    // embedded hyphens should not be confused with
+    // presence operators
+    suite('single term with hyphen', function () {
+      setup(function () {
+        this.lexer = lex('foo-bar')
+      })
+
+      test('produces 2 lexeme', function () {
+        assert.lengthOf(this.lexer.lexemes, 2)
+      })
+
+      suite('lexeme', function () {
+        setup(function () {
+          this.fooLexeme = this.lexer.lexemes[0]
+          this.barLexeme = this.lexer.lexemes[1]
+        })
+
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.TERM, this.fooLexeme.type)
+          assert.equal(lunr.QueryLexer.TERM, this.barLexeme.type)
+        })
+
+        test('#str', function () {
+          assert.equal('foo', this.fooLexeme.str)
+          assert.equal('bar', this.barLexeme.str)
+        })
+
+        test('#start', function () {
+          assert.equal(0, this.fooLexeme.start)
+          assert.equal(4, this.barLexeme.start)
+        })
+
+        test('#end', function () {
+          assert.equal(3, this.fooLexeme.end)
+          assert.equal(7, this.barLexeme.end)
+        })
+      })
+    })
+
     suite('term escape char', function () {
       setup(function () {
         this.lexer = lex("foo\\:bar")
@@ -104,6 +143,42 @@ suite('lunr.QueryLexer', function () {
         test('#end', function () {
           assert.equal(3, this.fooLexeme.end)
           assert.equal(7, this.barLexeme.end)
+        })
+      })
+    })
+
+    suite('multiple terms with presence', function () {
+      setup(function () {
+        this.lexer = lex('+foo +bar')
+      })
+
+      test('produces 2 lexems', function () {
+        assert.lengthOf(this.lexer.lexemes, 4)
+      })
+
+      suite('lexemes', function () {
+        setup(function () {
+          this.fooPresenceLexeme = this.lexer.lexemes[0]
+          this.fooTermLexeme = this.lexer.lexemes[1]
+
+          this.barPresenceLexeme = this.lexer.lexemes[2]
+          this.barTermLexeme = this.lexer.lexemes[3]
+        })
+
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.TERM, this.fooTermLexeme.type)
+          assert.equal(lunr.QueryLexer.TERM, this.barTermLexeme.type)
+
+          assert.equal(lunr.QueryLexer.PRESENCE, this.fooPresenceLexeme.type)
+          assert.equal(lunr.QueryLexer.PRESENCE, this.barPresenceLexeme.type)
+        })
+
+        test('#str', function () {
+          assert.equal('foo', this.fooTermLexeme.str)
+          assert.equal('bar', this.barTermLexeme.str)
+
+          assert.equal('+', this.fooPresenceLexeme.str)
+          assert.equal('+', this.barPresenceLexeme.str)
         })
       })
     })
@@ -229,6 +304,121 @@ suite('lunr.QueryLexer', function () {
       })
     })
 
+    suite('term with presence required', function () {
+      setup(function () {
+        this.lexer = lex('+foo')
+      })
+
+      test('produces 2 lexemes', function () {
+        assert.lengthOf(this.lexer.lexemes, 2)
+      })
+
+      suite('lexemes', function () {
+        setup(function () {
+          this.presenceLexeme = this.lexer.lexemes[0]
+          this.termLexeme = this.lexer.lexemes[1]
+        })
+
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.PRESENCE, this.presenceLexeme.type)
+          assert.equal(lunr.QueryLexer.TERM, this.termLexeme.type)
+        })
+
+        test('#str', function () {
+          assert.equal('+', this.presenceLexeme.str)
+          assert.equal('foo', this.termLexeme.str)
+        })
+
+        test('#start', function () {
+          assert.equal(1, this.termLexeme.start)
+          assert.equal(0, this.presenceLexeme.start)
+        })
+
+        test('#end', function () {
+          assert.equal(4, this.termLexeme.end)
+          assert.equal(1, this.presenceLexeme.end)
+        })
+      })
+    })
+
+    suite('term with field with presence required', function () {
+      setup(function () {
+        this.lexer = lex('+title:foo')
+      })
+
+      test('produces 3 lexemes', function () {
+        assert.lengthOf(this.lexer.lexemes, 3)
+      })
+
+      suite('lexemes', function () {
+        setup(function () {
+          this.presenceLexeme = this.lexer.lexemes[0]
+          this.fieldLexeme = this.lexer.lexemes[1]
+          this.termLexeme = this.lexer.lexemes[2]
+        })
+
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.PRESENCE, this.presenceLexeme.type)
+          assert.equal(lunr.QueryLexer.FIELD, this.fieldLexeme.type)
+          assert.equal(lunr.QueryLexer.TERM, this.termLexeme.type)
+        })
+
+        test('#str', function () {
+          assert.equal('+', this.presenceLexeme.str)
+          assert.equal('title', this.fieldLexeme.str)
+          assert.equal('foo', this.termLexeme.str)
+        })
+
+        test('#start', function () {
+          assert.equal(0, this.presenceLexeme.start)
+          assert.equal(1, this.fieldLexeme.start)
+          assert.equal(7, this.termLexeme.start)
+        })
+
+        test('#end', function () {
+          assert.equal(1, this.presenceLexeme.end)
+          assert.equal(6, this.fieldLexeme.end)
+          assert.equal(10, this.termLexeme.end)
+        })
+      })
+    })
+
+    suite('term with presence prohibited', function () {
+      setup(function () {
+        this.lexer = lex('-foo')
+      })
+
+      test('produces 2 lexemes', function () {
+        assert.lengthOf(this.lexer.lexemes, 2)
+      })
+
+      suite('lexemes', function () {
+        setup(function () {
+          this.presenceLexeme = this.lexer.lexemes[0]
+          this.termLexeme = this.lexer.lexemes[1]
+        })
+
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.PRESENCE, this.presenceLexeme.type)
+          assert.equal(lunr.QueryLexer.TERM, this.termLexeme.type)
+        })
+
+        test('#str', function () {
+          assert.equal('-', this.presenceLexeme.str)
+          assert.equal('foo', this.termLexeme.str)
+        })
+
+        test('#start', function () {
+          assert.equal(1, this.termLexeme.start)
+          assert.equal(0, this.presenceLexeme.start)
+        })
+
+        test('#end', function () {
+          assert.equal(4, this.termLexeme.end)
+          assert.equal(1, this.presenceLexeme.end)
+        })
+      })
+    })
 
     suite('term with edit distance', function () {
       setup(function () {

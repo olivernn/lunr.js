@@ -31,6 +31,10 @@ suite('lunr.QueryParser', function () {
           assert.sameMembers(['title', 'body'], this.clause.fields)
         })
 
+        test('presence', function () {
+          assert.equal(lunr.Query.presence.OPTIONAL, this.clause.presence)
+        })
+
         test('usePipeline', function () {
           assert.ok(this.clause.usePipeline)
         })
@@ -103,6 +107,17 @@ suite('lunr.QueryParser', function () {
           assert.equal('foo', this.clauses[0].term)
           assert.equal('bar', this.clauses[1].term)
         })
+      })
+    })
+
+    suite('multiple terms with presence', function () {
+      setup(function () {
+        this.clauses = parse('+foo +bar')
+      })
+
+      test('has 2 clause', function () {
+        debugger
+        assert.lengthOf(this.clauses, 2)
       })
     })
 
@@ -336,6 +351,110 @@ suite('lunr.QueryParser', function () {
 
       test('fields', function () {
         assert.sameMembers(['title'], this.clauses[0].fields)
+      })
+    })
+
+    suite('term with presence required', function () {
+      setup(function () {
+        this.clauses = parse('+foo')
+      })
+
+      test('has 1 clauses', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
+
+      test('term', function () {
+        assert.equal('foo', this.clauses[0].term)
+      })
+
+      test('boost', function () {
+        assert.equal(1, this.clauses[0].boost)
+      })
+
+      test('fields', function () {
+        assert.sameMembers(['title', 'body'], this.clauses[0].fields)
+      })
+
+      test('presence', function () {
+        assert.equal(lunr.Query.presence.REQUIRED, this.clauses[0].presence)
+      })
+    })
+
+    suite('term with presence prohibited', function () {
+      setup(function () {
+        this.clauses = parse('-foo')
+      })
+
+      test('has 1 clauses', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
+
+      test('term', function () {
+        assert.equal('foo', this.clauses[0].term)
+      })
+
+      test('boost', function () {
+        assert.equal(1, this.clauses[0].boost)
+      })
+
+      test('fields', function () {
+        assert.sameMembers(['title', 'body'], this.clauses[0].fields)
+      })
+
+      test('presence', function () {
+        assert.equal(lunr.Query.presence.PROHIBITED, this.clauses[0].presence)
+      })
+    })
+
+    suite('term scoped by field with presence required', function () {
+      setup(function () {
+        this.clauses = parse('+title:foo')
+      })
+
+      test('has 1 clauses', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
+
+      test('term', function () {
+        assert.equal('foo', this.clauses[0].term)
+      })
+
+      test('boost', function () {
+        assert.equal(1, this.clauses[0].boost)
+      })
+
+      test('fields', function () {
+        assert.sameMembers(['title'], this.clauses[0].fields)
+      })
+
+      test('presence', function () {
+        assert.equal(lunr.Query.presence.REQUIRED, this.clauses[0].presence)
+      })
+    })
+
+    suite('term scoped by field with presence prohibited', function () {
+      setup(function () {
+        this.clauses = parse('-title:foo')
+      })
+
+      test('has 1 clauses', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
+
+      test('term', function () {
+        assert.equal('foo', this.clauses[0].term)
+      })
+
+      test('boost', function () {
+        assert.equal(1, this.clauses[0].boost)
+      })
+
+      test('fields', function () {
+        assert.sameMembers(['title'], this.clauses[0].fields)
+      })
+
+      test('presence', function () {
+        assert.equal(lunr.Query.presence.PROHIBITED, this.clauses[0].presence)
       })
     })
   })
