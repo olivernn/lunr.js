@@ -30,20 +30,36 @@ suite('search', function () {
 
   suite('single term search', function () {
     suite('one match', function () {
-      setup(function () {
-        this.results = this.idx.search('scarlett')
+      var assertions = function () {
+        test('one result returned', function () {
+          assert.lengthOf(this.results, 1)
+        })
+
+        test('document c matches', function () {
+          assert.equal('c', this.results[0].ref)
+        })
+
+        test('matching term', function () {
+          assert.sameMembers(['scarlett'], Object.keys(this.results[0].matchData.metadata))
+        })
+      }
+
+      suite('#seach', function () {
+        setup(function () {
+          this.results = this.idx.search('scarlett')
+        })
+
+        assertions()
       })
 
-      test('one result returned', function () {
-        assert.lengthOf(this.results, 1)
-      })
+      suite('#query', function () {
+        setup(function () {
+          this.results = this.idx.query(function (q) {
+            q.term('scarlett')
+          })
+        })
 
-      test('document c matches', function () {
-        assert.equal('c', this.results[0].ref)
-      })
-
-      test('matching term', function () {
-        assert.sameMembers(['scarlett'], Object.keys(this.results[0].matchData.metadata))
+        assertions()
       })
     })
 
@@ -541,38 +557,54 @@ suite('search', function () {
   suite('term presence', function () {
     suite('prohibited', function () {
       suite('match', function () {
-        setup(function () {
+        var assertions = function (fn) {
+          setup(fn)
+
+          test('two results found', function () {
+            assert.lengthOf(this.results, 2)
+          })
+
+          test('matching documents returned', function () {
+            assert.equal('b', this.results[0].ref)
+            assert.equal('c', this.results[1].ref)
+          })
+
+          test('matching terms returned', function () {
+            assert.sameMembers(['green'], Object.keys(this.results[0].matchData.metadata))
+            assert.sameMembers(['green'], Object.keys(this.results[1].matchData.metadata))
+          })
+        }
+
+        suite('#query', assertions(function () {
           this.results = this.idx.query(function (q) {
             q.term('candlestick', { presence: lunr.Query.presence.PROHIBITED })
             q.term('green', { presence: lunr.Query.presence.OPTIONAL })
           })
-        })
+        }))
 
-        test('two results found', function () {
-          assert.lengthOf(this.results, 2)
-        })
-
-        test('matching documents returned', function () {
-          assert.equal('b', this.results[0].ref)
-          assert.equal('c', this.results[1].ref)
-        })
-
-        test('matching terms returned', function () {
-          assert.sameMembers(['green'], Object.keys(this.results[0].matchData.metadata))
-          assert.sameMembers(['green'], Object.keys(this.results[1].matchData.metadata))
-        })
+        suite('#search', assertions(function () {
+          this.results = this.idx.search('-candlestick green')
+        }))
       })
 
       suite('no match', function () {
-        setup(function () {
+        var assertions = function (fn) {
+          setup(fn)
+
+          test('no matches', function () {
+            assert.lengthOf(this.results, 0)
+          })
+        }
+
+        suite('#query', assertions(function () {
           this.results = this.idx.query(function (q) {
             q.term('green', { presence: lunr.Query.presence.PROHIBITED })
           })
-        })
+        }))
 
-        test('no matches', function () {
-          assert.lengthOf(this.results, 0)
-        })
+        suite('#search', assertions(function () {
+          this.results = this.idx.search('-green')
+        }))
       })
 
       suite('no matching term', function () {
@@ -591,82 +623,143 @@ suite('search', function () {
       })
 
       suite('field match', function () {
-        setup(function () {
+        var assertions = function (fn) {
+          setup(fn)
+
+          test('one result found', function () {
+            assert.lengthOf(this.results, 1)
+          })
+
+          test('matching documents returned', function () {
+            assert.equal('c', this.results[0].ref)
+          })
+
+          test('matching terms returned', function () {
+            assert.sameMembers(['plumb'], Object.keys(this.results[0].matchData.metadata))
+          })
+        }
+
+        suite('#query', assertions(function () {
           this.results = this.idx.query(function (q) {
             q.term('plant', { presence: lunr.Query.presence.PROHIBITED, fields: ['title'] })
             q.term('plumb', { presence: lunr.Query.presence.OPTIONAL })
           })
-        })
+        }))
 
-        test('one result found', function () {
-          assert.lengthOf(this.results, 1)
-        })
+        suite('#search', assertions(function () {
+          this.results = this.idx.search('-title:plant plumb')
+        }))
 
-        test('matching documents returned', function () {
-          assert.equal('c', this.results[0].ref)
-        })
-
-        test('matching terms returned', function () {
-          assert.sameMembers(['plumb'], Object.keys(this.results[0].matchData.metadata))
-        })
       })
     })
 
     suite('required', function () {
       suite('match', function () {
-        setup(function () {
+        var assertions = function (fn) {
+          setup(fn)
+
+          test('one result found', function () {
+            assert.lengthOf(this.results, 1)
+          })
+
+          test('matching documents returned', function () {
+            assert.equal('a', this.results[0].ref)
+          })
+
+          test('matching terms returned', function () {
+            assert.sameMembers(['candlestick', 'green'], Object.keys(this.results[0].matchData.metadata))
+          })
+        }
+
+        suite('#search', assertions(function () {
+          this.results = this.idx.search("+candlestick green")
+        }))
+
+        suite('#query', assertions(function () {
           this.results = this.idx.query(function (q) {
             q.term('candlestick', { presence: lunr.Query.presence.REQUIRED })
             q.term('green', { presence: lunr.Query.presence.OPTIONAL })
           })
-        })
+        }))
 
-        test('one result found', function () {
-          assert.lengthOf(this.results, 1)
-        })
-
-        test('matching documents returned', function () {
-          assert.equal('a', this.results[0].ref)
-        })
-
-        test('matching terms returned', function () {
-          assert.sameMembers(['candlestick', 'green'], Object.keys(this.results[0].matchData.metadata))
-        })
       })
 
       suite('no match', function () {
-        setup(function () {
+        var assertions = function (fn) {
+          setup(fn)
+
+          test('no matches', function () {
+            assert.lengthOf(this.results, 0)
+          })
+        }
+
+        suite('#query', assertions(function () {
           this.results = this.idx.query(function (q) {
             q.term('mustard', { presence: lunr.Query.presence.REQUIRED })
             q.term('plant', { presence: lunr.Query.presence.REQUIRED })
           })
-        })
+        }))
 
-        test('no matches', function () {
-          assert.lengthOf(this.results, 0)
-        })
+        suite('#search', assertions(function () {
+          this.results = this.idx.search('+mustard +plant')
+        }))
       })
 
       suite('no matching term', function () {
-        setup(function () {
+        var assertions = function (fn) {
+          setup(fn)
+
+          test('no matches', function () {
+            assert.lengthOf(this.results, 0)
+          })
+        }
+
+        suite('#query', assertions(function () {
           this.results = this.idx.query(function (q) {
             q.term('qwertyuiop', { presence: lunr.Query.presence.REQUIRED })
             q.term('green', { presence: lunr.Query.presence.OPTIONAL })
           })
-        })
+        }))
 
-        test('no matches', function () {
-          assert.lengthOf(this.results, 0)
-        })
+        suite('#search', assertions(function () {
+          this.results = this.idx.search('+qwertyuiop green')
+        }))
       })
 
       suite('field match', function () {
-        setup(function () {
+        var assertions = function (fn) {
+          setup(fn)
+
+          test('one result found', function () {
+            assert.lengthOf(this.results, 1)
+          })
+
+          test('matching documents returned', function () {
+            assert.equal('b', this.results[0].ref)
+          })
+
+          test('matching terms returned', function () {
+            assert.sameMembers(['plant', 'green'], Object.keys(this.results[0].matchData.metadata))
+          })
+        }
+
+        suite('#query', assertions(function () {
           this.results = this.idx.query(function (q) {
             q.term('plant', { presence: lunr.Query.presence.REQUIRED, fields: ['title'] })
             q.term('green', { presence: lunr.Query.presence.OPTIONAL })
           })
-        })
+        }))
+
+        suite('#search', assertions(function () {
+          this.results = this.idx.search('+title:plant green')
+        }))
+
+      })
+    })
+
+    suite('combined', function () {
+      var assertions = function (fn) {
+        setup(fn)
 
         test('one result found', function () {
           assert.lengthOf(this.results, 1)
@@ -679,29 +772,20 @@ suite('search', function () {
         test('matching terms returned', function () {
           assert.sameMembers(['plant', 'green'], Object.keys(this.results[0].matchData.metadata))
         })
-      })
-    })
+      }
 
-    suite('combined', function () {
-      setup(function () {
+      suite('#query', assertions(function () {
         this.results = this.idx.query(function (q) {
           q.term('plant', { presence: lunr.Query.presence.REQUIRED })
           q.term('green', { presence: lunr.Query.presence.OPTIONAL })
           q.term('office', { presence: lunr.Query.presence.PROHIBITED })
         })
-      })
+      }))
 
-      test('one result found', function () {
-        assert.lengthOf(this.results, 1)
-      })
+      suite('#search', assertions(function () {
+        this.results = this.idx.search('+plant green -office')
+      }))
 
-      test('matching documents returned', function () {
-        assert.equal('b', this.results[0].ref)
-      })
-
-      test('matching terms returned', function () {
-        assert.sameMembers(['plant', 'green'], Object.keys(this.results[0].matchData.metadata))
-      })
     })
   })
 })
