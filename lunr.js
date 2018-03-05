@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.1.6
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.2.0-alpha.1
  * Copyright (C) 2018 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.1.6"
+lunr.version = "2.2.0-alpha.1"
 /*!
  * lunr.utils
  * Copyright (C) 2018 Oliver Nightingale
@@ -62,6 +62,7 @@ lunr.version = "2.1.6"
 
 /**
  * A namespace containing utils for the rest of the lunr library
+ * @namespace lunr.utils
  */
 lunr.utils = {}
 
@@ -69,7 +70,8 @@ lunr.utils = {}
  * Print a warning message to the console.
  *
  * @param {String} message The message to be printed.
- * @memberOf Utils
+ * @memberOf lunr.utils
+ * @function
  */
 lunr.utils.warn = (function (global) {
   /* eslint-disable no-console */
@@ -90,7 +92,7 @@ lunr.utils.warn = (function (global) {
  *
  * @param {Any} obj The object to convert to a string.
  * @return {String} string representation of the passed object.
- * @memberOf Utils
+ * @memberOf lunr.utils
  */
 lunr.utils.asString = function (obj) {
   if (obj === void 0 || obj === null) {
@@ -126,6 +128,123 @@ lunr.FieldRef.prototype.toString = function () {
   }
 
   return this._stringValue
+}
+/*!
+ * lunr.Set
+ * Copyright (C) 2018 Oliver Nightingale
+ */
+
+/**
+ * A lunr set.
+ *
+ * @constructor
+ */
+lunr.Set = function (elements) {
+  this.elements = Object.create(null)
+
+  if (elements) {
+    this.length = elements.length
+
+    for (var i = 0; i < this.length; i++) {
+      this.elements[elements[i]] = true
+    }
+  } else {
+    this.length = 0
+  }
+}
+
+/**
+ * A complete set that contains all elements.
+ *
+ * @static
+ * @readonly
+ * @type {lunr.Set}
+ */
+lunr.Set.complete = {
+  intersect: function (other) {
+    return other
+  },
+
+  union: function (other) {
+    return other
+  },
+
+  contains: function () {
+    return true
+  }
+}
+
+/**
+ * An empty set that contains no elements.
+ *
+ * @static
+ * @readonly
+ * @type {lunr.Set}
+ */
+lunr.Set.empty = {
+  intersect: function () {
+    return this
+  },
+
+  union: function (other) {
+    return other
+  },
+
+  contains: function () {
+    return false
+  }
+}
+
+/**
+ * Returns true if this set contains the specified object.
+ *
+ * @param {object} object - Object whose presence in this set is to be tested.
+ * @returns {boolean} - True if this set contains the specified object.
+ */
+lunr.Set.prototype.contains = function (object) {
+  return !!this.elements[object]
+}
+
+/**
+ * Returns a new set containing only the elements that are present in both
+ * this set and the specified set.
+ *
+ * @param {lunr.Set} other - set to intersect with this set.
+ * @returns {lunr.Set} a new set that is the intersection of this and the specified set.
+ */
+
+lunr.Set.prototype.intersect = function (other) {
+  var a, b, elements, intersection = []
+
+  if (this.length < other.length) {
+    a = this
+    b = other
+  } else {
+    a = other
+    b = this
+  }
+
+  elements = Object.keys(a.elements)
+
+  for (var i = 0; i < elements.length; i++) {
+    var element = elements[i]
+    if (element in b.elements) {
+      intersection.push(element)
+    }
+  }
+
+  return new lunr.Set (intersection)
+}
+
+/**
+ * Returns a new set combining the elements of this and the specified set.
+ *
+ * @param {lunr.Set} other - set to union with this set.
+ * @return {lunr.Set} a new set that is the union of this and the specified set.
+ */
+
+lunr.Set.prototype.union = function (other) {
+  return new lunr.Set(Object.keys(this.elements).concat(Object.keys(other.elements)))
 }
 /**
  * A function to calculate the inverse document frequency for
@@ -223,6 +342,7 @@ lunr.Token.prototype.clone = function (fn) {
  * @static
  * @param {?(string|object|object[])} obj - The object to convert into tokens
  * @returns {lunr.Token[]}
+ * @see {@link lunr.Pipeline}
  */
 lunr.tokenizer = function (obj) {
   if (obj == null || obj == undefined) {
@@ -748,6 +868,7 @@ lunr.Vector.prototype.toJSON = function () {
  * @param {lunr.Token} token - The string to stem
  * @returns {lunr.Token}
  * @see {@link lunr.Pipeline}
+ * @function
  */
 lunr.stemmer = (function(){
   var step2list = {
@@ -966,6 +1087,7 @@ lunr.Pipeline.registerFunction(lunr.stemmer, 'stemmer')
  * The built in lunr.stopWordFilter is built using this generator and can be used
  * to generate custom stopWordFilters for applications or non English languages.
  *
+ * @function
  * @param {Array} token The token to pass through the filter
  * @returns {lunr.PipelineFunction}
  * @see lunr.Pipeline
@@ -989,6 +1111,7 @@ lunr.generateStopWordFilter = function (stopWords) {
  * This is intended to be used in the Pipeline. If the token does not pass the
  * filter then undefined will be returned.
  *
+ * @function
  * @implements {lunr.PipelineFunction}
  * @params {lunr.Token} token - A token to check for being a stop word.
  * @returns {lunr.Token}
@@ -1701,6 +1824,12 @@ lunr.Index = function (attrs) {
  * to provide fuzzy matching, e.g. 'hello~2' will match documents with hello with an edit distance of 2.
  * Avoid large values for edit distance to improve query performance.
  *
+ * Each term also supports a presence modifier. By default a term's presence in document is optional, however
+ * this can be changed to either required or prohibited. For a term's presence to be required in a document the
+ * term should be prefixed with a '+', e.g. `+foo bar` is a search for documents that must contain 'foo' and
+ * optionally contain 'bar'. Conversely a leading '-' sets the terms presence to prohibited, i.e. it must not
+ * appear in a document, e.g. `-foo bar` is a search for documents that do not contain 'foo' but may contain 'bar'.
+ *
  * To escape special characters the backslash character '\' can be used, this allows searches to include
  * characters that would normally be considered modifiers, e.g. `foo\~2` will search for a term "foo~2" instead
  * of attempting to apply a boost of 2 to the search term "foo".
@@ -1716,6 +1845,8 @@ lunr.Index = function (attrs) {
  * hello^10
  * @example <caption>term with an edit distance of 2</caption>
  * hello~2
+ * @example <caption>terms with presence modifiers</caption>
+ * -foo +bar baz
  */
 
 /**
@@ -1773,7 +1904,9 @@ lunr.Index.prototype.query = function (fn) {
   var query = new lunr.Query(this.fields),
       matchingFields = Object.create(null),
       queryVectors = Object.create(null),
-      termFieldCache = Object.create(null)
+      termFieldCache = Object.create(null),
+      requiredMatches = Object.create(null),
+      prohibitedMatches = Object.create(null)
 
   fn.call(query, query)
 
@@ -1814,6 +1947,21 @@ lunr.Index.prototype.query = function (fn) {
       var termTokenSet = lunr.TokenSet.fromClause(clause),
           expandedTerms = this.tokenSet.intersect(termTokenSet).toArray()
 
+      /*
+       * If a term marked as required does not exist in the tokenSet it is
+       * impossible for the search to return any matches. We set all the field
+       * scoped required matches set to empty and stop examining any further
+       * clauses.
+       */
+      if (expandedTerms.length === 0 && clause.presence === lunr.Query.presence.REQUIRED) {
+        for (var k = 0; k < clause.fields.length; k++) {
+          var field = clause.fields[k]
+          requiredMatches[field] = lunr.Set.empty
+        }
+
+        break
+      }
+
       for (var j = 0; j < expandedTerms.length; j++) {
         /*
          * For each term get the posting and termIndex, this is required for
@@ -1835,7 +1983,41 @@ lunr.Index.prototype.query = function (fn) {
           var field = clause.fields[k],
               fieldPosting = posting[field],
               matchingDocumentRefs = Object.keys(fieldPosting),
-              termField = expandedTerm + "/" + field
+              termField = expandedTerm + "/" + field,
+              matchingDocumentsSet = new lunr.Set(matchingDocumentRefs)
+
+          /*
+           * if the presence of this term is required ensure that the matching
+           * documents are added to the set of required matches for this field,
+           * creating that set if it does not yet exist.
+           */
+          if (clause.presence == lunr.Query.presence.REQUIRED) {
+            if (requiredMatches[field] === undefined) {
+              requiredMatches[field] = lunr.Set.complete
+            }
+
+            requiredMatches[field] = requiredMatches[field].intersect(matchingDocumentsSet)
+          }
+
+          /*
+           * if the presence of this term is prohibited ensure that the matching
+           * documents are added to the set of prohibited matches for this field,
+           * creating that set if it does not yet exist.
+           */
+          if (clause.presence == lunr.Query.presence.PROHIBITED) {
+            if (prohibitedMatches[field] === undefined) {
+              prohibitedMatches[field] = lunr.Set.empty
+            }
+
+            prohibitedMatches[field] = prohibitedMatches[field].union(matchingDocumentsSet)
+
+            /*
+             * Prohibited matches should not be part of the query vector used for
+             * similarity scoring and no metadata should be extracted so we continue
+             * to the next field
+             */
+            continue
+          }
 
           /*
            * To support field level boosts a query vector is created per
@@ -1890,6 +2072,26 @@ lunr.Index.prototype.query = function (fn) {
     }
   }
 
+  /**
+   * Need to combine the field scoped required and prohibited
+   * matching documents into a global set of required and prohibited
+   * matches
+   */
+  var allRequiredMatches = lunr.Set.complete,
+      allProhibitedMatches = lunr.Set.empty
+
+  for (var i = 0; i < this.fields.length; i++) {
+    var field = this.fields[i]
+
+    if (requiredMatches[field]) {
+      allRequiredMatches = allRequiredMatches.union(requiredMatches[field])
+    }
+
+    if (prohibitedMatches[field]) {
+      allProhibitedMatches = allProhibitedMatches.union(prohibitedMatches[field])
+    }
+  }
+
   var matchingFieldRefs = Object.keys(matchingFields),
       results = [],
       matches = Object.create(null)
@@ -1908,6 +2110,14 @@ lunr.Index.prototype.query = function (fn) {
         fieldVector = this.fieldVectors[fieldRef],
         score = queryVectors[fieldRef.fieldName].similarity(fieldVector),
         docMatch
+
+    if (!allRequiredMatches.contains(docRef)) {
+      continue
+    }
+
+    if (allProhibitedMatches.contains(docRef)) {
+      continue
+    }
 
     if ((docMatch = matches[docRef]) !== undefined) {
       docMatch.score += score
@@ -2465,10 +2675,41 @@ lunr.Query = function (allFields) {
  *   wildcard: lunr.Query.wildcard.LEADING | lunr.Query.wildcard.TRAILING
  * })
  */
+
 lunr.Query.wildcard = new String ("*")
 lunr.Query.wildcard.NONE = 0
 lunr.Query.wildcard.LEADING = 1
 lunr.Query.wildcard.TRAILING = 2
+
+/**
+ * Constants for indicating what kind of presence a term must have in matching documents.
+ *
+ * @constant
+ * @enum {number}
+ * @see lunr.Query~Clause
+ * @see lunr.Query#clause
+ * @see lunr.Query#term
+ * @example <caption>query term with required presence</caption>
+ * query.term('foo', { presence: lunr.Query.presence.REQUIRED })
+ */
+lunr.Query.presence = {
+  /**
+   * Term's presence in a document is optional, this is the default value.
+   */
+  OPTIONAL: 1,
+
+  /**
+   * Term's presence in a document is required, documents that do not contain
+   * this term will not be returned.
+   */
+  REQUIRED: 2,
+
+  /**
+   * Term's presence in a document is prohibited, documents that do contain
+   * this term will not be returned.
+   */
+  PROHIBITED: 3
+}
 
 /**
  * A single clause in a {@link lunr.Query} contains a term and details on how to
@@ -2479,7 +2720,8 @@ lunr.Query.wildcard.TRAILING = 2
  * @property {number} [boost=1] - Any boost that should be applied when matching this clause.
  * @property {number} [editDistance] - Whether the term should have fuzzy matching applied, and how fuzzy the match should be.
  * @property {boolean} [usePipeline] - Whether the term should be passed through the search pipeline.
- * @property {number} [wildcard=0] - Whether the term should have wildcards appended or prepended.
+ * @property {number} [wildcard=lunr.Query.wildcard.NONE] - Whether the term should have wildcards appended or prepended.
+ * @property {number} [presence=lunr.Query.presence.OPTIONAL] - The terms presence in any matching documents.
  */
 
 /**
@@ -2515,6 +2757,10 @@ lunr.Query.prototype.clause = function (clause) {
 
   if ((clause.wildcard & lunr.Query.wildcard.TRAILING) && (clause.term.slice(-1) != lunr.Query.wildcard)) {
     clause.term = "" + clause.term + "*"
+  }
+
+  if (!('presence' in clause)) {
+    clause.presence = lunr.Query.presence.OPTIONAL
   }
 
   this.clauses.push(clause)
@@ -2654,6 +2900,7 @@ lunr.QueryLexer.FIELD = 'FIELD'
 lunr.QueryLexer.TERM = 'TERM'
 lunr.QueryLexer.EDIT_DISTANCE = 'EDIT_DISTANCE'
 lunr.QueryLexer.BOOST = 'BOOST'
+lunr.QueryLexer.PRESENCE = 'PRESENCE'
 
 lunr.QueryLexer.lexField = function (lexer) {
   lexer.backup()
@@ -2742,6 +2989,22 @@ lunr.QueryLexer.lexText = function (lexer) {
       return lunr.QueryLexer.lexBoost
     }
 
+    // "+" indicates term presence is required
+    // checking for length to ensure that only
+    // leading "+" are considered
+    if (char == "+" && lexer.width() === 1) {
+      lexer.emit(lunr.QueryLexer.PRESENCE)
+      return lunr.QueryLexer.lexText
+    }
+
+    // "-" indicates term presence is prohibited
+    // checking for length to ensure that only
+    // leading "-" are considered
+    if (char == "-" && lexer.width() === 1) {
+      lexer.emit(lunr.QueryLexer.PRESENCE)
+      return lunr.QueryLexer.lexText
+    }
+
     if (char.match(lunr.QueryLexer.termSeparator)) {
       return lunr.QueryLexer.lexTerm
     }
@@ -2759,7 +3022,7 @@ lunr.QueryParser.prototype.parse = function () {
   this.lexer.run()
   this.lexemes = this.lexer.lexemes
 
-  var state = lunr.QueryParser.parseFieldOrTerm
+  var state = lunr.QueryParser.parseClause
 
   while (state) {
     state = state(this)
@@ -2784,7 +3047,7 @@ lunr.QueryParser.prototype.nextClause = function () {
   this.currentClause = {}
 }
 
-lunr.QueryParser.parseFieldOrTerm = function (parser) {
+lunr.QueryParser.parseClause = function (parser) {
   var lexeme = parser.peekLexeme()
 
   if (lexeme == undefined) {
@@ -2792,6 +3055,8 @@ lunr.QueryParser.parseFieldOrTerm = function (parser) {
   }
 
   switch (lexeme.type) {
+    case lunr.QueryLexer.PRESENCE:
+      return lunr.QueryParser.parsePresence
     case lunr.QueryLexer.FIELD:
       return lunr.QueryParser.parseField
     case lunr.QueryLexer.TERM:
@@ -2804,6 +3069,43 @@ lunr.QueryParser.parseFieldOrTerm = function (parser) {
       }
 
       throw new lunr.QueryParseError (errorMessage, lexeme.start, lexeme.end)
+  }
+}
+
+lunr.QueryParser.parsePresence = function (parser) {
+  var lexeme = parser.consumeLexeme()
+
+  if (lexeme == undefined) {
+    return
+  }
+
+  switch (lexeme.str) {
+    case "-":
+      parser.currentClause.presence = lunr.Query.presence.PROHIBITED
+      break
+    case "+":
+      parser.currentClause.presence = lunr.Query.presence.REQUIRED
+      break
+    default:
+      var errorMessage = "unrecognised presence operator'" + lexeme.str + "'"
+      throw new lunr.QueryParseError (errorMessage, lexeme.start, lexeme.end)
+  }
+
+  var nextLexeme = parser.peekLexeme()
+
+  if (nextLexeme == undefined) {
+    var errorMessage = "expecting term or field, found nothing"
+    throw new lunr.QueryParseError (errorMessage, lexeme.start, lexeme.end)
+  }
+
+  switch (nextLexeme.type) {
+    case lunr.QueryLexer.FIELD:
+      return lunr.QueryParser.parseField
+    case lunr.QueryLexer.TERM:
+      return lunr.QueryParser.parseTerm
+    default:
+      var errorMessage = "expecting term or field, found '" + nextLexeme.type + "'"
+      throw new lunr.QueryParseError (errorMessage, nextLexeme.start, nextLexeme.end)
   }
 }
 
@@ -2870,6 +3172,9 @@ lunr.QueryParser.parseTerm = function (parser) {
       return lunr.QueryParser.parseEditDistance
     case lunr.QueryLexer.BOOST:
       return lunr.QueryParser.parseBoost
+    case lunr.QueryLexer.PRESENCE:
+      parser.nextClause()
+      return lunr.QueryParser.parsePresence
     default:
       var errorMessage = "Unexpected lexeme type '" + nextLexeme.type + "'"
       throw new lunr.QueryParseError (errorMessage, nextLexeme.start, nextLexeme.end)
