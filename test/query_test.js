@@ -127,4 +127,43 @@ suite('lunr.Query', function () {
       })
     })
   })
+
+  suite('#isNegated', function () {
+    setup(function () {
+      this.query = new lunr.Query (allFields)
+    })
+
+    suite('all prohibited', function () {
+      setup(function () {
+        this.query.term('foo', { presence: lunr.Query.presence.PROHIBITED })
+        this.query.term('bar', { presence: lunr.Query.presence.PROHIBITED })
+      })
+
+      test('is negated', function () {
+        assert.isTrue(this.query.isNegated())
+      })
+    })
+
+    suite('some prohibited', function () {
+      setup(function () {
+        this.query.term('foo', { presence: lunr.Query.presence.PROHIBITED })
+        this.query.term('bar', { presence: lunr.Query.presence.REQUIRED })
+      })
+
+      test('is negated', function () {
+        assert.isFalse(this.query.isNegated())
+      })
+    })
+
+    suite('none prohibited', function () {
+      setup(function () {
+        this.query.term('foo', { presence: lunr.Query.presence.OPTIONAL })
+        this.query.term('bar', { presence: lunr.Query.presence.REQUIRED })
+      })
+
+      test('is negated', function () {
+        assert.isFalse(this.query.isNegated())
+      })
+    })
+  })
 })
