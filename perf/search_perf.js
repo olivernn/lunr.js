@@ -61,4 +61,12 @@ suite('search', function () {
       q.term("pl", { boost: 1, editDistance: 1 })
     })
   })
+
+  this.add('negated query', function () {
+    idx.search('-plant')
+  })
+
+  this.add('required term', function () {
+    idx.search('green +plant')
+  })
 })
