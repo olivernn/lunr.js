@@ -33,6 +33,22 @@ suite('lunr.Vector', function () {
 
       assert.approximately(v1.similarity(v2), 0.111, 0.001)
     })
+
+    test('empty vector', function () {
+      var vEmpty = new lunr.Vector,
+          v1 = vectorFromArgs(1)
+
+      assert.equal(0, vEmpty.similarity(v1))
+      assert.equal(0, v1.similarity(vEmpty))
+    })
+
+    test('non-overlapping vector', function () {
+      var v1 = new lunr.Vector([1, 1]),
+          v2 = new lunr.Vector([2, 1])
+
+      assert.equal(0, v1.similarity(v2))
+      assert.equal(0, v2.similarity(v1))
+    })
   })
 
   suite('#insert', function () {
