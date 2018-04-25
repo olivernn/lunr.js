@@ -607,19 +607,56 @@ suite('search', function () {
         }))
       })
 
-      suite('no matching term', function () {
-        setup(function () {
+      suite('negated query no match', function () {
+        var assertions = function (fn) {
+          setup(fn)
+
+          test('all documents returned', function () {
+            assert.lengthOf(this.results, 3)
+          })
+
+          test('all results have same score', function () {
+            assert.isTrue(this.results.every(function (r) { return r.score === 0 }))
+          })
+        }
+
+        suite('#query', assertions(function () {
           this.results = this.idx.query(function (q) {
             q.term('qwertyuiop', { presence: lunr.Query.presence.PROHIBITED })
           })
-        })
+        }))
 
-        // TODO: what is the right behaviour here?
-        // logically it _should_ return all results, but is that useful? It would
-        // require a bunch of extra work to return a result set that isn't very useful.
-        // Perhaps instead it should just mark queries that only have prohibited clauses
-        // as invalid?
-        test('all results returned?')
+        suite('#search', assertions(function () {
+          this.results = this.idx.search("-qwertyuiop")
+        }))
+      })
+
+      suite('negated query some match', function () {
+        var assertions = function (fn) {
+          setup(fn)
+
+          test('all documents returned', function () {
+            assert.lengthOf(this.results, 1)
+          })
+
+          test('all results have same score', function () {
+            assert.isTrue(this.results.every(function (r) { return r.score === 0 }))
+          })
+
+          test('matching documents returned', function () {
+            assert.equal('a', this.results[0].ref)
+          })
+        }
+
+        suite('#query', assertions(function () {
+          this.results = this.idx.query(function (q) {
+            q.term('plant', { presence: lunr.Query.presence.PROHIBITED })
+          })
+        }))
+
+        suite('#search', assertions(function () {
+          this.results = this.idx.search("-plant")
+        }))
       })
 
       suite('field match', function () {
