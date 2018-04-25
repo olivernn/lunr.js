@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.2.0-alpha.1
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.2.0-alpha.2
  * Copyright (C) 2018 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.2.0-alpha.1"
+lunr.version = "2.2.0-alpha.2"
 /*!
  * lunr.utils
  * Copyright (C) 2018 Oliver Nightingale
@@ -826,7 +826,7 @@ lunr.Vector.prototype.dot = function (otherVector) {
  * @returns {Number}
  */
 lunr.Vector.prototype.similarity = function (otherVector) {
-  return this.dot(otherVector) / (this.magnitude() * otherVector.magnitude())
+  return this.dot(otherVector) / (this.magnitude() * otherVector.magnitude()) || 0
 }
 
 /**
@@ -1908,6 +1908,15 @@ lunr.Index.prototype.query = function (fn) {
       requiredMatches = Object.create(null),
       prohibitedMatches = Object.create(null)
 
+  /*
+   * To support field level boosts a query vector is created per
+   * field. An empty vector is eagerly created to support negated
+   * queries.
+   */
+  for (var i = 0; i < this.fields.length; i++) {
+    queryVectors[this.fields[i]] = new lunr.Vector
+  }
+
   fn.call(query, query)
 
   for (var i = 0; i < query.clauses.length; i++) {
@@ -2020,18 +2029,8 @@ lunr.Index.prototype.query = function (fn) {
           }
 
           /*
-           * To support field level boosts a query vector is created per
-           * field. This vector is populated using the termIndex found for
+           * The query field vector is populated using the termIndex found for
            * the term and a unit value with the appropriate boost applied.
-           *
-           * If the query vector for this field does not exist yet it needs
-           * to be created.
-           */
-          if (queryVectors[field] === undefined) {
-            queryVectors[field] = new lunr.Vector
-          }
-
-          /*
            * Using upsert because there could already be an entry in the vector
            * for the term we are working with. In that case we just add the scores
            * together.
@@ -2096,6 +2095,26 @@ lunr.Index.prototype.query = function (fn) {
       results = [],
       matches = Object.create(null)
 
+  /*
+   * If the query is negated (contains only prohibited terms)
+   * we need to get _all_ fieldRefs currently existing in the
+   * index. This is only done when we know that the query is
+   * entirely prohibited terms to avoid any cost of getting all
+   * fieldRefs unnecessarily.
+   *
+   * Additionally, blank MatchData must be created to correctly
+   * populate the results.
+   */
+  if (query.isNegated()) {
+    matchingFieldRefs = Object.keys(this.fieldVectors)
+
+    for (var i = 0; i < matchingFieldRefs.length; i++) {
+      var matchingFieldRef = matchingFieldRefs[i]
+      var fieldRef = lunr.FieldRef.fromString(matchingFieldRef)
+      matchingFields[matchingFieldRef] = new lunr.MatchData
+    }
+  }
+
   for (var i = 0; i < matchingFieldRefs.length; i++) {
     /*
      * Currently we have document fields that match the query, but we
@@ -2106,10 +2125,7 @@ lunr.Index.prototype.query = function (fn) {
      * above, and combined into a final document score using addition.
      */
     var fieldRef = lunr.FieldRef.fromString(matchingFieldRefs[i]),
-        docRef = fieldRef.docRef,
-        fieldVector = this.fieldVectors[fieldRef],
-        score = queryVectors[fieldRef.fieldName].similarity(fieldVector),
-        docMatch
+        docRef = fieldRef.docRef
 
     if (!allRequiredMatches.contains(docRef)) {
       continue
@@ -2118,6 +2134,10 @@ lunr.Index.prototype.query = function (fn) {
     if (allProhibitedMatches.contains(docRef)) {
       continue
     }
+
+    var fieldVector = this.fieldVectors[fieldRef],
+        score = queryVectors[fieldRef.fieldName].similarity(fieldVector),
+        docMatch
 
     if ((docMatch = matches[docRef]) !== undefined) {
       docMatch.score += score
@@ -2546,7 +2566,7 @@ lunr.Builder.prototype.use = function (fn) {
  */
 lunr.MatchData = function (term, field, metadata) {
   var clonedMetadata = Object.create(null),
-      metadataKeys = Object.keys(metadata)
+      metadataKeys = Object.keys(metadata || {})
 
   // Cloning the metadata to prevent the original
   // being mutated during match data combination.
@@ -2559,8 +2579,11 @@ lunr.MatchData = function (term, field, metadata) {
   }
 
   this.metadata = Object.create(null)
-  this.metadata[term] = Object.create(null)
-  this.metadata[term][field] = clonedMetadata
+
+  if (term !== undefined) {
+    this.metadata[term] = Object.create(null)
+    this.metadata[term][field] = clonedMetadata
+  }
 }
 
 /**
@@ -2766,6 +2789,23 @@ lunr.Query.prototype.clause = function (clause) {
   this.clauses.push(clause)
 
   return this
+}
+
+/**
+ * A negated query is one in which every clause has a presence of
+ * prohibited. These queries require some special processing to return
+ * the expected results.
+ *
+ * @returns boolean
+ */
+lunr.Query.prototype.isNegated = function () {
+  for (var i = 0; i < this.clauses.length; i++) {
+    if (this.clauses[i].presence != lunr.Query.presence.PROHIBITED) {
+      return false
+    }
+  }
+
+  return true
 }
 
 /**
