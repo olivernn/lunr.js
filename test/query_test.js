@@ -1,6 +1,70 @@
 suite('lunr.Query', function () {
   var allFields = ['title', 'body']
 
+  suite('#term', function () {
+    setup(function () {
+      this.query = new lunr.Query (allFields)
+    })
+
+    suite('single string term', function () {
+      setup(function () {
+        this.query.term('foo')
+      })
+
+      test('adds a single clause', function () {
+        assert.equal(this.query.clauses.length, 1)
+      })
+
+      test('clause has the correct term', function () {
+        assert.equal(this.query.clauses[0].term, 'foo')
+      })
+    })
+
+    suite('single token term', function () {
+      setup(function () {
+        this.query.term(new lunr.Token('foo'))
+      })
+
+      test('adds a single clause', function () {
+        assert.equal(this.query.clauses.length, 1)
+      })
+
+      test('clause has the correct term', function () {
+        assert.equal(this.query.clauses[0].term, 'foo')
+      })
+    })
+
+    suite('multiple string terms', function () {
+      setup(function () {
+        this.query.term(['foo', 'bar'])
+      })
+
+      test('adds a single clause', function () {
+        assert.equal(this.query.clauses.length, 2)
+      })
+
+      test('clause has the correct term', function () {
+        var terms = this.query.clauses.map(function (c) { return c.term })
+        assert.sameMembers(terms, ['foo', 'bar'])
+      })
+    })
+
+    suite('multiple token terms', function () {
+      setup(function () {
+        this.query.term(lunr.tokenizer('foo bar'))
+      })
+
+      test('adds a single clause', function () {
+        assert.equal(this.query.clauses.length, 2)
+      })
+
+      test('clause has the correct term', function () {
+        var terms = this.query.clauses.map(function (c) { return c.term })
+        assert.sameMembers(terms, ['foo', 'bar'])
+      })
+    })
+  })
+
   suite('#clause', function () {
     setup(function () {
       this.query = new lunr.Query (allFields)
