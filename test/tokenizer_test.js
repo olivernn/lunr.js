@@ -93,4 +93,10 @@ suite('lunr.tokenizer', function () {
     assert.deepEqual(tokens[0].metadata.position, [0, 3])
     assert.deepEqual(tokens[1].metadata.position, [4, 3])
   })
+
+  test('providing additional metadata', function () {
+    var tokens = lunr.tokenizer('foo bar', { 'hurp': 'durp' })
+    assert.deepEqual(tokens[0].metadata.hurp, 'durp')
+    assert.deepEqual(tokens[1].metadata.hurp, 'durp')
+  })
 })
