@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.2.0
+
+* Add support for queries with term presence, e.g. required terms and prohibited terms.
+* Add support for using the output of `lunr.tokenizer` directly with `lunr.Query#term`.
+* Add field name metadata to tokens in build and search pipelines.
+* Fix documentation for `lunr.Index` constructor, thanks [Michael Manukyan](https://github.com/mike1808).
+
 ## 2.1.6
 
 * Improve pipeline performance for large fields [#329](https://github.com/olivernn/lunr.js/pull/329), thanks [andymcm](https://github.com/andymcm).

@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.2.0-alpha.2
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.2.0
  * Copyright (C) 2018 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.2.0-alpha.2"
+lunr.version = "2.2.0"
 /*!
  * lunr.utils
  * Copyright (C) 2018 Oliver Nightingale
@@ -100,6 +100,52 @@ lunr.utils.asString = function (obj) {
   } else {
     return obj.toString()
   }
+}
+
+/**
+ * Clones an object.
+ *
+ * Will create a copy of an existing object such that any mutations
+ * on the copy cannot affect the original.
+ *
+ * Only shallow objects are supported, passing a nested object to this
+ * function will cause a TypeError.
+ *
+ * Objects with primitives, and arrays of primitives are supported.
+ *
+ * @param {Object} obj The object to clone.
+ * @return {Object} a clone of the passed object.
+ * @throws {TypeError} when a nested object is passed.
+ * @memberOf Utils
+ */
+lunr.utils.clone = function (obj) {
+  if (obj === null || obj === undefined) {
+    return obj
+  }
+
+  var clone = Object.create(null),
+      keys = Object.keys(obj)
+
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i],
+        val = obj[key]
+
+    if (Array.isArray(val)) {
+      clone[key] = val.slice()
+      continue
+    }
+
+    if (typeof val === 'string' ||
+        typeof val === 'number' ||
+        typeof val === 'boolean') {
+      clone[key] = val
+      continue
+    }
+
+    throw new TypeError("clone is not deep and does not support nested objects")
+  }
+
+  return clone
 }
 lunr.FieldRef = function (docRef, fieldName, stringValue) {
   this.docRef = docRef
@@ -339,19 +385,26 @@ lunr.Token.prototype.clone = function (fn) {
  * then will split this string on the character in `lunr.tokenizer.separator`.
  * Arrays will have their elements converted to strings and wrapped in a lunr.Token.
  *
+ * Optional metadata can be passed to the tokenizer, this metadata will be cloned and
+ * added as metadata to every token that is created from the object to be tokenized.
+ *
  * @static
  * @param {?(string|object|object[])} obj - The object to convert into tokens
+ * @param {?object} metadata - Optional metadata to associate with every token
  * @returns {lunr.Token[]}
  * @see {@link lunr.Pipeline}
  */
-lunr.tokenizer = function (obj) {
+lunr.tokenizer = function (obj, metadata) {
   if (obj == null || obj == undefined) {
     return []
   }
 
   if (Array.isArray(obj)) {
     return obj.map(function (t) {
-      return new lunr.Token(lunr.utils.asString(t).toLowerCase())
+      return new lunr.Token(
+        lunr.utils.asString(t).toLowerCase(),
+        lunr.utils.clone(metadata)
+      )
     })
   }
 
@@ -366,11 +419,15 @@ lunr.tokenizer = function (obj) {
     if ((char.match(lunr.tokenizer.separator) || sliceEnd == len)) {
 
       if (sliceLength > 0) {
+        var tokenMetadata = lunr.utils.clone(metadata) || {}
+        tokenMetadata["position"] = [sliceStart, sliceLength]
+        tokenMetadata["index"] = tokens.length
+
         tokens.push(
-          new lunr.Token (str.slice(sliceStart, sliceEnd), {
-            position: [sliceStart, sliceLength],
-            index: tokens.length
-          })
+          new lunr.Token (
+            str.slice(sliceStart, sliceEnd),
+            tokenMetadata
+          )
         )
       }
 
@@ -623,10 +680,12 @@ lunr.Pipeline.prototype.run = function (tokens) {
  * token and mapping the resulting tokens back to strings.
  *
  * @param {string} str - The string to pass through the pipeline.
+ * @param {?object} metadata - Optional metadata to associate with the token
+ * passed to the pipeline.
  * @returns {string[]}
  */
-lunr.Pipeline.prototype.runString = function (str) {
-  var token = new lunr.Token (str)
+lunr.Pipeline.prototype.runString = function (str, metadata) {
+  var token = new lunr.Token (str, metadata)
 
   return this.run([token]).map(function (t) {
     return t.toString()
@@ -1778,7 +1837,7 @@ lunr.TokenSet.Builder.prototype.minimize = function (downTo) {
  * @constructor
  * @param {Object} attrs - The attributes of the built search index.
  * @param {Object} attrs.invertedIndex - An index of term/field to document reference.
- * @param {Object<string, lunr.Vector>} attrs.documentVectors - Document vectors keyed by document reference.
+ * @param {Object<string, lunr.Vector>} attrs.fieldVectors - Field vectors
  * @param {lunr.TokenSet} attrs.tokenSet - An set of all corpus tokens.
  * @param {string[]} attrs.fields - The names of indexed document fields.
  * @param {lunr.Pipeline} attrs.pipeline - The pipeline to use for search terms.
@@ -1932,7 +1991,9 @@ lunr.Index.prototype.query = function (fn) {
         terms = null
 
     if (clause.usePipeline) {
-      terms = this.pipeline.runString(clause.term)
+      terms = this.pipeline.runString(clause.term, {
+        fields: clause.fields
+      })
     } else {
       terms = [clause.term]
     }
@@ -2361,7 +2422,9 @@ lunr.Builder.prototype.add = function (doc) {
   for (var i = 0; i < this._fields.length; i++) {
     var fieldName = this._fields[i],
         field = doc[fieldName],
-        tokens = this.tokenizer(field),
+        tokens = this.tokenizer(field, {
+          fields: [fieldName]
+        }),
         terms = this.pipeline.run(tokens),
         fieldRef = new lunr.FieldRef (docRef, fieldName),
         fieldTerms = Object.create(null)
@@ -2812,8 +2875,14 @@ lunr.Query.prototype.isNegated = function () {
  * Adds a term to the current query, under the covers this will create a {@link lunr.Query~Clause}
  * to the list of clauses that make up this query.
  *
- * @param {string} term - The term to add to the query.
- * @param {Object} [options] - Any additional properties to add to the query clause.
+ * The term is used as is, i.e. no tokenization will be performed by this method. Instead conversion
+ * to a token or token-like string should be done before calling this method.
+ *
+ * The term will be converted to a string by calling `toString`. Multiple terms can be passed as an
+ * array, each term in the array will share the same options.
+ *
+ * @param {object|object[]} term - The term(s) to add to the query.
+ * @param {object} [options] - Any additional properties to add to the query clause.
  * @returns {lunr.Query}
  * @see lunr.Query#clause
  * @see lunr.Query~Clause
@@ -2825,10 +2894,17 @@ lunr.Query.prototype.isNegated = function () {
  *   boost: 10,
  *   wildcard: lunr.Query.wildcard.TRAILING
  * })
+ * @example <caption>using lunr.tokenizer to convert a string to tokens before using them as terms</caption>
+ * query.term(lunr.tokenizer("foo bar"))
  */
 lunr.Query.prototype.term = function (term, options) {
+  if (Array.isArray(term)) {
+    term.forEach(function (t) { this.term(t, options) }, this)
+    return this
+  }
+
   var clause = options || {}
-  clause.term = term
+  clause.term = term.toString()
 
   this.clause(clause)
 
