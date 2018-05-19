@@ -51,7 +51,7 @@ size: lunr.min.js
 	@gzip -c lunr.min.js | wc -c
 
 server: test/index.html
-	${NODE_STATIC} -H '{"Cache-Control": "no-cache, must-revalidate"}'
+	${NODE_STATIC} -a 0.0.0.0 -H '{"Cache-Control": "no-cache, must-revalidate"}'
 
 lint: $(SRC)
 	${ESLINT} $^
