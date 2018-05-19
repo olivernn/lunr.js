@@ -64,6 +64,9 @@ benchmark: perf/*_perf.js
 test: node_modules lunr.js
 	${MOCHA} test/*.js -u tdd -r test/test_helper.js -R dot -C
 
+test/inspect: node_modules lunr.js
+	${MOCHA} test/*.js -u tdd -r test/test_helper.js -R dot -C --inspect-brk=0.0.0.0:9292
+
 test/env/file_list.json: $(wildcard test/*test.js)
 	${NODE} -p 'JSON.stringify({test_files: process.argv.slice(1)})' $^ > $@
 
@@ -84,4 +87,4 @@ reset:
 node_modules: package.json
 	${NPM} -s install
 
-.PHONY: test clean docs reset perf/*_perf.js
+.PHONY: test clean docs reset perf/*_perf.js test/inspect
