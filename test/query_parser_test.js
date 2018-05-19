@@ -116,7 +116,6 @@ suite('lunr.QueryParser', function () {
       })
 
       test('has 2 clause', function () {
-        debugger
         assert.lengthOf(this.clauses, 2)
       })
     })
