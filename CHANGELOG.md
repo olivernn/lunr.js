@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.1
+
+* Fix bug [#344](https://github.com/olivernn/lunr.js/issues/344) in logic for required terms in multiple fields, thanks [Stephane Mankowski](https://github.com/miraks31).
+* Upgrade mocha and fix some test snafus.
+
 ## 2.2.0
 
 * Add support for queries with term presence, e.g. required terms and prohibited terms.

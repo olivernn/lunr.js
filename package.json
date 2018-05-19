@@ -1,11 +1,9 @@
 {
   "name": "lunr",
   "description": "Simple full-text search in your browser.",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "author": "Oliver Nightingale",
-  "keywords": [
-    "search"
-  ],
+  "keywords": ["search"],
   "homepage": "http://lunrjs.com",
   "bugs": "http://github.com/olivernn/lunr.js/issues",
   "main": "lunr.js",
@@ -20,7 +18,7 @@
     "eslint-plugin-spellcheck": "0.0.8",
     "eslint": "3.4.x",
     "jsdoc": "3.5.x",
-    "mocha": "3.4.x",
+    "mocha": "3.0.x",
     "mustache": "2.2.x",
     "node-static": "0.7.x",
     "uglify-js": "2.4.x",

@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.2.0
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.2.1
  * Copyright (C) 2018 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.2.0"
+lunr.version = "2.2.1"
 /*!
  * lunr.utils
  * Copyright (C) 2018 Oliver Nightingale
@@ -1988,7 +1988,8 @@ lunr.Index.prototype.query = function (fn) {
      * for a single query term.
      */
     var clause = query.clauses[i],
-        terms = null
+        terms = null,
+        clauseMatches = lunr.Set.complete
 
     if (clause.usePipeline) {
       terms = this.pipeline.runString(clause.term, {
@@ -2058,15 +2059,15 @@ lunr.Index.prototype.query = function (fn) {
 
           /*
            * if the presence of this term is required ensure that the matching
-           * documents are added to the set of required matches for this field,
-           * creating that set if it does not yet exist.
+           * documents are added to the set of required matches for this clause.
+           *
            */
           if (clause.presence == lunr.Query.presence.REQUIRED) {
+            clauseMatches = clauseMatches.union(matchingDocumentsSet)
+
             if (requiredMatches[field] === undefined) {
               requiredMatches[field] = lunr.Set.complete
             }
-
-            requiredMatches[field] = requiredMatches[field].intersect(matchingDocumentsSet)
           }
 
           /*
@@ -2130,6 +2131,19 @@ lunr.Index.prototype.query = function (fn) {
         }
       }
     }
+
+    /**
+     * If the presence was required we need to update the requiredMatches field sets.
+     * We do this after all fields for the term have collected their matches because
+     * the clause terms presence is required in _any_ of the fields not _all_ of the
+     * fields.
+     */
+    if (clause.presence === lunr.Query.presence.REQUIRED) {
+      for (var k = 0; k < clause.fields.length; k++) {
+        var field = clause.fields[k]
+        requiredMatches[field] = requiredMatches[field].intersect(clauseMatches)
+      }
+    }
   }
 
   /**
@@ -2144,7 +2158,7 @@ lunr.Index.prototype.query = function (fn) {
     var field = this.fields[i]
 
     if (requiredMatches[field]) {
-      allRequiredMatches = allRequiredMatches.union(requiredMatches[field])
+      allRequiredMatches = allRequiredMatches.intersect(requiredMatches[field])
     }
 
     if (prohibitedMatches[field]) {
