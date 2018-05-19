@@ -13,7 +13,7 @@ suite('lunr.Set', function () {
     })
 
     suite('populated set', function () {
-      before(function () {
+      setup(function () {
         this.set = new lunr.Set (['foo'])
       })
 
@@ -28,7 +28,7 @@ suite('lunr.Set', function () {
   })
 
   suite('#union', function () {
-    before(function () {
+    setup(function () {
       this.set = new lunr.Set(['foo'])
     })
 
@@ -59,7 +59,7 @@ suite('lunr.Set', function () {
   })
 
   suite('#intersect', function () {
-    before(function () {
+    setup(function () {
       this.set = new lunr.Set(['foo'])
     })
 
@@ -79,7 +79,7 @@ suite('lunr.Set', function () {
 
     suite('populated set', function () {
       suite('no intersection', function () {
-        test('contains intersection elements', function () {
+        test('does not contain intersection elements', function () {
           var target = new lunr.Set (['bar'])
           var result = target.intersect(this.set)
 
