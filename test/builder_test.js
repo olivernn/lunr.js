@@ -56,7 +56,7 @@ suite('lunr.Builder', function () {
     test('defining fields to index', function () {
       var builder = new lunr.Builder
       builder.field('foo')
-      assert.include(builder._fields, 'foo')
+      assert.property(builder._fields, 'foo')
     })
   })
 

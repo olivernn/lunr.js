@@ -2344,6 +2344,7 @@ lunr.Index.load = function (serializedIndex) {
 lunr.Builder = function () {
   this._ref = "id"
   this._fields = []
+  this._documents = []
   this.invertedIndex = Object.create(null)
   this.fieldTermFrequencies = {}
   this.fieldLengths = {}
@@ -2383,8 +2384,10 @@ lunr.Builder.prototype.ref = function (ref) {
  *
  * @param {string} field - The name of a field to index in all documents.
  */
-lunr.Builder.prototype.field = function (field) {
-  this._fields.push(field)
+lunr.Builder.prototype.field = function (fieldName, attributes) {
+  var attributes = attributes || {}
+  attributes.fieldName = fieldName
+  this._fields.push(attributes)
 }
 
 /**
@@ -2428,13 +2431,17 @@ lunr.Builder.prototype.k1 = function (number) {
  *
  * @param {object} doc - The document to add to the index.
  */
-lunr.Builder.prototype.add = function (doc) {
+lunr.Builder.prototype.add = function (doc, attributes) {
   var docRef = doc[this._ref]
+      attributes = attributes || {}
+
+  attributes.ref = docRef
+  this._documents.push(attributes)
 
   this.documentCount += 1
 
   for (var i = 0; i < this._fields.length; i++) {
-    var fieldName = this._fields[i],
+    var fieldName = this._fields[i].fieldName,
         field = doc[fieldName],
         tokens = this.tokenizer(field, {
           fields: [fieldName]
@@ -2467,7 +2474,7 @@ lunr.Builder.prototype.add = function (doc) {
         this.termIndex += 1
 
         for (var k = 0; k < this._fields.length; k++) {
-          posting[this._fields[k]] = Object.create(null)
+          posting[this._fields[k].fieldName] = Object.create(null)
         }
 
         this.invertedIndex[term] = posting
@@ -2519,8 +2526,8 @@ lunr.Builder.prototype.calculateAverageFieldLengths = function () {
   }
 
   for (var i = 0; i < this._fields.length; i++) {
-    var field = this._fields[i]
-    accumulator[field] = accumulator[field] / documentsWithField[field]
+    var fieldName = this._fields[i].fieldName
+    accumulator[fieldName] = accumulator[fieldName] / documentsWithField[fieldName]
   }
 
   this.averageFieldLength = accumulator
@@ -2539,12 +2546,16 @@ lunr.Builder.prototype.createFieldVectors = function () {
 
   for (var i = 0; i < fieldRefsLength; i++) {
     var fieldRef = lunr.FieldRef.fromString(fieldRefs[i]),
-        field = fieldRef.fieldName,
+        fieldName = fieldRef.fieldName,
         fieldLength = this.fieldLengths[fieldRef],
         fieldVector = new lunr.Vector,
         termFrequencies = this.fieldTermFrequencies[fieldRef],
         terms = Object.keys(termFrequencies),
         termsLength = terms.length
+
+
+    var fieldBoost = this._fields.find(function (f) { return f.fieldName == fieldName }).boost || 1
+        docBoost = this._documents.find(function (d) { return d.ref == fieldRef.docRef }).boost || 1
 
     for (var j = 0; j < termsLength; j++) {
       var term = terms[j],
@@ -2559,7 +2570,9 @@ lunr.Builder.prototype.createFieldVectors = function () {
         idf = termIdfCache[term]
       }
 
-      score = idf * ((this._k1 + 1) * tf) / (this._k1 * (1 - this._b + this._b * (fieldLength / this.averageFieldLength[field])) + tf)
+      score = idf * ((this._k1 + 1) * tf) / (this._k1 * (1 - this._b + this._b * (fieldLength / this.averageFieldLength[fieldName])) + tf)
+      tf *= fieldBoost
+      tf *= docBoost
       scoreWithPrecision = Math.round(score * 1000) / 1000
       // Converts 1.23456789 to 1.234.
       // Reducing the precision so that the vectors take up less
@@ -2605,7 +2618,7 @@ lunr.Builder.prototype.build = function () {
     invertedIndex: this.invertedIndex,
     fieldVectors: this.fieldVectors,
     tokenSet: this.tokenSet,
-    fields: this._fields,
+    fields: this._fields.map(function (f) { return f.fieldName }),
     pipeline: this.searchPipeline
   })
 }
