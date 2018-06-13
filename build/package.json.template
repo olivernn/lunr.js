@@ -18,10 +18,10 @@
     "eslint-plugin-spellcheck": "0.0.8",
     "eslint": "3.4.x",
     "jsdoc": "3.5.x",
-    "mocha": "3.0.x",
+    "mocha": "3.3.x",
     "mustache": "2.2.x",
     "node-static": "0.7.x",
-    "uglify-js": "2.4.x",
+    "uglify-js": "2.6.x",
     "word-list": "1.0.x"
   },
   "scripts": {
