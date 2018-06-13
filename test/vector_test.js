@@ -31,7 +31,7 @@ suite('lunr.Vector', function () {
       var v1 = vectorFromArgs(1, 3, -5),
           v2 = vectorFromArgs(4, -2, -1)
 
-      assert.approximately(v1.similarity(v2), 0.111, 0.001)
+      assert.approximately(v1.similarity(v2), 0.5, 0.01)
     })
 
     test('empty vector', function () {
