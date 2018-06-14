@@ -58,6 +58,13 @@ suite('lunr.Builder', function () {
       builder.field('foo')
       assert.property(builder._fields, 'foo')
     })
+
+    test('field with illegal characters', function () {
+      var builder = new lunr.Builder
+      assert.throws(function () {
+        builder.field('foo/bar')
+      })
+    })
   })
 
   suite('#ref', function () {
