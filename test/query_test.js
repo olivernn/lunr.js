@@ -49,6 +49,17 @@ suite('lunr.Query', function () {
       })
     })
 
+    suite('multiple string terms with options', function () {
+      setup(function () {
+        this.query.term(['foo', 'bar'], { usePipeline: false })
+      })
+
+      test('clause has the correct term', function () {
+        var terms = this.query.clauses.map(function (c) { return c.term })
+        assert.sameMembers(terms, ['foo', 'bar'])
+      })
+    })
+
     suite('multiple token terms', function () {
       setup(function () {
         this.query.term(lunr.tokenizer('foo bar'))
