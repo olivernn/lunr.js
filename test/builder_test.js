@@ -50,6 +50,23 @@ suite('lunr.Builder', function () {
       assert.deepProperty(this.builder.invertedIndex, 'word.title.id.constructor')
       assert.deepEqual(this.builder.invertedIndex.word.title.id.constructor, ['foo'])
     })
+
+    test('extracting nested properties from a document', function () {
+      var extractor = function (d) { return d.person.name }
+
+      this.builder.field('name', {
+        extractor: extractor
+      })
+
+      this.builder.add({
+        id: 'id',
+        person: {
+          name: 'bob'
+        }
+      })
+
+      assert.deepProperty(this.builder.invertedIndex, 'bob.name.id')
+    })
   })
 
   suite('#field', function () {
