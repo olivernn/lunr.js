@@ -1,11 +1,12 @@
 {
   "env": {
     "browser": true,
-    "node": true
+    "node": true,
+    "mocha": true
   },
-
   "globals": {
-    "lunr": true
+    "lunr": true,
+    "assert": true
   },
 
   "extends": "eslint:recommended",
@@ -25,7 +26,7 @@
           "attrs", "tf", "idf", "lookups", "whitelist", "whitelisted", "tokenizer",
           "whitespace", "automata", "i", "obj", "anymore", "lexer", "var", "refs",
           "serializable", "tis", "twas", "int", "args", "unshift", "plugins", "upsert",
-          "upserting", "readonly", "baz", "tokenization"
+          "upserting", "readonly", "baz", "tokenization", "lunrjs", "com"
         ]
       }
     ],
