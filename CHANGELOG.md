@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.0
+
+* Add support for build time field and document boosts.
+* Add support for indexing nested document fields using field extractors.
+* Prevent usage of problematic characters in field names, thanks [Stephane Mankowski](https://github.com/miraks31).
+* Fix bug when using an array of tokens in a single query term, thanks [Michael Manukyan](https://github.com/mike1808).
+
 ## 2.2.1
 
 * Fix bug [#344](https://github.com/olivernn/lunr.js/issues/344) in logic for required terms in multiple fields, thanks [Stephane Mankowski](https://github.com/miraks31).
