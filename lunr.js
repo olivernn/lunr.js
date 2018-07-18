@@ -2038,8 +2038,13 @@ lunr.Index.prototype.query = function (fn) {
          * For each term get the posting and termIndex, this is required for
          * building the query vector.
          */
-        var expandedTerm = expandedTerms[j],
-            posting = this.invertedIndex[expandedTerm],
+        var expandedTerm = expandedTerms[j]
+
+        if (typeof String.prototype.normalize === "function") {
+          expandedTerm = expandedTerm.normalize("NFC")
+        }
+
+        var posting = this.invertedIndex[expandedTerm],
             termIndex = posting._index
 
         for (var k = 0; k < clause.fields.length; k++) {
