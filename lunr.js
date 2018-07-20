@@ -1626,6 +1626,11 @@ lunr.TokenSet.prototype.toArray = function () {
         len = edges.length
 
     if (frame.node.final) {
+      /* In Safari, at this point the prefix is sometimes corrupted, see:
+       * https://github.com/olivernn/lunr.js/issues/279 Calling any
+       * String.prototype method forces Safari to "cast" this string to what
+       * it's supposed to be, fixing the bug. */
+      frame.prefix.charAt(0)
       words.push(frame.prefix)
     }
 
@@ -2038,14 +2043,8 @@ lunr.Index.prototype.query = function (fn) {
          * For each term get the posting and termIndex, this is required for
          * building the query vector.
          */
-        var expandedTerm = expandedTerms[j]
-
-        /* Calling a cheap string method forces Safari to "cast" this string to
-         * what it's supposed to be, fixing a bug. See:
-         * https://github.com/olivernn/lunr.js/issues/279 */
-        expandedTerm.charAt(0)
-
-        var posting = this.invertedIndex[expandedTerm],
+        var expandedTerm = expandedTerms[j],
+            posting = this.invertedIndex[expandedTerm],
             termIndex = posting._index
 
         for (var k = 0; k < clause.fields.length; k++) {
