@@ -2038,8 +2038,14 @@ lunr.Index.prototype.query = function (fn) {
          * For each term get the posting and termIndex, this is required for
          * building the query vector.
          */
-        var expandedTerm = expandedTerms[j],
-            posting = this.invertedIndex[expandedTerm],
+        var expandedTerm = expandedTerms[j]
+
+        /* Calling a cheap string method forces Safari to "cast" this string to
+         * what it's supposed to be, fixing a bug. See:
+         * https://github.com/olivernn/lunr.js/issues/279 */
+        expandedTerm.charAt(0)
+
+        var posting = this.invertedIndex[expandedTerm],
             termIndex = posting._index
 
         for (var k = 0; k < clause.fields.length; k++) {
