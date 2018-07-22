@@ -1030,6 +1030,33 @@ suite('search', function () {
             assertions()
           })
         })
+
+        suite('different fields one without match', function () {
+          var assertions = function () {
+            test('no matches', function () {
+              assert.lengthOf(this.results, 0)
+            })
+          }
+
+          suite('#search', function () {
+            setup(function () {
+              this.results = this.idx.search('+title:plant +body:qwertyuiop')
+            })
+
+            assertions()
+          })
+
+          suite('#query', function () {
+            setup(function () {
+              this.results = this.idx.query(function (q) {
+                q.term('plant', { fields: ['title'], presence: lunr.Query.presence.REQUIRED })
+                q.term('qwertyuiop', { fields: ['body'], presence: lunr.Query.presence.REQUIRED })
+              })
+            })
+
+            assertions()
+          })
+        })
       })
 
       suite('combined', function () {

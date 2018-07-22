@@ -47,13 +47,36 @@ suite('lunr.Set', function () {
     })
 
     suite('populated set', function () {
-      test('contains both elements', function () {
-        var target = new lunr.Set (['bar'])
-        var result = target.union(this.set)
+      suite('with other populated set', function () {
+        test('contains both elements', function () {
+          var target = new lunr.Set (['bar'])
+          var result = target.union(this.set)
 
-        assert.isOk(result.contains('foo'))
-        assert.isOk(result.contains('bar'))
-        assert.isNotOk(result.contains('baz'))
+          assert.isOk(result.contains('foo'))
+          assert.isOk(result.contains('bar'))
+          assert.isNotOk(result.contains('baz'))
+        })
+      })
+
+      suite('with empty set', function () {
+        test('contains all elements', function () {
+          var target = new lunr.Set (['bar'])
+          var result = target.union(lunr.Set.empty)
+
+          assert.isOk(result.contains('bar'))
+          assert.isNotOk(result.contains('baz'))
+        })
+      })
+
+      suite('with complete set', function () {
+        test('contains all elements', function () {
+          var target = new lunr.Set (['bar'])
+          var result = target.union(lunr.Set.complete)
+
+          assert.isOk(result.contains('foo'))
+          assert.isOk(result.contains('bar'))
+          assert.isOk(result.contains('baz'))
+        })
       })
     })
   })
@@ -95,6 +118,24 @@ suite('lunr.Set', function () {
 
           assert.isOk(result.contains('foo'))
           assert.isNotOk(result.contains('bar'))
+        })
+      })
+
+      suite('with empty set', function () {
+        test('returns empty set', function () {
+          var target = new lunr.Set(['foo']),
+              result = target.intersect(lunr.Set.empty)
+
+          assert.isNotOk(result.contains('foo'))
+        })
+      })
+
+      suite('with complete set', function () {
+        test('returns populated set', function () {
+          var target = new lunr.Set(['foo']),
+              result = target.intersect(lunr.Set.complete)
+
+          assert.isOk(result.contains('foo'))
         })
       })
     })
