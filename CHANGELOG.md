@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.1
+
+* Add workaround for inconsistent browser behaviour [#279](https://github.com/olivernn/lunr.js/issues/279), thanks [Luca Ongaro](https://github.com/lucaong).
+* Fix bug in intersect/union of `lunr.Set` [#360](https://github.com/olivernn/lunr.js/issues/360), thanks [Brandon Bethke](https://github.com/brandon-bethke-neudesic) for reporting.
+
 ## 2.3.0
 
 * Add support for build time field and document boosts.

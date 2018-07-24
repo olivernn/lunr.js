@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.3.0
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.3.1
  * Copyright (C) 2018 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.3.0"
+lunr.version = "2.3.1"
 /*!
  * lunr.utils
  * Copyright (C) 2018 Oliver Nightingale
@@ -262,6 +262,14 @@ lunr.Set.prototype.contains = function (object) {
 lunr.Set.prototype.intersect = function (other) {
   var a, b, elements, intersection = []
 
+  if (other === lunr.Set.complete) {
+    return this
+  }
+
+  if (other === lunr.Set.empty) {
+    return other
+  }
+
   if (this.length < other.length) {
     a = this
     b = other
@@ -290,6 +298,14 @@ lunr.Set.prototype.intersect = function (other) {
  */
 
 lunr.Set.prototype.union = function (other) {
+  if (other === lunr.Set.complete) {
+    return lunr.Set.complete
+  }
+
+  if (other === lunr.Set.empty) {
+    return this
+  }
+
   return new lunr.Set(Object.keys(this.elements).concat(Object.keys(other.elements)))
 }
 /**
@@ -1626,6 +1642,11 @@ lunr.TokenSet.prototype.toArray = function () {
         len = edges.length
 
     if (frame.node.final) {
+      /* In Safari, at this point the prefix is sometimes corrupted, see:
+       * https://github.com/olivernn/lunr.js/issues/279 Calling any
+       * String.prototype method forces Safari to "cast" this string to what
+       * it's supposed to be, fixing the bug. */
+      frame.prefix.charAt(0)
       words.push(frame.prefix)
     }
 
