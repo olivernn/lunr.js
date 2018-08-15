@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.3.1
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.3.2
  * Copyright (C) 2018 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.3.1"
+lunr.version = "2.3.2"
 /*!
  * lunr.utils
  * Copyright (C) 2018 Oliver Nightingale
@@ -3409,6 +3409,9 @@ lunr.QueryParser.parseEditDistance = function (parser) {
       return lunr.QueryParser.parseEditDistance
     case lunr.QueryLexer.BOOST:
       return lunr.QueryParser.parseBoost
+    case lunr.QueryLexer.PRESENCE:
+      parser.nextClause()
+      return lunr.QueryParser.parsePresence
     default:
       var errorMessage = "Unexpected lexeme type '" + nextLexeme.type + "'"
       throw new lunr.QueryParseError (errorMessage, nextLexeme.start, nextLexeme.end)
@@ -3449,6 +3452,9 @@ lunr.QueryParser.parseBoost = function (parser) {
       return lunr.QueryParser.parseEditDistance
     case lunr.QueryLexer.BOOST:
       return lunr.QueryParser.parseBoost
+    case lunr.QueryLexer.PRESENCE:
+      parser.nextClause()
+      return lunr.QueryParser.parsePresence
     default:
       var errorMessage = "Unexpected lexeme type '" + nextLexeme.type + "'"
       throw new lunr.QueryParseError (errorMessage, nextLexeme.start, nextLexeme.end)

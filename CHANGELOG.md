@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.2
+
+* Fix bug [#369](https://github.com/olivernn/lunr.js/issues/369) in parsing queries that include either a boost or edit distance modifier followed by a presence modifier on a subsequent term. Thanks [mtdjr](https://github.com/mtdjr) for reporting.
+
 ## 2.3.1
 
 * Add workaround for inconsistent browser behaviour [#279](https://github.com/olivernn/lunr.js/issues/279), thanks [Luca Ongaro](https://github.com/lucaong).
