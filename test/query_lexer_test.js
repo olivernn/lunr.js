@@ -183,6 +183,34 @@ suite('lunr.QueryLexer', function () {
       })
     })
 
+    suite('multiple terms with presence and fuzz', function () {
+      setup(function () {
+        this.lexer = lex('+foo~1 +bar')
+      })
+
+      test('produces n lexemes', function () {
+        assert.lengthOf(this.lexer.lexemes, 5)
+      })
+
+      suite('lexemes', function () {
+        setup(function () {
+          this.fooPresenceLexeme = this.lexer.lexemes[0]
+          this.fooTermLexeme = this.lexer.lexemes[1]
+          this.fooFuzzLexeme = this.lexer.lexemes[2]
+          this.barPresenceLexeme = this.lexer.lexemes[3]
+          this.barTermLexeme = this.lexer.lexemes[4]
+        })
+
+        test('#type', function () {
+          assert.equal(lunr.QueryLexer.PRESENCE, this.fooPresenceLexeme.type)
+          assert.equal(lunr.QueryLexer.TERM, this.fooTermLexeme.type)
+          assert.equal(lunr.QueryLexer.EDIT_DISTANCE, this.fooFuzzLexeme.type)
+          assert.equal(lunr.QueryLexer.PRESENCE, this.barPresenceLexeme.type)
+          assert.equal(lunr.QueryLexer.TERM, this.barTermLexeme.type)
+        })
+      })
+    })
+
     suite('separator length > 1', function () {
       setup(function () {
         this.lexer = lex('foo    bar')

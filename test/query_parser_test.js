@@ -120,6 +120,72 @@ suite('lunr.QueryParser', function () {
       })
     })
 
+    suite('edit distance followed by presence', function () {
+      setup(function () {
+        this.clauses = parse('foo~10 +bar')
+      })
+
+      test('has 2 clause', function () {
+        assert.lengthOf(this.clauses, 2)
+      })
+
+      suite('clauses', function () {
+        setup(function () {
+          this.fooClause = this.clauses[0]
+          this.barClause = this.clauses[1]
+        })
+
+        test('#term', function () {
+          assert.equal('foo', this.fooClause.term)
+          assert.equal('bar', this.barClause.term)
+        })
+
+        test('#presence', function () {
+          assert.equal(lunr.Query.presence.OPTIONAL, this.fooClause.presence)
+          assert.equal(lunr.Query.presence.REQUIRED, this.barClause.presence)
+        })
+
+        test('#editDistance', function () {
+          assert.equal(10, this.fooClause.editDistance)
+          // It feels dirty asserting that something is undefined
+          // but there is no Optional so this is what we are reduced to
+          assert.isUndefined(this.barClause.editDistance)
+        })
+      })
+    })
+
+    suite('boost followed by presence', function () {
+      setup(function () {
+        this.clauses = parse('foo^10 +bar')
+      })
+
+      test('has 2 clause', function () {
+        assert.lengthOf(this.clauses, 2)
+      })
+
+      suite('clauses', function () {
+        setup(function () {
+          this.fooClause = this.clauses[0]
+          this.barClause = this.clauses[1]
+        })
+
+        test('#term', function () {
+          assert.equal('foo', this.fooClause.term)
+          assert.equal('bar', this.barClause.term)
+        })
+
+        test('#presence', function () {
+          assert.equal(lunr.Query.presence.OPTIONAL, this.fooClause.presence)
+          assert.equal(lunr.Query.presence.REQUIRED, this.barClause.presence)
+        })
+
+        test('#boost', function () {
+          assert.equal(10, this.fooClause.boost)
+          assert.equal(1, this.barClause.boost)
+        })
+      })
+    })
+
     suite('field without a term', function () {
       test('fails with lunr.QueryParseError', function () {
         assert.throws(function () { parse('title:') }, lunr.QueryParseError)
