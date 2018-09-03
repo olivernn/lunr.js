@@ -144,9 +144,25 @@ suite('lunr.TokenSet', function () {
       assert.sameMembers(['cat'], z.toArray())
     })
 
+    test('leading wildcard backtracking intersection', function () {
+      var x = lunr.TokenSet.fromString('aaacbab'),
+          y = lunr.TokenSet.fromString('*ab'),
+          z = x.intersect(y)
+
+      assert.sameMembers(['aaacbab'], z.toArray())
+    })
+
     test('leading wildcard no intersection', function () {
       var x = lunr.TokenSet.fromString('cat'),
           y = lunr.TokenSet.fromString('*r'),
+          z = x.intersect(y)
+
+      assert.equal(0, z.toArray().length)
+    })
+
+    test('leading wildcard backtracking no intersection', function () {
+      var x = lunr.TokenSet.fromString('aaabdcbc'),
+          y = lunr.TokenSet.fromString('*abc'),
           z = x.intersect(y)
 
       assert.equal(0, z.toArray().length)
@@ -160,9 +176,25 @@ suite('lunr.TokenSet', function () {
       assert.sameMembers(['foo'], z.toArray())
     })
 
+    test('contained wildcard backtracking intersection', function () {
+      var x = lunr.TokenSet.fromString('ababc'),
+          y = lunr.TokenSet.fromString('a*bc'),
+          z = x.intersect(y)
+
+      assert.sameMembers(['ababc'], z.toArray())
+    })
+
     test('contained wildcard no intersection', function () {
       var x = lunr.TokenSet.fromString('foo'),
           y = lunr.TokenSet.fromString('b*r'),
+          z = x.intersect(y)
+
+      assert.equal(0, z.toArray().length)
+    })
+
+    test('contained wildcard backtracking no intersection', function () {
+      var x = lunr.TokenSet.fromString('ababc'),
+          y = lunr.TokenSet.fromString('a*ac'),
           z = x.intersect(y)
 
       assert.equal(0, z.toArray().length)
@@ -174,6 +206,33 @@ suite('lunr.TokenSet', function () {
           z = x.intersect(y)
 
       assert.sameMembers(['foo'], z.toArray())
+    })
+
+    // This test is intended to prevent 'bugs' that have lead to these
+    // kind of intersections taking a _very_ long time. The assertion
+    // is not of interest, just that the test does not timeout.
+    test('catastrophic backtracking with leading characters', function () {
+      var x = lunr.TokenSet.fromString('fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'),
+          y = lunr.TokenSet.fromString('*ff'),
+          z = x.intersect(y)
+
+      assert.equal(1, z.toArray().length)
+    })
+
+    test('leading and trailing backtracking intersection', function () {
+      var x = lunr.TokenSet.fromString('acbaabab'),
+          y = lunr.TokenSet.fromString('*ab*'),
+          z = x.intersect(y)
+
+      assert.sameMembers(['acbaabab'], z.toArray())
+    })
+
+    test('multiple contained wildcard backtracking', function () {
+      var x = lunr.TokenSet.fromString('acbaabab'),
+          y = lunr.TokenSet.fromString('a*ba*b'),
+          z = x.intersect(y)
+
+      assert.sameMembers(['acbaabab'], z.toArray())
     })
 
     test('intersect with fuzzy string substitution', function () {
