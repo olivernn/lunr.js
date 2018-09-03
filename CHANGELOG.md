@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.3
+
+* Fig bugs [#270](https://github.com/olivernn/lunr.js/issues/270) and [#368](https://github.com/olivernn/lunr.js/issues/368), some wildcard searches over long tokens could be extremely slow, potentially pinning the current thread indefinitely. Thanks [Kyle Spearrin](https://github.com/kspearrin) and [Mohamed Eltuhamy](https://github.com/meltuhamy) for reporting.
+
 ## 2.3.2
 
 * Fix bug [#369](https://github.com/olivernn/lunr.js/issues/369) in parsing queries that include either a boost or edit distance modifier followed by a presence modifier on a subsequent term. Thanks [mtdjr](https://github.com/mtdjr) for reporting.
