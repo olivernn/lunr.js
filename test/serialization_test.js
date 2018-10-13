@@ -15,6 +15,11 @@ suite('serialization', function () {
       title: 'Scarlett helps Professor',
       body: 'Miss Scarlett watered Professor Plumbs green plant while he was away from his office last week.',
       wordCount: 16
+    },{
+      id: 'd',
+      title: 'All about JavaScript',
+      body: 'JavaScript objects have a special __proto__ property',
+      wordCount: 7
     }]
 
     this.idx = lunr(function () {
@@ -36,5 +41,13 @@ suite('serialization', function () {
         serializedResults = this.loadedIdx.search('green')
 
     assert.deepEqual(idxResults, serializedResults)
+  })
+
+  test('__proto__ double serialization', function () {
+    var doubleLoadedIdx = lunr.Index.load(JSON.parse(JSON.stringify(this.loadedIdx))),
+        idxResults = this.idx.search('__proto__'),
+        doubleSerializedResults = doubleLoadedIdx.search('__proto__')
+
+    assert.deepEqual(idxResults, doubleSerializedResults)
   })
 })
