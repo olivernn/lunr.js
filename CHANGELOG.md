@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.5
+
+* Fix bug [#375](https://github.com/olivernn/lunr.js/issues/375) with fuzzy matching that meant insertions at the end of a word would not match. Thanks [Luca Ongaro](https://github.com/lucaong) for reporting and to [Rob Hoelz](https://github.com/hoelzro) for providing a fix.
+* Switch to using `Array.isArray` when checking for results from pipeline functions to support `vm.runInContext`, [#381](https://github.com/olivernn/lunr.js/pull/381) thanks [Rob Hoelz](https://github.com/hoelzro).
+
 ## 2.3.4
 
 * Ensure that [inverted index is prototype-less](https://github.com/olivernn/lunr.js/pull/378) after serialization, thanks [Rob Hoelz](https://github.com/hoelzro).
