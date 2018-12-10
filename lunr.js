@@ -424,7 +424,7 @@ lunr.tokenizer = function (obj, metadata) {
     })
   }
 
-  var str = obj.toString().trim().toLowerCase(),
+  var str = obj.toString().toLowerCase(),
       len = str.length,
       tokens = []
 
