@@ -294,5 +294,34 @@ suite('lunr.TokenSet', function () {
       assert.sameMembers(x2.intersect(y).toArray(), ["bra"])
       assert.equal(x3.intersect(y).toArray().length, 0)
     })
+
+    test('fuzzy string insertion', function () {
+      var x = lunr.TokenSet.fromString('abcxx'),
+          y = lunr.TokenSet.fromFuzzyString('abc', 2)
+
+      assert.sameMembers(x.intersect(y).toArray(), ['abcxx'])
+    })
+
+    test('fuzzy string substitution', function () {
+      var x = lunr.TokenSet.fromString('axx'),
+          y = lunr.TokenSet.fromFuzzyString('abc', 2)
+
+      assert.sameMembers(x.intersect(y).toArray(), ['axx'])
+    })
+
+    test('fuzzy string deletion', function () {
+      var x = lunr.TokenSet.fromString('a'),
+          y = lunr.TokenSet.fromFuzzyString('abc', 2)
+
+      assert.sameMembers(x.intersect(y).toArray(), ['a'])
+    })
+
+    test('fuzzy string transpose', function () {
+      var x = lunr.TokenSet.fromString('bca'),
+          y = lunr.TokenSet.fromFuzzyString('abc', 2)
+
+      assert.sameMembers(x.intersect(y).toArray(), ['bca'])
+    })
+
   })
 })
