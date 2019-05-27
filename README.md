@@ -66,6 +66,13 @@ Alternatively an npm package is also available `npm install lunr`.
 
 Browsers that do not support ES5 will require a JavaScript shim for Lunr to work. You can either use [Augment.js](https://github.com/olivernn/augment.js), [ES5-Shim](https://github.com/kriskowal/es5-shim) or any library that patches old browsers to provide an ES5 compatible JavaScript environment.
 
+## Features
+
+* Full text search support for 14 languages
+* Boost terms at query time or boost entire documents at index time
+* Scope searches to specific fields
+* Fuzzy term matching with wildcards or edit distance
+
 ## Contributing
 
 See the [`CONTRIBUTING.md` file](CONTRIBUTING.md).
