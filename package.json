@@ -7,6 +7,7 @@
   "homepage": "http://lunrjs.com",
   "bugs": "http://github.com/olivernn/lunr.js/issues",
   "main": "lunr.js",
+  "module": "lunr.es6.js",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -22,7 +23,8 @@
     "mustache": "2.2.x",
     "node-static": "0.7.x",
     "uglify-js": "2.6.x",
-    "word-list": "1.0.x"
+    "word-list": "1.0.x",
+    "rollup": "^1.17.0"
   },
   "scripts": {
     "test": "make test"
