@@ -39,7 +39,9 @@ release: lunr.js lunr.min.js bower.json package.json component.json docs
 lunr.js: $(SRC)
 	cat build/wrapper_start $^ build/wrapper_end | \
 	sed "s/@YEAR/${YEAR}/" | \
-	sed "s/@VERSION/${VERSION}/" > $@
+	sed "s/@VERSION/${VERSION}/" > \
+	build/lunr.temp.js
+	npx rollup --input build/lunr.temp.js --config build/rollup.config.js
 
 lunr.min.js: lunr.js
 	${UGLIFYJS} --compress --mangle --comments < $< > $@
@@ -80,6 +82,7 @@ clean:
 	rm -f lunr{.min,}.js
 	rm -rf docs
 	rm *.json
+	rm -f build/lunr.temp.js
 
 reset:
 	git checkout lunr.* *.json
