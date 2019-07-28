@@ -7,6 +7,7 @@
   "homepage": "http://lunrjs.com",
   "bugs": "http://github.com/olivernn/lunr.js/issues",
   "main": "lunr.js",
+  "module": "lunr.es6.js",
   "license": "MIT",
   "repository": {
     "type": "git",
