@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.3.6
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.3.7
  * Copyright (C) 2019 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.3.6"
+lunr.version = "2.3.7"
 /*!
  * lunr.utils
  * Copyright (C) 2019 Oliver Nightingale
@@ -424,7 +424,7 @@ lunr.tokenizer = function (obj, metadata) {
     })
   }
 
-  var str = obj.toString().trim().toLowerCase(),
+  var str = obj.toString().toLowerCase(),
       len = str.length,
       tokens = []
 
@@ -1605,6 +1605,10 @@ lunr.TokenSet.fromString = function (str) {
 /**
  * Converts this TokenSet into an array of strings
  * contained within the TokenSet.
+ *
+ * This is not intended to be used on a TokenSet that
+ * contains wildcards, in these cases the results are
+ * undefined and are likely to cause an infinite loop.
  *
  * @returns {string[]}
  */

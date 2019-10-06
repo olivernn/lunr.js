@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.7
+
+* Fix bug [#417](https://github.com/olivernn/lunr.js/issues/417) where leading white space would cause token position metadata to be reported incorrectly. Thanks [Rob Hoelz](https://github.com/hoelzro) for the fix.
+
 ## 2.3.6
 
 * Fix bug [#390](https://github.com/olivernn/lunr.js/issues/390) with fuzzy matching that meant deletions at the end of a word would not match. Thanks [Luca Ongaro](https://github.com/lucaong) for reporting.
