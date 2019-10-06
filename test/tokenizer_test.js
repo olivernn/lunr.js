@@ -94,6 +94,18 @@ suite('lunr.tokenizer', function () {
     assert.deepEqual(tokens[1].metadata.position, [4, 3])
   })
 
+  test('tracking the token position with additional left-hand whitespace', function () {
+    var tokens = lunr.tokenizer(' foo bar')
+    assert.deepEqual(tokens[0].metadata.position, [1, 3])
+    assert.deepEqual(tokens[1].metadata.position, [5, 3])
+  })
+
+  test('tracking the token position with additional right-hand whitespace', function () {
+    var tokens = lunr.tokenizer('foo bar ')
+    assert.deepEqual(tokens[0].metadata.position, [0, 3])
+    assert.deepEqual(tokens[1].metadata.position, [4, 3])
+  })
+
   test('providing additional metadata', function () {
     var tokens = lunr.tokenizer('foo bar', { 'hurp': 'durp' })
     assert.deepEqual(tokens[0].metadata.hurp, 'durp')
