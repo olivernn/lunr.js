@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.8
+
+* Fix bug [#422](https://github.com/olivernn/lunr.js/issues/422) where a pipline function that returned null was not skipping the token as described in the documentation. Thanks [Stephen Cleary](https://github.com/StephenCleary) and [Rob Hoelz](https://github.com/hoelzro) for reporting and investigating.
+
 ## 2.3.7
 
 * Fix bug [#417](https://github.com/olivernn/lunr.js/issues/417) where leading white space would cause token position metadata to be reported incorrectly. Thanks [Rob Hoelz](https://github.com/hoelzro) for the fix.

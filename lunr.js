@@ -1,5 +1,5 @@
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.3.7
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.3.8
  * Copyright (C) 2019 Oliver Nightingale
  * @license MIT
  */
@@ -54,7 +54,7 @@ var lunr = function (config) {
   return builder.build()
 }
 
-lunr.version = "2.3.7"
+lunr.version = "2.3.8"
 /*!
  * lunr.utils
  * Copyright (C) 2019 Oliver Nightingale
@@ -509,8 +509,8 @@ lunr.Pipeline.registeredFunctions = Object.create(null)
  * or mutate (or add) metadata for a given token.
  *
  * A pipeline function can indicate that the passed token should be discarded by returning
- * null. This token will not be passed to any downstream pipeline functions and will not be
- * added to the index.
+ * null, undefined or an empty string. This token will not be passed to any downstream pipeline
+ * functions and will not be added to the index.
  *
  * Multiple tokens can be returned by returning an array of tokens. Each token will be passed
  * to any downstream pipeline functions and all will returned tokens will be added to the index.
@@ -673,7 +673,7 @@ lunr.Pipeline.prototype.run = function (tokens) {
     for (var j = 0; j < tokens.length; j++) {
       var result = fn(tokens[j], j, tokens)
 
-      if (result === void 0 || result === '') continue
+      if (result === null || result === void 0 || result === '') continue
 
       if (Array.isArray(result)) {
         for (var k = 0; k < result.length; k++) {
