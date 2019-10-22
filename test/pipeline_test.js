@@ -142,14 +142,23 @@ suite('lunr.Pipeline', function () {
       assert.deepEqual(['FOO'], this.pipeline.run(['foo']))
     })
 
-    test('filters out undefined values', function () {
+    test('filters out null, undefined and empty string values', function () {
       var tokens = [],
           output
 
       // only pass on tokens for even token indexes
+      // return null for 'foo'
+      // return undefined for 'bar'
+      // return '' for 'baz'
       this.pipeline.add(function (t, i) {
-        if (i % 2) {
+        if (i == 4) {
+          return null
+        } else if (i == 5) {
+          return ''
+        } if (i % 2) {
           return t
+        } else {
+          return undefined
         }
       })
 
@@ -158,7 +167,7 @@ suite('lunr.Pipeline', function () {
         return t
       })
 
-      output = this.pipeline.run(['a', 'b', 'c', 'd'])
+      output = this.pipeline.run(['a', 'b', 'c', 'd', 'foo', 'bar', 'baz'])
 
       assert.sameMembers(['b', 'd'], tokens)
       assert.sameMembers(['b', 'd'], output)
