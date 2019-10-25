@@ -6,6 +6,9 @@
   "keywords": ["search"],
   "homepage": "https://lunrjs.com",
   "bugs": "http://github.com/olivernn/lunr.js/issues",
+  "files": [
+    "lunr.js"
+  ],
   "main": "lunr.js",
   "license": "MIT",
   "repository": {
