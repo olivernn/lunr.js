@@ -5,7 +5,7 @@
   "author": "Oliver Nightingale",
   "keywords": ["search"],
   "homepage": "https://lunrjs.com",
-  "bugs": "http://github.com/olivernn/lunr.js/issues",
+  "bugs": "https://github.com/olivernn/lunr.js/issues",
   "main": "lunr.js",
   "license": "MIT",
   "repository": {
