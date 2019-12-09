@@ -56,13 +56,13 @@ Lunr.js is a small, full-text search library for use in the browser.  It indexes
 
 ## Why
 
-For web applications with all their data already sitting in the client, it makes sense to be able to search that data on the client too.  It saves adding extra, compacted services on the server.  A local search index will be quicker, there is no network overhead, and will remain available and useable even without a network connection.
+For web applications with all their data already sitting in the client, it makes sense to be able to search that data on the client too.  It saves adding extra, compacted services on the server.  A local search index will be quicker, there is no network overhead, and will remain available and usable even without a network connection.
 
 ## Installation
 
 Simply include the lunr.js source file in the page that you want to use it.  Lunr.js is supported in all modern browsers.
 
-Alternatively an npm package is also available `npm install lunr`.
+Alternatively a npm package is also available `npm install lunr`.
 
 Browsers that do not support ES5 will require a JavaScript shim for Lunr to work. You can either use [Augment.js](https://github.com/olivernn/augment.js), [ES5-Shim](https://github.com/kriskowal/es5-shim) or any library that patches old browsers to provide an ES5 compatible JavaScript environment.
 
