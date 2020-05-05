@@ -24,7 +24,7 @@ var idx = lunr(function () {
 })
 ```
 
-Then searching is as simple:
+Then searching is as simple as:
 
 ```javascript
 idx.search("love")
