@@ -33,9 +33,10 @@ suite('lunr.Set', function () {
     })
 
     suite('complete set', function () {
-      test('contains element', function () {
+      test('union is complete', function () {
         var result = lunr.Set.complete.union(this.set)
         assert.isOk(result.contains('foo'))
+        assert.isOk(result.contains('bar'))
       })
     })
 
@@ -43,6 +44,7 @@ suite('lunr.Set', function () {
       test('contains element', function () {
         var result = lunr.Set.empty.union(this.set)
         assert.isOk(result.contains('foo'))
+        assert.isNotOk(result.contains('bar'))
       })
     })
 
@@ -90,6 +92,7 @@ suite('lunr.Set', function () {
       test('contains element', function () {
         var result = lunr.Set.complete.intersect(this.set)
         assert.isOk(result.contains('foo'))
+        assert.isNotOk(result.contains('bar'))
       })
     })
 
@@ -136,6 +139,7 @@ suite('lunr.Set', function () {
               result = target.intersect(lunr.Set.complete)
 
           assert.isOk(result.contains('foo'))
+          assert.isNotOk(result.contains('bar'))
         })
       })
     })
