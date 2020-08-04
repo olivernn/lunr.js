@@ -1,8 +1,9 @@
 # Lunr.js
 
 [![Join the chat at https://gitter.im/olivernn/lunr.js](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/olivernn/lunr.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 [![Build Status](https://travis-ci.org/olivernn/lunr.js.png?branch=master)](https://travis-ci.org/olivernn/lunr.js)
+[![GZIP Size](https://img.shields.io/bundlephobia/minzip/lunr.svg)](https://bundlephobia.com/result?p=lunr)
+[![Install Size](https://packagephobia.now.sh/badge?p=lunr)](https://packagephobia.now.sh/result?p=lunr)
 
 A bit like Solr, but much smaller and not as bright.
 
