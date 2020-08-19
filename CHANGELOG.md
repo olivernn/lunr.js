@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.9
+
+* Fix bug [#469](https://github.com/olivernn/lunr.js/issues/469) where a union with a complete set returned a non-complete set. Thanks [Bertrand Le Roy](https://github.com/bleroy) for reporting and fixing.
+
 ## 2.3.8
 
 * Fix bug [#422](https://github.com/olivernn/lunr.js/issues/422) where a pipline function that returned null was not skipping the token as described in the documentation. Thanks [Stephen Cleary](https://github.com/StephenCleary) and [Rob Hoelz](https://github.com/hoelzro) for reporting and investigating.
