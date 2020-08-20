@@ -42,7 +42,7 @@ lunr.js: $(SRC)
 	sed "s/@VERSION/${VERSION}/" > $@
 
 lunr.min.js: lunr.js
-	${UGLIFYJS} --compress --mangle --comments < $< > $@
+	${UGLIFYJS} --compress --mangle --comments --source-map lunr.map lunr.js > $@
 
 %.json: build/%.json.template
 	cat $< | sed "s/@VERSION/${VERSION}/" > $@
