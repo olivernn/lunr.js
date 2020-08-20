@@ -50,6 +50,8 @@ This returns a list of matching documents with a score of how closely they match
 
 [API documentation](https://lunrjs.com/docs/index.html) is available, as well as a [full working example](https://olivernn.github.io/moonwalkers/).
 
+In Depth Guide: https://lunrjs.com/guides/upgrading.html
+
 ## Description
 
 Lunr.js is a small, full-text search library for use in the browser.  It indexes JSON documents and provides a simple search interface for retrieving documents that best match text queries.
