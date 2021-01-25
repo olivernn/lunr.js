@@ -3,7 +3,7 @@
   "description": "Simple full-text search in your browser.",
   "version": "2.3.9",
   "author": "Oliver Nightingale",
-  "keywords": ["search"],
+  "keywords": ["search", "full-text-search"],
   "homepage": "https://lunrjs.com",
   "bugs": "https://github.com/olivernn/lunr.js/issues",
   "main": "lunr.js",
