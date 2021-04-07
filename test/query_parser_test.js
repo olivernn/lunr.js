@@ -75,7 +75,35 @@ suite('lunr.QueryParser', function () {
       })
     })
 
-    suite('single term with wildcard', function () {
+    suite('single term with leading wildcard', function () {
+      setup(function () {
+        this.clauses = parse('*oo')
+      })
+
+      test('has 1 clause', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
+
+      suite('clauses', function () {
+        setup(function () {
+          this.clause = this.clauses[0]
+        })
+
+        test('#term', function () {
+          assert.equal('*oo', this.clause.term)
+        })
+
+        test('#usePipeline', function () {
+          assert.ok(!this.clause.usePipeline)
+        })
+
+        test('#wildcard', function () {
+          assert.equal(1, this.clause.wildcard)
+        })
+      })
+    })
+
+    suite('single term with trailing wildcard', function () {
       setup(function () {
         this.clauses = parse('fo*')
       })
@@ -99,6 +127,34 @@ suite('lunr.QueryParser', function () {
 
         test('#wildcard', function () {
           assert.equal(2, this.clause.wildcard)
+        })
+      })
+    })
+
+    suite('single term with leading and trailing wildcard', function () {
+      setup(function () {
+        this.clauses = parse('*o*')
+      })
+
+      test('has 1 clause', function () {
+        assert.lengthOf(this.clauses, 1)
+      })
+
+      suite('clauses', function () {
+        setup(function () {
+          this.clause = this.clauses[0]
+        })
+
+        test('#term', function () {
+          assert.equal('*o*', this.clause.term)
+        })
+
+        test('#usePipeline', function () {
+          assert.ok(!this.clause.usePipeline)
+        })
+
+        test('#wildcard', function () {
+          assert.equal(3, this.clause.wildcard)
         })
       })
     })

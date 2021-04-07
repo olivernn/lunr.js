@@ -3339,6 +3339,8 @@ lunr.QueryParser.parseTerm = function (parser) {
       parser.currentClause.wildcard = lunr.Query.wildcard.LEADING
     } else if (lastWildcardIndex == lexeme.str.length - 1) {
       parser.currentClause.wildcard = lunr.Query.wildcard.TRAILING
+    } else {
+      parser.currentClause.wildcard = lunr.Query.wildcard.NONE
     }
   } else {
     parser.currentClause.wildcard = lunr.Query.wildcard.NONE
