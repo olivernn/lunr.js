@@ -1,3 +1,5 @@
+const { assert } = require("chai")
+
 suite('lunr.QueryParser', function () {
   var parse = function (q) {
     var query = new lunr.Query (['title', 'body']),
@@ -37,6 +39,10 @@ suite('lunr.QueryParser', function () {
 
         test('usePipeline', function () {
           assert.ok(this.clause.usePipeline)
+        })
+
+        test('wildcard', function () {
+          assert.equal(0, this.clause.wildcard)
         })
       })
     })
@@ -89,6 +95,10 @@ suite('lunr.QueryParser', function () {
 
         test('#usePipeline', function () {
           assert.ok(!this.clause.usePipeline)
+        })
+
+        test('#wildcard', function () {
+          assert.equal(2, this.clause.wildcard)
         })
       })
     })
