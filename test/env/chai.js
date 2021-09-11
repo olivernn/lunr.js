@@ -272,7 +272,7 @@ module.exports = {
    *
    * Set it to zero if you want to disable truncating altogether.
    *
-   * This is especially userful when doing assertions on arrays: having this
+   * This is especially useful when doing assertions on arrays: having this
    * set to a reasonable large value makes the failure messages readily
    * inspectable.
    *
@@ -4381,7 +4381,7 @@ module.exports = function getEnumerableProperties(object) {
  */
 
 /*!
- * Module dependancies
+ * Module dependencies
  */
 
 var flag = require('./flag')
@@ -4855,7 +4855,7 @@ var getEnumerableProperties = require('./getEnumerableProperties');
 module.exports = inspect;
 
 /**
- * Echos the value of a value. Trys to print the value out
+ * Echos the value of a value. Tries to print the value out
  * in the best way possible given the different types.
  *
  * @param {Object} obj The object to print out.
@@ -5189,7 +5189,7 @@ function objectToString(o) {
  */
 
 /*!
- * Module dependancies
+ * Module dependencies
  */
 
 var inspect = require('./inspect');
@@ -5243,7 +5243,7 @@ module.exports = function (obj) {
 /**
  * ### overwriteChainableMethod (ctx, name, method, chainingBehavior)
  *
- * Overwites an already existing chainable method
+ * Overwrites an already existing chainable method
  * and provides access to the previous function or
  * property.  Must return functions to be used for
  * name.
@@ -5299,7 +5299,7 @@ module.exports = function (ctx, name, method, chainingBehavior) {
 /**
  * ### overwriteMethod (ctx, name, fn)
  *
- * Overwites an already existing method and provides
+ * Overwrites an already existing method and provides
  * access to previous function. Must return function
  * to be used for name.
  *
@@ -5353,7 +5353,7 @@ module.exports = function (ctx, name, method) {
 /**
  * ### overwriteProperty (ctx, name, fn)
  *
- * Overwites an already existing property getter and provides
+ * Overwrites an already existing property getter and provides
  * access to previous value. Must return function to use as getter.
  *
  *     utils.overwriteProperty(chai.Assertion.prototype, 'ok', function (_super) {
@@ -5408,7 +5408,7 @@ module.exports = function (ctx, name, getter) {
  */
 
 /*!
- * Module dependancies
+ * Module dependencies
  */
 
 var flag = require('./flag');

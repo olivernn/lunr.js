@@ -2037,7 +2037,7 @@ exports.cursor = {
 };
 
 /**
- * Outut the given `failures` as a list.
+ * Output the given `failures` as a list.
  *
  * @param {Array} failures
  * @api public
@@ -7055,7 +7055,7 @@ function alloc (that, size, fill, encoding) {
   if (fill !== undefined) {
     // Only pay attention to encoding if it's a string. This
     // prevents accidentally sending in a number that would
-    // be interpretted as a start offset.
+    // be interpreted as a start offset.
     return typeof encoding === 'string'
       ? createBuffer(that, size).fill(fill, encoding)
       : createBuffer(that, size).fill(fill)
@@ -7344,7 +7344,7 @@ function slowToString (encoding, start, end) {
     return ''
   }
 
-  // Force coersion to uint32. This will also coerce falsey/NaN values to 0.
+  // Force coercion to uint32. This will also coerce falsey/NaN values to 0.
   end >>>= 0
   start >>>= 0
 
@@ -9781,7 +9781,7 @@ exports.version = '1.4.1'
  *  - sticky  Make the notification stick (defaults to false)
  *  - priority  Specify an int or named key (default is 0)
  *  - name    Application name (defaults to growlnotify)
- *  - sound   Sound efect ( in OSx defined in preferences -> sound -> effects) * works only in OSX > 10.8x
+ *  - sound   Sound effect ( in OSx defined in preferences -> sound -> effects) * works only in OSX > 10.8x
  *  - image
  *    - path to an icon sets --iconpath
  *    - path to an image sets --image
@@ -12375,7 +12375,7 @@ process.nextTick = function (fun) {
     }
 };
 
-// v8 likes predictible objects
+// v8 likes predictable objects
 function Item(fun, array) {
     this.fun = fun;
     this.array = array;
@@ -14700,7 +14700,7 @@ exports.debuglog = function(set) {
 
 
 /**
- * Echos the value of a value. Trys to print the value out
+ * Echos the value of a value. Tries to print the value out
  * in the best way possible given the different types.
  *
  * @param {Object} obj The object to print out.
