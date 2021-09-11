@@ -257,7 +257,7 @@ suite('lunr.Pipeline', function () {
       assert.equal(fn, pipeline._stack[0])
     })
 
-    test('with unregisterd functions', function () {
+    test('with unregistered functions', function () {
       var serializedPipeline = ['fn']
 
       assert.throws(function () {

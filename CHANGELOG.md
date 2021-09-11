@@ -88,7 +88,7 @@
 
 * Improve handling of term boosts across multiple fields [#263](https://github.com/olivernn/lunr.js/issues/263)
 * Enable escaping of special characters when performing a search [#271](https://github.com/olivernn/lunr.js/issues/271)
-* Add ability to programatically include leading and trailing wildcards when performing a query.
+* Add ability to programmatically include leading and trailing wildcards when performing a query.
 
 ## 2.0.4
 
@@ -140,7 +140,7 @@
 * Replace array-like string access with ES3 compatible `String.prototype.charAt` [#186](https://github.com/olivernn/lunr.js/pull/186), thanks [jkellerer](https://github.com/jkellerer).
 * Move empty string filtering from `lunr.trimmer` to `lunr.Pipeline.prototype.run` so that empty tokens do not enter the index, regardless of the trimmer being used [#178](https://github.com/olivernn/lunr.js/issues/178), [#177](https://github.com/olivernn/lunr.js/issues/177) and [#174](https://github.com/olivernn/lunr.js/issues/174)
 * Allow tokenization of arrays with null and non string elements [#172](https://github.com/olivernn/lunr.js/issues/172).
-* Parameterize the seperator used by `lunr.tokenizer`, fixes [#102](https://github.com/olivernn/lunr.js/issues/102).
+* Parameterize the separator used by `lunr.tokenizer`, fixes [#102](https://github.com/olivernn/lunr.js/issues/102).
 
 ## 0.5.12
 
@@ -161,7 +161,7 @@
 ## 0.5.9
 
 * Remove recursion from SortedSet#indexOf and SortedSet#locationFor to gain small performance gains in Index#search and Index#add
-* Fix incorrect handling of non existant functions when adding/removing from a Pipeline [#146](https://github.com/olivernn/lunr.js/issues/146) thanks to [weixsong](https://github.com/weixsong)
+* Fix incorrect handling of non-existent functions when adding/removing from a Pipeline [#146](https://github.com/olivernn/lunr.js/issues/146) thanks to [weixsong](https://github.com/weixsong)
 
 ## 0.5.8
 
@@ -245,7 +245,7 @@
 
 ## 0.3.1
 
-* Fix bug [#24](https://github.com/olivernn/lunr.js/pull/24) that caused an error when trying to remove a non-existant document from the index, thanks [Jesús Leganés Combarro](https://github.com/piranna)
+* Fix bug [#24](https://github.com/olivernn/lunr.js/pull/24) that caused an error when trying to remove a non-existent document from the index, thanks [Jesús Leganés Combarro](https://github.com/piranna)
 
 ## 0.3.0
 
