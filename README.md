@@ -56,7 +56,7 @@ Lunr.js is a small, full-text search library for use in the browser.  It indexes
 
 ## Why
 
-For web applications with all their data already sitting in the client, it makes sense to be able to search that data on the client too.  It saves adding extra, compacted services on the server.  A local search index will be quicker, there is no network overhead, and will remain available and usable even without a network connection.
+For web applications with all their data already sitting in the client, it makes sense to be able to search that data on the client too.  It saves adding extra, compacted services on the server.  A local search index will be quicker, there is no network overhead, and will remain available and usable even without a network connection.  It also provides some level of privacy protection for the user, as the terms searched for are not sent to the server.
 
 ## Installation
 
