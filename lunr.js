@@ -1026,9 +1026,9 @@ lunr.stemmer = (function(){
 
     if (w.length < 3) { return w; }
 
-    firstch = w.substr(0,1);
+    firstch = w.slice(0,1);
     if (firstch == "y") {
-      w = firstch.toUpperCase() + w.substr(1);
+      w = firstch.toUpperCase() + w.slice(1);
     }
 
     // Step 1a
@@ -1137,7 +1137,7 @@ lunr.stemmer = (function(){
     // and turn initial Y back to y
 
     if (firstch == "y") {
-      w = firstch.toLowerCase() + w.substr(1);
+      w = firstch.toLowerCase() + w.slice(1);
     }
 
     return w;
