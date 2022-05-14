@@ -74,4 +74,42 @@ suite('lunr.utils', function () {
       })
     })
   })
+
+  suite('#warn', function () {
+    test('do nothing when console or console.warn is not implemented', function () {
+      var root = typeof self !== 'undefined' ? self : global
+      var origConsole = root.console
+
+      try {
+        root.console = undefined
+        lunr.utils.warn('foo')
+
+        root.console = {}
+        lunr.utils.warn('foo')
+      } finally {
+        root.console = origConsole
+      }
+    })
+
+    test('calls console.warn', function () {
+      var root = typeof self !== 'undefined' ? self : global
+      var origConsole = root.console
+
+      try {
+        var warnCalled = false
+
+        root.console = Object.create(root.console)
+        root.console.warn = function (message) {
+          assert.equal(message, 'foo')
+          warnCalled = true
+        }
+
+        lunr.utils.warn('foo')
+
+        assert.equal(warnCalled, true)
+      } finally {
+        root.console = origConsole
+      }
+    })
+  })
 })
