@@ -140,7 +140,7 @@
 * Replace array-like string access with ES3 compatible `String.prototype.charAt` [#186](https://github.com/olivernn/lunr.js/pull/186), thanks [jkellerer](https://github.com/jkellerer).
 * Move empty string filtering from `lunr.trimmer` to `lunr.Pipeline.prototype.run` so that empty tokens do not enter the index, regardless of the trimmer being used [#178](https://github.com/olivernn/lunr.js/issues/178), [#177](https://github.com/olivernn/lunr.js/issues/177) and [#174](https://github.com/olivernn/lunr.js/issues/174)
 * Allow tokenization of arrays with null and non string elements [#172](https://github.com/olivernn/lunr.js/issues/172).
-* Parameterize the seperator used by `lunr.tokenizer`, fixes [#102](https://github.com/olivernn/lunr.js/issues/102).
+* Parameterize the separator used by `lunr.tokenizer`, fixes [#102](https://github.com/olivernn/lunr.js/issues/102).
 
 ## 0.5.12
 

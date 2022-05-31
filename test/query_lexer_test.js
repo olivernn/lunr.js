@@ -248,7 +248,7 @@ suite('lunr.QueryLexer', function () {
       })
     })
 
-    suite('hyphen (-) considered a seperator', function () {
+    suite('hyphen (-) considered a separator', function () {
       setup(function () {
         this.lexer = lex('foo-bar')
       })
