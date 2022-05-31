@@ -6,7 +6,7 @@
 
 ## 2.3.8
 
-* Fix bug [#422](https://github.com/olivernn/lunr.js/issues/422) where a pipline function that returned null was not skipping the token as described in the documentation. Thanks [Stephen Cleary](https://github.com/StephenCleary) and [Rob Hoelz](https://github.com/hoelzro) for reporting and investigating.
+* Fix bug [#422](https://github.com/olivernn/lunr.js/issues/422) where a pipeline function that returned null was not skipping the token as described in the documentation. Thanks [Stephen Cleary](https://github.com/StephenCleary) and [Rob Hoelz](https://github.com/hoelzro) for reporting and investigating.
 
 ## 2.3.7
 
