@@ -58,7 +58,7 @@ suite('lunr.TokenSet', function () {
 
       // a state reached by a wildcard has
       // an edge with a wildcard to itself.
-      // the resulting automota is
+      // the resulting automata is
       // non-determenistic
       assert.equal(wild, wild.edges['*'])
       assert.isOk(wild.final)
