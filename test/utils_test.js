@@ -25,7 +25,7 @@ suite('lunr.utils', function () {
       })
     })
 
-    suite('object with primatives', function () {
+    suite('object with primitives', function () {
       subject({
         number: 1,
         string: 'foo',
