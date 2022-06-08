@@ -25,7 +25,7 @@ suite('lunr.utils', function () {
       })
     })
 
-    suite('object with primatives', function () {
+    suite('object with primitives', function () {
       subject({
         number: 1,
         string: 'foo',
@@ -54,7 +54,7 @@ suite('lunr.utils', function () {
         assert.deepEqual(this.obj.array, this.clone.array)
       })
 
-      test('mutations on clone do not affect orginial', function () {
+      test('mutations on clone do not affect original', function () {
         this.clone.array.push(4)
         assert.notDeepEqual(this.obj.array, this.clone.array)
         assert.equal(this.obj.array.length, 3)

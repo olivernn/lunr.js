@@ -6,7 +6,7 @@
 
 ## 2.3.8
 
-* Fix bug [#422](https://github.com/olivernn/lunr.js/issues/422) where a pipline function that returned null was not skipping the token as described in the documentation. Thanks [Stephen Cleary](https://github.com/StephenCleary) and [Rob Hoelz](https://github.com/hoelzro) for reporting and investigating.
+* Fix bug [#422](https://github.com/olivernn/lunr.js/issues/422) where a pipeline function that returned null was not skipping the token as described in the documentation. Thanks [Stephen Cleary](https://github.com/StephenCleary) and [Rob Hoelz](https://github.com/hoelzro) for reporting and investigating.
 
 ## 2.3.7
 
@@ -140,7 +140,7 @@
 * Replace array-like string access with ES3 compatible `String.prototype.charAt` [#186](https://github.com/olivernn/lunr.js/pull/186), thanks [jkellerer](https://github.com/jkellerer).
 * Move empty string filtering from `lunr.trimmer` to `lunr.Pipeline.prototype.run` so that empty tokens do not enter the index, regardless of the trimmer being used [#178](https://github.com/olivernn/lunr.js/issues/178), [#177](https://github.com/olivernn/lunr.js/issues/177) and [#174](https://github.com/olivernn/lunr.js/issues/174)
 * Allow tokenization of arrays with null and non string elements [#172](https://github.com/olivernn/lunr.js/issues/172).
-* Parameterize the seperator used by `lunr.tokenizer`, fixes [#102](https://github.com/olivernn/lunr.js/issues/102).
+* Parameterize the separator used by `lunr.tokenizer`, fixes [#102](https://github.com/olivernn/lunr.js/issues/102).
 
 ## 0.5.12
 
