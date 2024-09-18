@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.chai = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.chai = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Unable to find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 module.exports = require('./lib/chai');
 
 },{"./lib/chai":2}],2:[function(require,module,exports){
@@ -2068,8 +2068,8 @@ module.exports = function (chai, _) {
   /**
    * ### .sealed
    *
-   * Asserts that the target is sealed (cannot have new properties added to it
-   * and its existing properties cannot be removed).
+   * Asserts that the target is sealed (unable to have new properties added to it
+   * and its existing properties are unable to be removed).
    *
    *     var sealedObject = Object.seal({});
    *     var frozenObject = Object.freeze({});
@@ -2110,8 +2110,8 @@ module.exports = function (chai, _) {
   /**
    * ### .frozen
    *
-   * Asserts that the target is frozen (cannot have new properties added to it
-   * and its existing properties cannot be modified).
+   * Asserts that the target is frozen (unable to have new properties added to it
+   * and its existing properties are unable to be modified).
    *
    *     var frozenObject = Object.freeze({});
    *
@@ -3695,8 +3695,8 @@ module.exports = function (chai, util) {
   /**
    * ### .isSealed(object)
    *
-   * Asserts that `object` is sealed (cannot have new properties added to it
-   * and its existing properties cannot be removed).
+   * Asserts that `object` is sealed (unable to have new properties added to it
+   * and its existing properties are unable to be removed).
    *
    *     var sealedObject = Object.seal({});
    *     var frozenObject = Object.seal({});
@@ -3738,8 +3738,8 @@ module.exports = function (chai, util) {
   /**
    * ### .isFrozen(object)
    *
-   * Asserts that `object` is frozen (cannot have new properties added to it
-   * and its existing properties cannot be modified).
+   * Asserts that `object` is frozen (unable to have new properties added to it
+   * and its existing properties are unable to be modified).
    *
    *     var frozenObject = Object.freeze({});
    *     assert.frozen(frozenObject);
@@ -4057,7 +4057,7 @@ var config = require('../config');
 var hasProtoSupport = '__proto__' in Object;
 
 // Without `__proto__` support, this module will need to add properties to a function.
-// However, some Function.prototype methods cannot be overwritten,
+// However, some Function.prototype methods are unable to be overwritten,
 // and there seems no easy cross-platform way to detect them (@see chaijs/chai/issues/69).
 var excludeNames = /^(?:length|name|arguments|caller)$/;
 
@@ -4903,7 +4903,7 @@ function formatValue(ctx, value, recurseTimes) {
     return ret;
   }
 
-  // Primitive types cannot have properties
+  // Primitive types are unable to have properties
   var primitive = formatPrimitive(ctx, value);
   if (primitive) {
     return primitive;

@@ -106,7 +106,7 @@ lunr.utils.asString = function (obj) {
  * Clones an object.
  *
  * Will create a copy of an existing object such that any mutations
- * on the copy cannot affect the original.
+ * on the copy are unable to affect the original.
  *
  * Only shallow objects are supported, passing a nested object to this
  * function will cause a TypeError.
@@ -487,12 +487,12 @@ lunr.tokenizer.separator = /[\s\-]+/
  * should return undefined, the rest of the pipeline will not be called with
  * this token.
  *
- * For serialisation of pipelines to work, all functions used in an instance of
+ * For serialization of pipelines to work, all functions used in an instance of
  * a pipeline should be registered with lunr.Pipeline. Registered functions can
- * then be loaded. If trying to load a serialised pipeline that uses functions
+ * then be loaded. If attempting to load a serialized pipeline that uses functions
  * that are not registered an error will be thrown.
  *
- * If not planning on serialising the pipeline then registering pipeline functions
+ * If not planning on serializing the pipeline then registering pipeline functions
  * is not necessary.
  *
  * @constructor
@@ -528,7 +528,7 @@ lunr.Pipeline.registeredFunctions = Object.create(null)
  * Register a function with the pipeline.
  *
  * Functions that are used in the pipeline should be registered if the pipeline
- * needs to be serialised, or a serialised pipeline needs to be loaded.
+ * needs to be serialized, or a serialized pipeline needs to be loaded.
  *
  * Registering a function does not add it to a pipeline, functions must still be
  * added to instances of the pipeline for them to be used when running a pipeline.
@@ -555,30 +555,30 @@ lunr.Pipeline.warnIfFunctionNotRegistered = function (fn) {
   var isRegistered = fn.label && (fn.label in this.registeredFunctions)
 
   if (!isRegistered) {
-    lunr.utils.warn('Function is not registered with pipeline. This may cause problems when serialising the index.\n', fn)
+    lunr.utils.warn('Function is not registered with pipeline. This may cause errors when serializing the index.\n', fn)
   }
 }
 
 /**
- * Loads a previously serialised pipeline.
+ * Loads a previously serialized pipeline.
  *
  * All functions to be loaded must already be registered with lunr.Pipeline.
- * If any function from the serialised data has not been registered then an
+ * If any function from the serialized data has not been registered then an
  * error will be thrown.
  *
- * @param {Object} serialised - The serialised pipeline to load.
+ * @param {Object} serialized - The serialized pipeline to load.
  * @returns {lunr.Pipeline}
  */
-lunr.Pipeline.load = function (serialised) {
+lunr.Pipeline.load = function (serialized) {
   var pipeline = new lunr.Pipeline
 
-  serialised.forEach(function (fnName) {
+  serialized.forEach(function (fnName) {
     var fn = lunr.Pipeline.registeredFunctions[fnName]
 
     if (fn) {
       pipeline.add(fn)
     } else {
-      throw new Error('Cannot load unregistered function: ' + fnName)
+      throw new Error('An error occurred while loading unregistered function: ' + fnName)
     }
   })
 
@@ -615,7 +615,7 @@ lunr.Pipeline.prototype.after = function (existingFn, newFn) {
 
   var pos = this._stack.indexOf(existingFn)
   if (pos == -1) {
-    throw new Error('Cannot find existingFn')
+    throw new Error('An error occurred while finding existingFn.')
   }
 
   pos = pos + 1
@@ -636,7 +636,7 @@ lunr.Pipeline.prototype.before = function (existingFn, newFn) {
 
   var pos = this._stack.indexOf(existingFn)
   if (pos == -1) {
-    throw new Error('Cannot find existingFn')
+    throw new Error('An error occurred while finding existingFn.')
   }
 
   this._stack.splice(pos, 0, newFn)
@@ -717,7 +717,7 @@ lunr.Pipeline.prototype.reset = function () {
 }
 
 /**
- * Returns a representation of the pipeline ready for serialisation.
+ * Returns a representation of the pipeline ready for serialization.
  *
  * Logs a warning if the function has not been registered.
  *
@@ -1816,7 +1816,7 @@ lunr.TokenSet.Builder.prototype.minimize = function (downTo) {
       node.parent.edges[node.char] = this.minimizedNodes[childKey]
     } else {
       // Cache the key for this node since
-      // we know it can't change anymore
+      // we know it is unable to change anymore
       node.child._str = childKey
 
       this.minimizedNodes[childKey] = node.child
@@ -1922,7 +1922,7 @@ lunr.Index = function (attrs) {
  * For more programmatic querying use lunr.Index#query.
  *
  * @param {lunr.Index~QueryString} queryString - A string containing a lunr query.
- * @throws {lunr.QueryParseError} If the passed query string cannot be parsed.
+ * @throws {lunr.QueryParseError} If the passed query string was unable to be parsed.
  * @returns {lunr.Index~Result[]}
  */
 lunr.Index.prototype.search = function (queryString) {
@@ -2286,7 +2286,7 @@ lunr.Index.load = function (serializedIndex) {
       pipeline = lunr.Pipeline.load(serializedIndex.pipeline)
 
   if (serializedIndex.version != lunr.version) {
-    lunr.utils.warn("Version mismatch when loading serialised index. Current version of lunr '" + lunr.version + "' does not match serialized index '" + serializedIndex.version + "'")
+    lunr.utils.warn("Version mismatch when loading serialized index. Current version of lunr '" + lunr.version + "' does not match serialized index '" + serializedIndex.version + "'")
   }
 
   for (var i = 0; i < serializedVectors.length; i++) {
@@ -2409,7 +2409,7 @@ lunr.Builder.prototype.ref = function (ref) {
  * @param {object} attributes - Optional attributes associated with this field.
  * @param {number} [attributes.boost=1] - Boost applied to all terms within this field.
  * @param {fieldExtractor} [attributes.extractor] - Function to extract a field from a document.
- * @throws {RangeError} fieldName cannot contain unsupported characters '/'
+ * @throws {RangeError} fieldName was unable to contain unsupported characters '/'
  */
 lunr.Builder.prototype.field = function (fieldName, attributes) {
   if (/\//.test(fieldName)) {
@@ -2611,8 +2611,8 @@ lunr.Builder.prototype.createFieldVectors = function () {
       scoreWithPrecision = Math.round(score * 1000) / 1000
       // Converts 1.23456789 to 1.234.
       // Reducing the precision so that the vectors take up less
-      // space when serialised. Doing it now so that they behave
-      // the same before and after serialisation. Also, this is
+      // space when serialized. Doing it now so that they behave
+      // the same before and after serialization. Also, this is
       // the fastest approach to reducing a number's precision in
       // JavaScript.
 
